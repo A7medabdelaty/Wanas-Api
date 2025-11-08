@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Wanas.API/Wanas.API.csproj" />
+  <Project Path="Wanas.Application/Wanas.Application.csproj" />
+  <Project Path="Wanas.Domain/Wanas.Domain.csproj" />
+  <Project Path="Wanas.Infrastructure/Wanas.Infrastructure.csproj" />
+</Solution>
