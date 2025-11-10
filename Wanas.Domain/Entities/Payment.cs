@@ -6,7 +6,7 @@ namespace Wanas.Domain.Entities
     {
         public int PaymentId { get; set; }
         public decimal Amount { get; set; }
-        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+        public DateTime PaymentDate { get; set; }
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
 
         // reference id from payment gateway (Stripe, PayPal, Vodafone Cash, etc..)

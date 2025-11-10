@@ -9,7 +9,7 @@ namespace Wanas.Domain.Entities
         public string TargetId { get; set; } // store userId or listingId as string - simpler
         public int Rating { get; set; } // 1..5
         public string Comment { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
         public string ReviewerId { get; set; }
         public ApplicationUser Reviewer { get; set; }
     }
