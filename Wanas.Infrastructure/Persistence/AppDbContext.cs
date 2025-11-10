@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Wanas.Domain.Entities;
 
-namespace Wans.Infrastructure.Persistence
+namespace Wanas.Infrastructure.Persistence
 {
     public class AppDBContext(DbContextOptions options) : IdentityDbContext<ApplicationUser>(options)
     {
@@ -17,5 +17,15 @@ namespace Wans.Infrastructure.Persistence
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
-    }
+        public DbSet<Listing> Listings { get; set; }
+        public DbSet<ListingPhoto> ListingPhotos { get; set; }
+        public DbSet<Bed> Beds { get; set; }
+
+        public DbSet<Room> Rooms { get; set; }
+
+        public DbSet<Report> Reports { get; set; }
+
+        public DbSet<ReportPhoto> ReportPhotos { get; set; }
+
+        }
 }
