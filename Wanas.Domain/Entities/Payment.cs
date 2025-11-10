@@ -15,6 +15,6 @@ namespace Wanas.Domain.Entities
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
         public int ListingId { get; set; }
-        //public Listing Listing { get; set; }
+        public Listing Listing { get; set; }
     }
 }

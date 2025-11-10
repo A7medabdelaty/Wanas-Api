@@ -13,5 +13,6 @@ namespace Wanas.Domain.Entities
         public string Photo { get; set; }
         public ICollection<Listing> Listings { get; set; }
         public ICollection<Match> Matches { get; set; } = new List<Match>();
+        public HashSet<Bed>? Beds { get; set; } = new();
     }
 }

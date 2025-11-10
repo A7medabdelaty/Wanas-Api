@@ -15,11 +15,20 @@ namespace Wanas.Infrastructure.Persistence.Configurations
         {
             builder.HasKey(b => b.Id);
             builder.Property(p => p.IsAvailable).HasColumnType("bit");
+            builder.HasIndex(b => b.RenterId);
+
             builder
                 .HasOne(b => b.Room)
                 .WithMany(b => b.Beds)
                 .HasForeignKey(b => b.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .HasOne(b => b.Renter)
+                .WithMany(u => u.Beds)
+                .HasForeignKey(b => b.RenterId)
+                .OnDelete(DeleteBehavior.SetNull);
+
         }
     }
 }

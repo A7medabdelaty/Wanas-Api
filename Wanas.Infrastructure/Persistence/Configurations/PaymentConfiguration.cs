@@ -29,10 +29,10 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .HasForeignKey(p => p.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            //builder.HasOne(p => p.Listing)
-            //       .WithMany()
-            //       .HasForeignKey(p => p.ListingId)
-            //       .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(p => p.Listing)
+                   .WithMany(l => l.Payments)
+                   .HasForeignKey(p => p.ListingId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
