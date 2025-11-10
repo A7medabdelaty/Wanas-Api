@@ -11,8 +11,7 @@ namespace Wanas.Domain.Entities
         public string ProfileType { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string Photo { get; set; }
-
-        //public ICollection<Listing> Listings { get; set; }
+        public ICollection<Listing> Listings { get; set; }
         public ICollection<Match> Matches { get; set; } = new List<Match>();
     }
 }
