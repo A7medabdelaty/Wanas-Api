@@ -24,5 +24,7 @@ namespace Wanas.Domain.Entities
         public HashSet<Room> Rooms { get; set; } = new();
         public HashSet<ListingPhoto> ListingPhotos { get; set; } = new();
         public ApplicationUser Owner { get; set; }
+
+        public HashSet<Payment> Payments { get; set; } = new();
     }
 }
