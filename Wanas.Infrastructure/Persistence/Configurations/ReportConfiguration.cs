@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 
 namespace Wanas.Infrastructure.Persistence.Configurations
 {
@@ -8,7 +9,29 @@ namespace Wanas.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Report> builder)
         {
+            builder.HasKey(r => r.ReportId);
+
+            builder.Property(r => r.TargetType)
+                   .IsRequired();
+
+            builder.Property(r => r.TargetId)
+                   .IsRequired();
+
+            builder.Property(r => r.Reason)
+                   .IsRequired()
+                   .HasMaxLength(1000);
+
+            builder.Property(r => r.CreatedAt)
+                   .HasDefaultValueSql("GETUTCDATE()");
+
+            builder.HasOne(r => r.Reporter)
+                   .WithMany()
+                   .HasForeignKey(r => r.ReporterId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
             
+            builder.HasIndex(r => new { r.TargetType, r.TargetId });
+
         }
     }
 }
