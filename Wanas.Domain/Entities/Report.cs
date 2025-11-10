@@ -12,7 +12,8 @@ namespace Wanas.Domain.Entities
         public ReportStatus Status { get; set; } = ReportStatus.Pending;
         public DateTime CreatedAt { get; set; }
         public string ReporterId { get; set; }
-        public ApplicationUser Reporter { get; set; }
+        public virtual ApplicationUser Reporter { get; set; } = null!;
+        public virtual ICollection<ReportPhoto> ReportPhotos { get; set; } = new HashSet<ReportPhoto>();
     }
 
 }
