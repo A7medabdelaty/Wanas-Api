@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Wanas.Domain.Entities;
-using Wanas.Domain.Enums;
 
 namespace Wanas.Infrastructure.Persistence.Configurations
 {
@@ -29,9 +28,7 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .HasForeignKey(r => r.ReporterId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            
             builder.HasIndex(r => new { r.TargetType, r.TargetId });
-
         }
     }
 }

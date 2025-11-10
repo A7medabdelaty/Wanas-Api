@@ -1,5 +1,4 @@
-﻿
-using Wanas.Domain.Enums;
+﻿using Wanas.Domain.Enums;
 
 namespace Wanas.Domain.Entities
 {
@@ -14,5 +13,4 @@ namespace Wanas.Domain.Entities
         public string ReporterId { get; set; }
         public ApplicationUser Reporter { get; set; }
     }
-
 }

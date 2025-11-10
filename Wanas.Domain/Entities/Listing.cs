@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Wanas.Domain.Entities
+﻿namespace Wanas.Domain.Entities
 {
     public class Listing
     {
@@ -24,7 +18,6 @@ namespace Wanas.Domain.Entities
         public HashSet<Room> Rooms { get; set; } = new();
         public HashSet<ListingPhoto> ListingPhotos { get; set; } = new();
         public ApplicationUser Owner { get; set; }
-
         public HashSet<Payment> Payments { get; set; } = new();
     }
 }

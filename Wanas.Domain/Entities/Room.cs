@@ -1,5 +1,4 @@
-﻿
-namespace Wanas.Domain.Entities
+﻿namespace Wanas.Domain.Entities
 {
     public class Room
     {

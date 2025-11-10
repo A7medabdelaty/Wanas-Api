@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Wanas.Domain.Entities;
 
@@ -28,7 +23,6 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                 .WithMany(u => u.Beds)
                 .HasForeignKey(b => b.RenterId)
                 .OnDelete(DeleteBehavior.SetNull);
-
         }
     }
 }
