@@ -24,7 +24,7 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .HasDefaultValueSql("GETUTCDATE()");
 
             builder.HasOne(r => r.Reporter)
-                   .WithMany()
+                   .WithMany(u => u.Reports)
                    .HasForeignKey(r => r.ReporterId)
                    .OnDelete(DeleteBehavior.Restrict);
 

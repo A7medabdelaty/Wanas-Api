@@ -13,5 +13,8 @@ namespace Wanas.Domain.Entities
         public ICollection<Listing> Listings { get; set; }
         public ICollection<Match> Matches { get; set; } = new List<Match>();
         public HashSet<Bed>? Beds { get; set; } = new();
+
+        
+        public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
 }
