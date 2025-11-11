@@ -1,6 +1,6 @@
-﻿namespace Wanas.Infrastructure
-{
-    internal class DependencyInjection
-    {
-    }
-}
+﻿//namespace Wanas.Infrastructure
+//{
+//    internal class DependencyInjection
+//    {
+//    }
+//}
