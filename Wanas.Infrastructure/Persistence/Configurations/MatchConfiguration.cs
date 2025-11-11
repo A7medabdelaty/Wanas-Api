@@ -26,8 +26,8 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
 
             // Listing (one listing can have many matches)
-            builder.HasOne<Listing>()
-                   .WithMany()
+            builder.HasOne(m => m.Listing)
+                   .WithMany(l => l.Matches)
                    .HasForeignKey(m => m.ListingId)
                    .OnDelete(DeleteBehavior.Cascade);
         }

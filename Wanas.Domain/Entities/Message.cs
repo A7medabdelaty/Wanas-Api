@@ -11,7 +11,7 @@ namespace Wanas.Domain.Entities
         public string? MediaMimeType { get; set; }
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
-        public int SenderId { get; set; }
+        public string SenderId { get; set; }
         public virtual ApplicationUser Sender { get; set; }
 
         public int ChatId { get; set; }

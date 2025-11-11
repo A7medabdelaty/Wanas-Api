@@ -13,11 +13,12 @@
         public int AvailableRooms { get; set; }
         public int AvailableBeds { get; set; }
         public DateTime CreatedAt { get; set; }
-        public Boolean IsActive { get; set; }
-        public int? OwnerId { get; set; }
+        public bool IsActive { get; set; }
+        public string? OwnerId { get; set; }
         public HashSet<Room> Rooms { get; set; } = new();
         public HashSet<ListingPhoto> ListingPhotos { get; set; } = new();
         public ApplicationUser Owner { get; set; }
         public HashSet<Payment> Payments { get; set; } = new();
+        public ICollection<Match> Matches { get; set; }
     }
 }

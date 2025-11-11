@@ -7,7 +7,7 @@
         public int BedsCount { get; set; }
         public int AvailableBeds { get; set; }
         public decimal PricePerBed { get; set; }
-        public Boolean IsAvailable { get; set; }
+        public bool IsAvailable { get; set; }
         public int? ListingId { get; set; }
         public HashSet<Bed> Beds { get; set; } = new();
         public  Listing Listing { get; set; }
