@@ -11,7 +11,7 @@ namespace Wanas.Domain.Entities
         public int ChatId { get; set; }
         public virtual Chat Chat { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace Wanas.Domain.Entities
         public int MessageId { get; set; }
         public virtual Message Message { get; set; }
 
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
     }
 }
