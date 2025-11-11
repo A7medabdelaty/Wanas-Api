@@ -1,3 +1,4 @@
+using FluentValidation.AspNetCore;
 using Wanas.Application.DependencyInjection;
 using Wanas.Infrastructure.DependencyInjection;
 
