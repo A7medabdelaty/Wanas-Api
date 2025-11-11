@@ -10,10 +10,10 @@ namespace Wanas.Application.Mappings
         {
             // Map domain Message -> MessageDto
             CreateMap<Message, MessageDto>()
-                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.TextContent));
+                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.TextContent)).ReverseMap();
 
-            CreateMap<MessageDto, Message>()
-                .ForMember(dest => dest.TextContent, opt => opt.MapFrom(src => src.Content));
+            CreateMap<CreateMessageRequestDto, Message>();
+
         }
     }
 }
