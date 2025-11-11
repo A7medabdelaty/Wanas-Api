@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Wanas.Domain\Wanas.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.1.0" />
+  </ItemGroup>
+
 </Project>

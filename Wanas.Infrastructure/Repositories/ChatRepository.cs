@@ -13,7 +13,6 @@ namespace Wanas.Infrastructure.Repositories
         {
             return await _context.Chats
                 .Include(c => c.ChatParticipants)
-                .Include(c => c.Messages)
                 .Where(c => c.ChatParticipants.Any(p => p.UserId == userId))
                 .ToListAsync();
         }
@@ -22,7 +21,13 @@ namespace Wanas.Infrastructure.Repositories
         {
             return await _context.Chats
                 .Include(c => c.Messages)
-                .ThenInclude(m => m.Sender)
+                .Include(c => c.ChatParticipants)
+                .FirstOrDefaultAsync(c => c.Id == chatId);
+        }
+
+        public async Task<Chat?> GetChatWithParticipantsAsync(int chatId)
+        {
+            return await _context.Chats
                 .Include(c => c.ChatParticipants)
                 .FirstOrDefaultAsync(c => c.Id == chatId);
         }
