@@ -13,6 +13,7 @@
   <ItemGroup>
     <Folder Include="Identity\" />
     <Folder Include="Persistence\Migrations\" />
+    <Folder Include="UnitOfWork\" />
   </ItemGroup>
 
   <ItemGroup>

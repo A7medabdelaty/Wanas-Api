@@ -21,16 +21,11 @@ namespace Wanas.Infrastructure.Persistence
         public DbSet<ChatParticipant> ChatParticipants { get; set; }
         public DbSet<MessageReadReceipt> MessageReadReceipts { get; set; }
         public DbSet<Preference> Preferences { get; set; }
-
         public DbSet<Listing> Listings { get; set; }
         public DbSet<ListingPhoto> ListingPhotos { get; set; }
         public DbSet<Bed> Beds { get; set; }
-
         public DbSet<Room> Rooms { get; set; }
-
         public DbSet<Report> Reports { get; set; }
-
         public DbSet<ReportPhoto> ReportPhotos { get; set; }
-
         }
 }
