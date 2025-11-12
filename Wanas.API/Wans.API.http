@@ -1,6 +1,0 @@
-@Wans.API_HostAddress = http://localhost:5069
-
-GET {{Wans.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

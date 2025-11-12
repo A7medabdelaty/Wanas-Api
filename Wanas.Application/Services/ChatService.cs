@@ -1,5 +1,5 @@
-﻿using Wanas.Application.DTOs.Chat;
-using Wanas.Application.DTOs.Message;
+﻿using AutoMapper;
+using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
@@ -9,66 +9,52 @@ namespace Wanas.Application.Services
     public class ChatService : IChatService
     {
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
 
-        public ChatService(IUnitOfWork uow)
+        public ChatService(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
+            _mapper = mapper;
         }
-
         public async Task<IEnumerable<ChatDto>> GetUserChatsAsync(string userId)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException("UserId is required.", nameof(userId));
+
             var chats = await _uow.Chats.GetUserChatsAsync(userId);
-
-            return chats.Select(c => new ChatDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                IsGroup = c.IsGroup,
-                CreatedAt = c.CreatedAt,
-                ParticipantIds = c.ChatParticipants.Select(p => p.UserId).ToList()
-            });
+            return _mapper.Map<IEnumerable<ChatDto>>(chats);
         }
-
-        public async Task<ChatDto?> GetChatDetailsAsync(int chatId)
+        public async Task<ChatDto?> GetChatWithMessagesAsync(int chatId)
         {
             var chat = await _uow.Chats.GetChatWithMessagesAsync(chatId);
-            if (chat == null)
-                return null;
-
-            return new ChatDto
-            {
-                Id = chat.Id,
-                Name = chat.Name,
-                IsGroup = chat.IsGroup,
-                CreatedAt = chat.CreatedAt,
-                ParticipantIds = chat.ChatParticipants.Select(p => p.UserId).ToList(),
-                Messages = chat.Messages.Select(m => new MessageDto
-                {
-                    Id = m.Id,
-                    ChatId = m.ChatId,
-                    SenderId = m.SenderId,
-                    Content = m.TextContent,
-                    SentAt = m.SentAt
-                })
-            };
+            return chat == null ? null : _mapper.Map<ChatDto>(chat);
         }
-
-        public async Task<int> CreateChatAsync(string userId, string? chatName = null, bool isGroup = false)
+        public async Task<ChatDto> CreateChatAsync(CreateChatRequestDto request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+            if (string.IsNullOrWhiteSpace(request.UserId))
+                throw new ArgumentException("UserId is required.", nameof(request.UserId));
+
             var chat = new Chat
             {
-                Name = chatName,
-                IsGroup = isGroup,
-                CreatedAt = DateTime.UtcNow,
-                ChatParticipants = new List<ChatParticipant>
-                {
-                    new ChatParticipant { UserId = userId }
-                }
+                Name = request.ChatName,
+                IsGroup = request.IsGroup,
+                CreatedAt = DateTime.UtcNow
             };
+
+            var participant = new ChatParticipant
+            {
+                UserId = request.UserId,
+                Chat = chat
+            };
+
+            chat.ChatParticipants.Add(participant);
 
             await _uow.Chats.AddAsync(chat);
             await _uow.CommitAsync();
-            return chat.Id;
+
+            return _mapper.Map<ChatDto>(chat);
         }
     }
 }

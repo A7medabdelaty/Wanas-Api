@@ -1,6 +1,7 @@
-﻿using Wanas.Application.DTOs.Message;
+﻿using AutoMapper;
+using Wanas.Application.DTOs.Chat;
+using Wanas.Application.DTOs.Message;
 using Wanas.Domain.Entities;
-using AutoMapper;
 
 namespace Wanas.Application.Mappings
 {
@@ -8,12 +9,24 @@ namespace Wanas.Application.Mappings
     {
         public MappingProfile()
         {
-            // Map domain Message -> MessageDto
+            CreateMap<Chat, ChatDto>()
+                .ForMember(dest => dest.ParticipantIds,
+                    opt => opt.MapFrom(src => src.ChatParticipants.Select(p => p.UserId)))
+                .ForMember(dest => dest.Messages,
+                    opt => opt.MapFrom(src => src.Messages));
+
+            CreateMap<CreateChatRequestDto, Chat>()
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
+
             CreateMap<Message, MessageDto>()
-                .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.TextContent)).ReverseMap();
+                .ForMember(dest => dest.SenderId,
+                    opt => opt.MapFrom(src => src.SenderId))
+                .ForMember(dest => dest.Content,
+                    opt => opt.MapFrom(src => src.TextContent))
+                .ForMember(dest => dest.SentAt,
+                    opt => opt.MapFrom(src => src.SentAt));
 
             CreateMap<CreateMessageRequestDto, Message>();
-
         }
     }
 }
