@@ -29,6 +29,9 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(r => new { r.TargetType, r.TargetId });
+
+            builder.Property(r => r.TargetType).HasConversion<string>();
+            builder.Property(r => r.Status).HasConversion<string>();
         }
     }
 }

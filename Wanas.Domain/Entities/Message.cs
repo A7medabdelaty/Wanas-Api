@@ -5,7 +5,7 @@ namespace Wanas.Domain.Entities
     public class Message
     {
         public int Id { get; set; }
-        public MessageType Type { get; set; }
+        public MessageType MessageType { get; set; }
         public string? TextContent { get; set; }
         public string? MediaUrl { get; set; }
         public string? MediaMimeType { get; set; }

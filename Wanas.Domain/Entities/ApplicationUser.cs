@@ -16,9 +16,9 @@ namespace Wanas.Domain.Entities
         public string Photo { get; set; }
         public bool IsDeleted { get; set; } = false;
         public virtual UserPreference UserPreference { get; set; }
+        public HashSet<Bed>? Beds { get; set; } = new();
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
         public ICollection<Match> Matches { get; set; } = new List<Match>();
-        public HashSet<Bed>? Beds { get; set; } = new();
         public ICollection<Message> Messages { get; set; } = new List<Message>();
         public ICollection<ChatParticipant> ChatParticipants { get; set; } = new List<ChatParticipant>();
         public ICollection<MessageReadReceipt> MessageReadReceipts { get; set; } = new List<MessageReadReceipt>();

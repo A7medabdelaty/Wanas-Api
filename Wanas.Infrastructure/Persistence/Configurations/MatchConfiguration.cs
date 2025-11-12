@@ -29,6 +29,8 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                 .WithMany(l => l.Matches)      // Listing.Matches collection
                 .HasForeignKey(m => m.ListingId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(m => m.Status).HasConversion<string>();
         }
     }
 }
