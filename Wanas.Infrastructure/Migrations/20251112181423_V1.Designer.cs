@@ -12,7 +12,7 @@ using Wanas.Infrastructure.Persistence;
 namespace Wanas.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20251111101423_V1")]
+    [Migration("20251112181423_V1")]
     partial class V1
     {
         /// <inheritdoc />
@@ -158,6 +158,65 @@ namespace Wanas.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.ApartmentListing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("AreaInSqMeter")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AvailableBeds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AvailableRooms")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Floor")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("HasElevator")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasInternet")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasKitchen")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ListingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MonthlyPrice")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalBathrooms")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalBeds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalRooms")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ListingId")
+                        .IsUnique();
+
+                    b.ToTable("ApartmentListings");
+                });
+
             modelBuilder.Entity("Wanas.Domain.Entities.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -166,13 +225,18 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
                     b.Property<string>("Bio")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -190,7 +254,8 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -213,7 +278,9 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
@@ -257,6 +324,9 @@ namespace Wanas.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ApartmentListingId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
@@ -267,6 +337,8 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApartmentListingId");
 
                     b.HasIndex("RenterId");
 
@@ -335,7 +407,7 @@ namespace Wanas.Infrastructure.Migrations
                     b.ToTable("ChatParticipants");
                 });
 
-            modelBuilder.Entity("Wanas.Domain.Entities.Listing", b =>
+            modelBuilder.Entity("Wanas.Domain.Entities.Comment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -343,16 +415,44 @@ namespace Wanas.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Address")
+                    b.Property<string>("AuthorId")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("AvailableBeds")
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ListingId")
                         .HasColumnType("int");
 
-                    b.Property<int>("AvailableRooms")
+                    b.Property<int?>("ParentCommentId")
                         .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ListingId");
+
+                    b.HasIndex("ParentCommentId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("Wanas.Domain.Entities.Listing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -366,35 +466,27 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(350)
-                        .HasColumnType("nvarchar(350)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<decimal>("MonthlyPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("OwnerId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("TotalBeds")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalRooms")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("City")
                         .HasDatabaseName("IX_Listing_City");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Listings");
                 });
@@ -441,8 +533,9 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -476,6 +569,10 @@ namespace Wanas.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SenderId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -486,10 +583,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<string>("TextContent")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -575,89 +668,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("Wanas.Domain.Entities.Preference", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AllowVisits")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Children")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("IsStudent")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Job")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Major")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("MaximunBudget")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MinimunBudget")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NoiseToleranceLevel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PetsPreference")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SleepSchedule")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SmokingPreference")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SocialLevel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("University")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("City");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Preferences");
-                });
-
             modelBuilder.Entity("Wanas.Domain.Entities.Report", b =>
                 {
                     b.Property<int>("ReportId")
@@ -680,15 +690,17 @@ namespace Wanas.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TargetId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("TargetType")
-                        .HasColumnType("int");
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ReportId");
 
@@ -751,8 +763,9 @@ namespace Wanas.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("TargetType")
-                        .HasColumnType("int");
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ReviewId");
 
@@ -771,6 +784,9 @@ namespace Wanas.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ApartmentListingId")
+                        .HasColumnType("int");
+
                     b.Property<int>("AvailableBeds")
                         .HasColumnType("int");
 
@@ -780,9 +796,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ListingId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("PricePerBed")
                         .HasColumnType("decimal(18,2)");
 
@@ -791,9 +804,98 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ListingId");
+                    b.HasIndex("ApartmentListingId");
 
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("Wanas.Domain.Entities.UserPreference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Children")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsStudent")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Job")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Major")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("MaximumAge")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaximumBudget")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinimumAge")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MinimumBudget")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NoiseToleranceLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OvernightGuests")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Pets")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SleepSchedule")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Smoking")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SocialLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("University")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Visits")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("City");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserPreferences");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -847,8 +949,23 @@ namespace Wanas.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.ApartmentListing", b =>
+                {
+                    b.HasOne("Wanas.Domain.Entities.Listing", "Listing")
+                        .WithOne("ApartmentListing")
+                        .HasForeignKey("Wanas.Domain.Entities.ApartmentListing", "ListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Listing");
+                });
+
             modelBuilder.Entity("Wanas.Domain.Entities.Bed", b =>
                 {
+                    b.HasOne("Wanas.Domain.Entities.ApartmentListing", null)
+                        .WithMany("Beds")
+                        .HasForeignKey("ApartmentListingId");
+
                     b.HasOne("Wanas.Domain.Entities.ApplicationUser", "Renter")
                         .WithMany("Beds")
                         .HasForeignKey("RenterId")
@@ -857,7 +974,7 @@ namespace Wanas.Infrastructure.Migrations
                     b.HasOne("Wanas.Domain.Entities.Room", "Room")
                         .WithMany("Beds")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Renter");
@@ -884,14 +1001,41 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.Comment", b =>
+                {
+                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "Author")
+                        .WithMany("Comments")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Wanas.Domain.Entities.Listing", "Listing")
+                        .WithMany("Comments")
+                        .HasForeignKey("ListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Wanas.Domain.Entities.Comment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Listing");
+
+                    b.Navigation("ParentComment");
+                });
+
             modelBuilder.Entity("Wanas.Domain.Entities.Listing", b =>
                 {
-                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "Owner")
+                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "User")
                         .WithMany("Listings")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Owner");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.ListingPhoto", b =>
@@ -981,17 +1125,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Wanas.Domain.Entities.Preference", b =>
-                {
-                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "User")
-                        .WithOne("Preference")
-                        .HasForeignKey("Wanas.Domain.Entities.Preference", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Wanas.Domain.Entities.Report", b =>
                 {
                     b.HasOne("Wanas.Domain.Entities.ApplicationUser", "Reporter")
@@ -1027,12 +1160,31 @@ namespace Wanas.Infrastructure.Migrations
 
             modelBuilder.Entity("Wanas.Domain.Entities.Room", b =>
                 {
-                    b.HasOne("Wanas.Domain.Entities.Listing", "Listing")
+                    b.HasOne("Wanas.Domain.Entities.ApartmentListing", "ApartmentListing")
                         .WithMany("Rooms")
-                        .HasForeignKey("ListingId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("ApartmentListingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Listing");
+                    b.Navigation("ApartmentListing");
+                });
+
+            modelBuilder.Entity("Wanas.Domain.Entities.UserPreference", b =>
+                {
+                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "User")
+                        .WithOne("UserPreference")
+                        .HasForeignKey("Wanas.Domain.Entities.UserPreference", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Wanas.Domain.Entities.ApartmentListing", b =>
+                {
+                    b.Navigation("Beds");
+
+                    b.Navigation("Rooms");
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.ApplicationUser", b =>
@@ -1040,6 +1192,8 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("Beds");
 
                     b.Navigation("ChatParticipants");
+
+                    b.Navigation("Comments");
 
                     b.Navigation("Listings");
 
@@ -1049,10 +1203,10 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Navigation("Messages");
 
-                    b.Navigation("Preference")
-                        .IsRequired();
-
                     b.Navigation("Reports");
+
+                    b.Navigation("UserPreference")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Chat", b =>
@@ -1062,15 +1216,23 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.Comment", b =>
+                {
+                    b.Navigation("Replies");
+                });
+
             modelBuilder.Entity("Wanas.Domain.Entities.Listing", b =>
                 {
+                    b.Navigation("ApartmentListing")
+                        .IsRequired();
+
+                    b.Navigation("Comments");
+
                     b.Navigation("ListingPhotos");
 
                     b.Navigation("Matches");
 
                     b.Navigation("Payments");
-
-                    b.Navigation("Rooms");
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Message", b =>
