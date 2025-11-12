@@ -29,7 +29,7 @@ namespace Wanas.Infrastructure.Persistence.Configurations
             builder.Property(m => m.MediaUrl).HasMaxLength(500);
             builder.Property(m => m.MediaMimeType).HasMaxLength(100);
 
-            builder.Property(m => m.Type).HasConversion<string>();
+            builder.Property(m => m.MessageType).HasConversion<string>();
 
             builder.HasIndex(m => m.ChatId);
             builder.HasIndex(m => m.SenderId);

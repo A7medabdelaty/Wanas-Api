@@ -25,11 +25,12 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .HasForeignKey(m => m.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            // Listing (one listing can have many matches)
-            builder.HasOne(m => m.Listing)
-                   .WithMany(l => l.Matches)
-                   .HasForeignKey(m => m.ListingId)
-                   .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(m => m.Listing)        // Match.Listing navigation
+                .WithMany(l => l.Matches)      // Listing.Matches collection
+                .HasForeignKey(m => m.ListingId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(m => m.Status).HasConversion<string>();
         }
     }
 }
