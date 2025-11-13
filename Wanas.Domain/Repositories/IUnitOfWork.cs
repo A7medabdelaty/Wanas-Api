@@ -5,5 +5,6 @@
         IChatRepository Chats { get; }
         IMessageRepository Messages { get; }
         Task<int> CommitAsync();
+        IChatParticipantRepository ChatParticipants { get; }
     }
 }

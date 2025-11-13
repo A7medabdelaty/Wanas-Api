@@ -56,5 +56,35 @@ namespace Wanas.Application.Services
 
             return _mapper.Map<ChatDto>(chat);
         }
+        public async Task<bool> AddParticipantAsync(AddParticipantRequestDto request)
+        {
+            var chat = await _uow.Chats.GetChatWithParticipantsAsync(request.ChatId);
+            if (chat == null)
+                throw new InvalidOperationException("Chat not found.");
+
+            // Prevent duplicates
+            if (chat.ChatParticipants.Any(p => p.UserId == request.UserId))
+                return false;
+
+            var participant = new ChatParticipant
+            {
+                ChatId = request.ChatId,
+                UserId = request.UserId
+            };
+
+            await _uow.ChatParticipants.AddAsync(participant);
+            await _uow.CommitAsync();
+            return true;
+        }
+        public async Task<bool> RemoveParticipantAsync(int chatId, string userId)
+        {
+            var participant = await _uow.ChatParticipants.GetParticipantAsync(chatId, userId);
+            if (participant == null)
+                return false; // not found or already removed
+
+            _uow.ChatParticipants.Remove(participant);
+            await _uow.CommitAsync();
+            return true;
+        }
     }
 }

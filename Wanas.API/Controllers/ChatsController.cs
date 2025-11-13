@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
 
@@ -45,6 +44,31 @@ namespace Wanas.API.Controllers
 
             var chat = await _chatService.CreateChatAsync(request);
             return CreatedAtAction(nameof(GetChatDetails), new { id = chat.Id }, chat);
+        }
+
+        [HttpPost("{chatId}/participants")]
+        public async Task<IActionResult> AddParticipant(int chatId, [FromBody] string userId)
+        {
+            var result = await _chatService.AddParticipantAsync(new AddParticipantRequestDto
+            {
+                ChatId = chatId,
+                UserId = userId
+            });
+
+            if (!result)
+                return BadRequest("User already in chat or chat not found.");
+
+            return Ok("Participant added successfully.");
+        }
+
+        [HttpDelete("{chatId}/participants/{userId}")]
+        public async Task<IActionResult> RemoveParticipant(int chatId, string userId)
+        {
+            var result = await _chatService.RemoveParticipantAsync(chatId, userId);
+            if (!result)
+                return NotFound("Participant not found or already removed.");
+
+            return Ok("Participant removed successfully.");
         }
     }
 }

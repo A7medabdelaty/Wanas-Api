@@ -19,6 +19,7 @@ namespace Wanas.API.Extentions
             // Repositories
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Services (Application Layer)
