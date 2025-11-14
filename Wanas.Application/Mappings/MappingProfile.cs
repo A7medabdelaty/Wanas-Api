@@ -27,6 +27,10 @@ namespace Wanas.Application.Mappings
                     opt => opt.MapFrom(src => src.SentAt));
 
             CreateMap<CreateMessageRequestDto, Message>();
+
+            CreateMap<ChatParticipant, ChatParticipantDto>()
+                .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.User.UserName));
+
         }
     }
 }

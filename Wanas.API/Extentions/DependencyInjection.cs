@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Wanas.API.RealTime;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
@@ -25,6 +26,8 @@ namespace Wanas.API.Extentions
             // Services (Application Layer)
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
+
+            services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
 
             // AutoMapper
             services.AddAutoMapper(cfg =>

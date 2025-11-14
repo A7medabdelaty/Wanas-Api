@@ -10,7 +10,7 @@ namespace Wanas.Domain.Entities
         public string? MediaUrl { get; set; }
         public string? MediaMimeType { get; set; }
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
-
+        public bool IsEdited { get; set; }
         public string SenderId { get; set; }
         public virtual ApplicationUser Sender { get; set; }
 
