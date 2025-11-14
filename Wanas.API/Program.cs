@@ -1,5 +1,6 @@
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
+using Wanas.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddAutoMapper(typeof(ReportProfile).Assembly);
+
 
 var app = builder.Build();
 
