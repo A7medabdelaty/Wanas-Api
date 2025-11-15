@@ -8,19 +8,16 @@ namespace Wanas.Application.Services
     {
         private readonly IMatchingService _traditionalMatcher;
         private readonly IChromaService _chromaService;
-        private readonly IUserRepository _userRepo;
-        private readonly IUserPreferenceRepository _prefRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
         public HybridMatchingService(
             IMatchingService traditionalMatcher,
             IChromaService chromaService,
-            IUserRepository userRepo,
-            IUserPreferenceRepository prefRepo)
+            IUnitOfWork unitOfWork)
         {
             _traditionalMatcher = traditionalMatcher;
             _chromaService = chromaService;
-            _userRepo = userRepo;
-            _prefRepo = prefRepo;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<MatchingResultDto>> MatchUserAsync(string userId)
@@ -29,8 +26,8 @@ namespace Wanas.Application.Services
             var traditionalResults = await _traditionalMatcher.MatchUserAsync(userId);
 
             // Step 2: Get user data for semantic search
-            var user = await _userRepo.GetUserByIdAsync(userId);
-            var pref = await _prefRepo.GetByUserIdAsync(userId);
+            var user = await _unitOfWork.Users.GetUserByIdAsync(userId);
+            var pref = await _unitOfWork.UserPreferences.GetByUserIdAsync(userId);
 
             if (user == null || pref == null)
                 return traditionalResults;

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Wanas.Application.DTOs.Matching;
+﻿using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 
 namespace Wanas.Application.Services

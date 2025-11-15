@@ -7,9 +7,7 @@ namespace Wanas.Application.Services
 {
     public class MatchingService : IMatchingService
     {
-        private readonly IUserRepository _userRepo;
-        private readonly IUserPreferenceRepository _prefRepo;
-        private readonly IListingRepository _listingRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
         // Scoring constants
         private const int CityMatchScore = 30;
@@ -22,14 +20,9 @@ namespace Wanas.Application.Services
         private const int SocialLevelCompatibilityScore = 5;
         private const int MinimumScoreThreshold = 20;
 
-        public MatchingService(
-            IUserRepository userRepo,
-            IUserPreferenceRepository prefRepo,
-            IListingRepository listingRepo)
+        public MatchingService(IUnitOfWork unitOfWork)
         {
-            _userRepo = userRepo;
-            _prefRepo = prefRepo;
-            _listingRepo = listingRepo;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<MatchingResultDto>> MatchUserAsync(string userId)
@@ -38,26 +31,34 @@ namespace Wanas.Application.Services
             if (user == null || preferences == null)
                 return new List<MatchingResultDto>();
 
-            var listings = await _listingRepo.GetActiveListingsAsync();
+            var listings = await _unitOfWork.Listings.GetActiveListingsAsync();
+
             var results = CalculateMatches(userId, preferences, listings);
 
-            return results.OrderByDescending(r => r.Score).ToList();
+            return results
+                .OrderByDescending(r => r.Score)
+                .ToList();
         }
 
         private async Task<(ApplicationUser, UserPreference)> ValidateAndGetUserDataAsync(string userId)
         {
-            var user = await _userRepo.GetUserByIdAsync(userId);
+            var user = await _unitOfWork.Users.GetUserByIdAsync(userId);
+
             if (user == null || user.IsDeleted)
                 return (null, null);
 
-            var preferences = await _prefRepo.GetByUserIdAsync(userId);
+            var preferences = await _unitOfWork.UserPreferences.GetByUserIdAsync(userId);
+
             if (preferences == null)
                 return (null, null);
 
             return (user, preferences);
         }
 
-        private List<MatchingResultDto> CalculateMatches(string userId, UserPreference userPref, List<Listing> listings)
+        private List<MatchingResultDto> CalculateMatches(
+            string userId,
+            UserPreference userPref,
+            List<Listing> listings)
         {
             var results = new List<MatchingResultDto>();
 
@@ -79,23 +80,37 @@ namespace Wanas.Application.Services
 
         private bool IsValidListing(Listing listing, string userId)
         {
-            return listing.UserId != userId && 
-                   listing.User != null && 
-                   listing.User.UserPreference != null;
+            if (listing == null)
+                return false;
+
+            if (listing.UserId == userId)
+                return false;
+
+            if (listing.User == null)
+                return false;
+
+            if (listing.User.UserPreference == null)
+                return false;
+
+            return true;
         }
 
         private int CalculateCompatibilityScore(UserPreference userPref, Listing listing)
         {
             int score = 0;
 
+            // Safe null-access
+            var ownerPref = listing?.User?.UserPreference;
+            var ownerAge = listing?.User?.Age ?? 0;
+
             score += CalculateCityScore(userPref.City, listing.City);
-            score += CalculateAgeScore(userPref, listing.User.Age);
+            score += CalculateAgeScore(userPref, ownerAge);
             score += CalculateBudgetScore(userPref, listing.ApartmentListing);
-            score += CalculateGenderScore(userPref, listing.User.UserPreference);
-            score += CalculateSmokingScore(userPref, listing.User.UserPreference);
-            score += CalculatePetsScore(userPref, listing.User.UserPreference);
-            score += CalculateSleepScheduleScore(userPref, listing.User.UserPreference);
-            score += CalculateSocialLevelScore(userPref, listing.User.UserPreference);
+            score += CalculateGenderScore(userPref, ownerPref);
+            score += CalculateSmokingScore(userPref, ownerPref);
+            score += CalculatePetsScore(userPref, ownerPref);
+            score += CalculateSleepScheduleScore(userPref, ownerPref);
+            score += CalculateSocialLevelScore(userPref, ownerPref);
 
             return score;
         }
@@ -108,61 +123,89 @@ namespace Wanas.Application.Services
             {
                 return CityMatchScore;
             }
+
             return 0;
         }
 
         private int CalculateAgeScore(UserPreference userPref, int ownerAge)
         {
+            if (ownerAge == 0) return 0;
+
             if (ownerAge >= userPref.MinimumAge && ownerAge <= userPref.MaximumAge)
                 return AgeCompatibilityScore;
+
             return 0;
         }
 
-        private int CalculateBudgetScore(UserPreference userPref, ApartmentListing apartmentListing)
+        private int CalculateBudgetScore(UserPreference userPref, ApartmentListing apt)
         {
-            if (apartmentListing == null)
-                return 0;
+            if (apt == null) return 0;
 
-            var monthlyPrice = apartmentListing.MonthlyPrice;
-            if (monthlyPrice >= userPref.MinimumBudget && monthlyPrice <= userPref.MaximumBudget)
+            if (apt.MonthlyPrice >= userPref.MinimumBudget &&
+                apt.MonthlyPrice <= userPref.MaximumBudget)
+            {
                 return BudgetCompatibilityScore;
+            }
+
             return 0;
         }
 
         private int CalculateGenderScore(UserPreference userPref, UserPreference ownerPref)
         {
-            return userPref.Gender == ownerPref.Gender ? GenderPreferenceScore : 0;
+            if (ownerPref == null) return 0;
+
+            return userPref.Gender == ownerPref.Gender
+                ? GenderPreferenceScore
+                : 0;
         }
 
         private int CalculateSmokingScore(UserPreference userPref, UserPreference ownerPref)
         {
-            return userPref.Smoking == ownerPref.Smoking ? SmokingCompatibilityScore : 0;
+            if (ownerPref == null) return 0;
+
+            return userPref.Smoking == ownerPref.Smoking
+                ? SmokingCompatibilityScore
+                : 0;
         }
 
         private int CalculatePetsScore(UserPreference userPref, UserPreference ownerPref)
         {
-            return userPref.Pets == ownerPref.Pets ? PetsCompatibilityScore : 0;
+            if (ownerPref == null) return 0;
+
+            return userPref.Pets == ownerPref.Pets
+                ? PetsCompatibilityScore
+                : 0;
         }
 
         private int CalculateSleepScheduleScore(UserPreference userPref, UserPreference ownerPref)
         {
-            return userPref.SleepSchedule == ownerPref.SleepSchedule ? SleepScheduleCompatibilityScore : 0;
+            if (ownerPref == null) return 0;
+
+            return userPref.SleepSchedule == ownerPref.SleepSchedule
+                ? SleepScheduleCompatibilityScore
+                : 0;
         }
 
         private int CalculateSocialLevelScore(UserPreference userPref, UserPreference ownerPref)
         {
-            return userPref.SocialLevel == ownerPref.SocialLevel ? SocialLevelCompatibilityScore : 0;
+            if (ownerPref == null) return 0;
+
+            return userPref.SocialLevel == ownerPref.SocialLevel
+                ? SocialLevelCompatibilityScore
+                : 0;
         }
 
         private MatchingResultDto CreateMatchingResult(Listing listing, int score)
         {
+            var user = listing.User;
+
             return new MatchingResultDto
             {
                 ListingId = listing.Id,
                 ListingTitle = listing.Title,
                 ListingCity = listing.City,
-                OwnerName = listing.User.FullName,
-                OwnerPhoto = listing.User.Photo,
+                OwnerName = user?.FullName ?? "Unknown",
+                OwnerPhoto = user?.Photo,
                 Score = score
             };
         }

@@ -11,7 +11,7 @@ namespace Wanas.Domain.Entities
         public string Bio { get; set; }
         public ProfileType ProfileType { get; set; }
         public int Age { get; set; }
-        public string PhoneNumber { get; set; }
+        public new string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string Photo { get; set; }
         public bool IsDeleted { get; set; } = false;
