@@ -33,9 +33,34 @@ namespace Wanas.Application.Services
 
            
         }
-        public Task<ReportResponseDto> SubmitReportAsync(CreateReportDto reportDto, string reporterId)
+        public async Task<ReportResponseDto> SubmitReportAsync(CreateReportDto reportDto, string reporterId)
         {
-            throw new NotImplementedException();
+            var report = _mapper.Map<Report>(reportDto);
+            report.ReporterId = reporterId;
+            report.CreatedAt = DateTime.UtcNow;
+            await _unitOfWork.Reports.AddAsync(report);
+            await _unitOfWork.CommitAsync();
+            if(report.ReportPhotos != null && reportDto.PhotoUrls.Any())
+            {
+                foreach (var url in reportDto.PhotoUrls)
+                {
+                    var photo = new ReportPhoto
+                    {
+                        URL = url,
+                        ReportId = report.ReportId
+                    };
+
+                    await _unitOfWork.ReportPhotos.AddAsync(photo);
+                }
+
+                await _unitOfWork.CommitAsync();
+            }
+            var finalReport = await _unitOfWork.Reports.GetByIdAsync(report.ReportId);
+            var response = _mapper.Map<ReportResponseDto>(finalReport);
+            return response;
+
+
+
         }
     }
 }

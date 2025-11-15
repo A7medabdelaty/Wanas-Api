@@ -27,6 +27,7 @@ namespace Wanas.API.Extentions
             // Services (Application Layer)
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IReportService, ReportService>();
 
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
 
@@ -35,6 +36,7 @@ namespace Wanas.API.Extentions
             {
                 cfg.AddProfile<MappingProfile>();
             }, typeof(MappingProfile).Assembly);
+            services.AddAutoMapper(cfg => {cfg.AddProfile<ReportProfile>();}, typeof(ReportProfile).Assembly);
 
             return services;
         }
