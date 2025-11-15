@@ -1,7 +1,6 @@
 ﻿using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
-using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 namespace Wanas.Application.Services
 {

@@ -24,11 +24,11 @@ namespace Wanas.Application.Services
         {
             var user = await _userRepo.GetUserByIdAsync(userId);
             if (user == null || user.IsDeleted)
-                return new();
+                return null;
 
             var pref = await _prefRepo.GetByUserIdAsync(userId);
             if (pref == null)
-                return new();
+                return null;
 
             var listings = await _listingRepo.GetActiveListingsAsync();
 

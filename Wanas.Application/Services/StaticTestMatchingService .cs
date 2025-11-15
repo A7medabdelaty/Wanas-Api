@@ -115,6 +115,7 @@ namespace Wanas.Application.Services
             // Boost scores for listings that matched semantically
             foreach (var result in allTestResults)
             {
+                //1,3,4
                 if (semanticListingIds.Contains(result.ListingId))
                 {
                     result.Score += 25; // RAG boost

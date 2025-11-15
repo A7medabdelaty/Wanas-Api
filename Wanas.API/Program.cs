@@ -1,16 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.Application.Interfaces;
-using Wanas.Application.Services;
-using Wanas.Domain.Repositories;
-using Wanas.Infrastructure.Persistence;
-using Wanas.Infrastructure.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 builder.Services.AddSignalR();
 
@@ -31,49 +24,8 @@ builder.Services.AddCors(options =>
 // Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-// Replace the HybridMatchingService registration with:
-builder.Services.AddScoped<IMatchingService, StaticTestMatchingService>();
-#region RAG DEPENDENCIES
 
-// 1. HTTP Clients
-builder.Services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
-builder.Services.AddHttpClient<IChromaService, ChromaService>();
-
-// 2. Configuration
-builder.Services.Configure<OpenAIConfig>(builder.Configuration.GetSection("OpenAI"));
-
-// 3. Service Registrations
-builder.Services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
-builder.Services.AddScoped<IChromaService, ChromaService>();
-// In Program.cs - add these registrations
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
-builder.Services.AddScoped<IListingRepository, ListingRepository>();
-
-// 4. Keep original matching service
-builder.Services.AddScoped<MatchingService>();
-
-// 5. Register Hybrid as the main IMatchingService
-//builder.Services.AddScoped<IMatchingService>(provider =>
-//{
-//    var traditional = provider.GetRequiredService<MatchingService>();
-//    var chroma = provider.GetRequiredService<IChromaService>();
-//    var userRepo = provider.GetRequiredService<IUserRepository>();
-//    var prefRepo = provider.GetRequiredService<IUserPreferenceRepository>();
-
-//    return new HybridMatchingService(traditional, chroma, userRepo, prefRepo);
-//});
-
-// 5. Register StaticTest as the main IMatchingService
-builder.Services.AddScoped<IMatchingService>(provider =>
-{
-    var chroma = provider.GetRequiredService<IChromaService>();
-    return new StaticTestMatchingService(chroma);
-});
-
-
-
-#endregion
+builder.Services.AddApplicationServices(builder.Configuration);
 
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
