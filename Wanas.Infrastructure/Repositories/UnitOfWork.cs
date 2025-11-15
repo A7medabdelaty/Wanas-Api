@@ -10,6 +10,9 @@ namespace Wanas.Infrastructure.Repositories
         public IChatRepository Chats { get; }
         public IMessageRepository Messages { get; }
         public IChatParticipantRepository ChatParticipants { get; }
+        public IUserRepository Users { get; }
+        public IUserPreferenceRepository UserPreferences { get; }
+        public IListingRepository Listings { get; }
 
 
         public IReportRepository Reports { get; }
@@ -20,12 +23,18 @@ namespace Wanas.Infrastructure.Repositories
                           IMessageRepository messages,
                           IChatParticipantRepository chatParticipants,
                           IReportRepository reports,
-                          IReportPhotoRepository reportPhotos)
+                          IReportPhotoRepository reportPhotos,
+                          IUserRepository users,
+                          IUserPreferenceRepository userPreferences,
+                          IListingRepository listings)
         {
             _context = context;
             Chats = chats;
             Messages = messages;
             ChatParticipants = chatParticipants;
+            Users = users;
+            UserPreferences = userPreferences;
+            Listings = listings;
             Reports = reports;
             ReportPhotos = reportPhotos;
         }

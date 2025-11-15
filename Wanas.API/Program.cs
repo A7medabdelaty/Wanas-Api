@@ -1,6 +1,7 @@
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
-using Wanas.Application.Mappings;
+using Wanas.Application.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,27 +18,49 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowCredentials()
             .SetIsOriginAllowed(_ => true);
-    });
+  });
 });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Swagger Configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplicationServices(builder.Configuration);
 
-builder.Services.AddAutoMapper(typeof(ReportProfile).Assembly);
-
-
+// ======== BUILD & INITIALIZE ========
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure Swagger (works in all environments)
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.UseSwaggerUI(op => op.SwaggerEndpoint("/openapi/v1.json", "v1"));
+    app.UseDeveloperExceptionPage();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Wanas API v1");
+    });
+}
+
+
+//Initialize ChromaDB on startup
+using (var scope = app.Services.CreateScope())
+{
+    var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
+    try
+    {
+        await chromaService.InitializeCollectionAsync();
+        Console.WriteLine("ChromaDB collection initialized");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"ChromaDB init failed: {ex.Message}");
+        // Continue - traditional matching will still work
+    }
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
