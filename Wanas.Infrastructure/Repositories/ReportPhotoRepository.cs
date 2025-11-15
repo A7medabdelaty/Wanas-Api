@@ -5,7 +5,7 @@ using Wanas.Infrastructure.Persistence;
 
 namespace Wanas.Infrastructure.Repositories
 {
-    public class ReportPhotoRepository : GenericRepository<ReportPhoto>/* IReportPhotoRepository*/
+    public class ReportPhotoRepository : GenericRepository<ReportPhoto> ,IReportPhotoRepository
     {
         public ReportPhotoRepository(AppDBContext context) : base(context)
         {
