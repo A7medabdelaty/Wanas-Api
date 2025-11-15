@@ -4,7 +4,10 @@
     {
         IChatRepository Chats { get; }
         IMessageRepository Messages { get; }
-        Task<int> CommitAsync();
         IChatParticipantRepository ChatParticipants { get; }
+        IUserRepository Users { get; }
+        IUserPreferenceRepository UserPreferences { get; }
+        IListingRepository Listings { get; }
+        Task<int> CommitAsync();
     }
 }
