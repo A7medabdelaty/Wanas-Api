@@ -1,4 +1,4 @@
-﻿
+
 namespace Wanas.Domain.Entities
 {
     public class ApartmentListing

@@ -23,6 +23,11 @@ namespace Wanas.API.Extentions
             services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IMatchingService, MatchingService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
+            services.AddScoped<IListingRepository, ListingRepository>();
+
             // Services (Application Layer)
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();

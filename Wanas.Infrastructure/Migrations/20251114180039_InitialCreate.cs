@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wanas.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class V1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -329,6 +329,7 @@ namespace Wanas.Infrastructure.Migrations
                     MediaUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     MediaMimeType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsEdited = table.Column<bool>(type: "bit", nullable: false),
                     SenderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ChatId = table.Column<int>(type: "int", nullable: false)
                 },

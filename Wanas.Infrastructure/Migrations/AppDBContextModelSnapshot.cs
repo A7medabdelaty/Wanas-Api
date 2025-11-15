@@ -558,6 +558,9 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("bit");
+
                     b.Property<string>("MediaMimeType")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
