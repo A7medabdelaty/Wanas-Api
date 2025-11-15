@@ -5,7 +5,7 @@ using Wanas.Infrastructure.Persistence;
 
 namespace Wanas.Infrastructure.Repositories
 {
-    public class ReportRepository /*:IGenericRepository<Report> , IReportRepository*/
+    public class ReportRepository : IReportRepository
     {
         //public ReportRepository(AppDBContext context) : base(context)
         //{

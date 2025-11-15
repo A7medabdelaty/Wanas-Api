@@ -7,14 +7,17 @@ using System.Threading.Tasks;
 using Wanas.Application.DTOs.Reports;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
 {
     public class ReportService : IReportService
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public ReportService(IMapper mapper /*, IUnitOfWork uow, IUserAccessor ... */)
+        public ReportService(IMapper mapper ,IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
@@ -25,6 +28,10 @@ namespace Wanas.Application.Services
             // save using unit of work / repository
             // await _uow.Reports.AddAsync(report);
             // await _uow.SaveAsync();
+            await _unitOfWork.Reports.AddAsync(report);
+            return null;
+
+           
         }
         public Task<ReportResponseDto> SubmitReportAsync(CreateReportDto reportDto, string reporterId)
         {

@@ -3,7 +3,7 @@ using Wanas.Domain.Entities;
 
 namespace Wanas.Domain.Repositories
 {
-    public class IReportRepository /*:IGenericRepository<Report>*/
+    public interface IReportRepository : IGenericRepository<Report>
     {
 
 

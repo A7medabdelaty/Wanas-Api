@@ -11,15 +11,23 @@ namespace Wanas.Infrastructure.Repositories
         public IMessageRepository Messages { get; }
         public IChatParticipantRepository ChatParticipants { get; }
 
+
+        public IReportRepository Reports { get; }
+        public IReportPhotoRepository ReportPhotos { get; }
+
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
                           IMessageRepository messages,
-                          IChatParticipantRepository chatParticipants)
+                          IChatParticipantRepository chatParticipants,
+                          IReportRepository reports,
+                          IReportPhotoRepository reportPhotos)
         {
             _context = context;
             Chats = chats;
             Messages = messages;
             ChatParticipants = chatParticipants;
+            Reports = reports;
+            ReportPhotos = reportPhotos;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
