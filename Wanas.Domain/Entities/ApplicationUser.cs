@@ -21,5 +21,7 @@ namespace Wanas.Domain.Entities
 
         
         public ICollection<Report> Reports { get; set; } = new List<Report>();
+
+        public List<RefreshToken> RefreshTokens { get; set; } = [];
     }
 }

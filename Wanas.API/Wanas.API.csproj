@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Wanas.Infrastructure\Wanas.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>
