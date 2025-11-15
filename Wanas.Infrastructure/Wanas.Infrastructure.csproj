@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Wanas.Application\Wanas.Application.csproj" />
+    <Compile Remove="UnitOfWork\**" />
+    <EmbeddedResource Remove="UnitOfWork\**" />
+    <None Remove="UnitOfWork\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Identity\" />
-    <Folder Include="Persistence\Migrations\" />
+    <ProjectReference Include="..\Wanas.Application\Wanas.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

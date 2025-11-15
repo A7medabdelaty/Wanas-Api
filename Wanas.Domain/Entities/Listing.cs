@@ -6,18 +6,14 @@
         public string Title { get; set; }
         public string Description { get; set; }
         public string City { get; set; }
-        public string Address { get; set; }
-        public decimal MonthlyPrice { get; set; }
-        public int TotalRooms { get; set; }
-        public int TotalBeds { get; set; }
-        public int AvailableRooms { get; set; }
-        public int AvailableBeds { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public Boolean IsActive { get; set; }
-        public int? OwnerId { get; set; }
-        public HashSet<Room> Rooms { get; set; } = new();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsActive { get; set; }
+        public string UserId { get; set; }
+        public virtual ApplicationUser User { get; set; }
+        public virtual ApartmentListing ApartmentListing { get; set; }
         public HashSet<ListingPhoto> ListingPhotos { get; set; } = new();
-        public ApplicationUser Owner { get; set; }
         public HashSet<Payment> Payments { get; set; } = new();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Match> Matches { get; set; } = new List<Match>();
     }
 }
