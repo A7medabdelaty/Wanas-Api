@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 
 namespace Wanas.Infrastructure.Persistence.Configurations;
 public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
@@ -30,14 +31,18 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
             SecurityStamp = "71ac7750-1375-4d94-9b71-cfd70509373f",
             ConcurrencyStamp = "d7b60902-76de-41cd-b394-4bcb7ad058e3",
             EmailConfirmed = true,
+            PhoneNumber= "01234567890",
+            CreatedAt = new DateTime(2025, 11, 15, 0, 0, 0, DateTimeKind.Utc),
+            Age = 30,
             City = "Cairo",
             Bio = "System Administrator",
-            ProfileType = "Admin",
+            ProfileType =ProfileType.Admin,
             Photo = "",
-            IsDeleted = false
+            IsDeleted = false,
+            PasswordHash= "AQAAAAIAAYagAAAAELa2X0xFqZjvpTNRlgpsUPiLoNS8BFTI6VQSb4aUwPk2Wk3UMJ90QYH832zEDknnkA=="
         };
 
-        admin.PasswordHash = passwordHasher.HashPassword(admin, "Admin@12345");
+        //admin.PasswordHash = passwordHasher.HashPassword(admin, "Admin@12345");
 
         builder.HasData(admin);
 

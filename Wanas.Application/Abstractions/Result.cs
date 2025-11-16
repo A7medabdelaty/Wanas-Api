@@ -1,4 +1,6 @@
 ﻿
+using Wanas.Domain.Errors;
+
 namespace Wanas.Application.Abstractions;
 public class Result
 {

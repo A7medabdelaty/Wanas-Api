@@ -3,8 +3,7 @@ namespace Wanas.Application.DTOs.Authentication;
 public record AuthResponse(
     string Id,
     string? Email,
-    string FirstName,
-    string LastName,
+    string FullName,
     string Token,
     int ExpiresIn,
     string RefreshToken,
