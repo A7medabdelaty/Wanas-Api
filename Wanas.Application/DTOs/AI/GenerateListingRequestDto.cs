@@ -4,7 +4,7 @@ namespace Wanas.Application.DTOs.AI
     public class GenerateListingRequestDto
     {
         public string? Prompt { get; set; }
-        public string? Location { get; set; }
+        public string? City { get; set; }
         public string? RoomType { get; set; } // e.g. "private room", "shared room"
         public int? Bedrooms { get; set; }
         public int? MinPrice { get; set; }
