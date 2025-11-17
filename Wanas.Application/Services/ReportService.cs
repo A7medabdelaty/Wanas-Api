@@ -21,18 +21,18 @@ namespace Wanas.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<ReportResponseDto> CreateREportAsync(CreateReportDto dto, string reporterId)
-        {
-            var report = _mapper.Map<Report>(dto);
-            report.ReporterId = reporterId;
-            // save using unit of work / repository
-            // await _uow.Reports.AddAsync(report);
-            // await _uow.SaveAsync();
-            await _unitOfWork.Reports.AddAsync(report);
-            return null;
+        //public async Task<ReportResponseDto> CreateREportAsync(CreateReportDto dto, string reporterId)
+        //{
+        //    var report = _mapper.Map<Report>(dto);
+        //    report.ReporterId = reporterId;
+        //    // save using unit of work / repository
+        //    // await _uow.Reports.AddAsync(report);
+        //    // await _uow.SaveAsync();
+        //    await _unitOfWork.Reports.AddAsync(report);
+        //    return null;
 
            
-        }
+        //}
         public async Task<ReportResponseDto> SubmitReportAsync(CreateReportDto reportDto, string reporterId)
         {
             var report = _mapper.Map<Report>(reportDto);
@@ -47,7 +47,8 @@ namespace Wanas.Application.Services
                     var photo = new ReportPhoto
                     {
                         URL = url,
-                        ReportId = report.ReportId
+                        ReportId = report.ReportId //linking photo to report by reporterId
+
                     };
 
                     await _unitOfWork.ReportPhotos.AddAsync(photo);
