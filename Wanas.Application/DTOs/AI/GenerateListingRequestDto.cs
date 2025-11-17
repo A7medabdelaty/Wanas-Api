@@ -15,5 +15,17 @@ namespace Wanas.Application.DTOs.AI
         public List<string>? PhotoUrls { get; set; }
         public bool DraftOnly { get; set; } = true;       // don't publish immediately
 
+
+
+
+
+        //we can add them in listing entity later ifff needed ,
+        //or create new table for them in Database if we want to search with tags 
+        //I suggest to keep it simple for now
+
+        //public string? TagsJson { get; set; }
+        //public string? RulesJson { get; set; }
+
+
     }
 }
