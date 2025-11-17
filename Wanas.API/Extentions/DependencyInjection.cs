@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wanas.API.RealTime;
 using Wanas.Application.Interfaces;
+using Wanas.Application.Interfaces.AI;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
 using Wanas.Domain.Repositories;
+using Wanas.Infrastructure.AI;
 using Wanas.Infrastructure.Persistence;
 using Wanas.Infrastructure.Repositories;
 
@@ -39,6 +41,9 @@ namespace Wanas.API.Extentions
             // 1. HTTP Clients
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
             services.AddHttpClient<IChromaService, ChromaService>();
+            services.AddHttpClient<IAIProvider, OpenAIProvider>();
+            services.AddHttpClient<IAIProvider, GroqProvider>();
+
 
             // 2. Configuration
             services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
