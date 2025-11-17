@@ -22,11 +22,13 @@ namespace Wanas.API.Controllers
         [Authorize]
         public async Task<IActionResult> SubmitReport([FromBody] CreateReportDto dto)
         {
+            //Jwt thing
             string? reporterId =User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if(reporterId == null ) return Unauthorized("User is not Logged in");
 
             var result = await _reportService.SubmitReportAsync(dto, reporterId);
+
             return Ok(result);
         }
 
