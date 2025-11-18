@@ -17,6 +17,12 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                 .WithOne(l => l.ApartmentListing)
                 .HasForeignKey<ApartmentListing>(a => a.ListingId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(x => x.IsPetFriendly)
+                .HasDefaultValue(false);
+
+            builder.Property(x => x.IsSmokingAllowed)
+                  .HasDefaultValue(false);
         }
     }
 }
