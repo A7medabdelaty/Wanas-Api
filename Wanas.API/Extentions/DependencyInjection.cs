@@ -32,6 +32,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
+            services.AddScoped<IListingSearchService, ListingSearchService>();
 
             #region RAG DEPENDENCIES
 

@@ -5,7 +5,6 @@ using Wanas.Application.DTOs.Listing;
 using Wanas.Application.DTOs.Search;
 using Wanas.Application.Interfaces;
 using Wanas.Application.QueryBuilders;
-using Wanas.Domain.Models;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
