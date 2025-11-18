@@ -78,6 +78,11 @@ namespace Wanas.API.Extentions
                 cfg.AddProfile<MappingProfile>();
             }, typeof(MappingProfile).Assembly);
 
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<ListingProfile>();
+            }, typeof(ListingProfile).Assembly);
+
             return services;
         }
     }
