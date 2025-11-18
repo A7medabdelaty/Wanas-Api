@@ -12,6 +12,7 @@ using Wanas.Application.Helpers;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Interfaces.Authentication;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Errors;
 
 namespace Wanas.Application.Services;
@@ -153,6 +154,11 @@ public class AuthService(
     // -----------------------------------------
     public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
+
+        if (request.ProfileType == ProfileType.Admin)
+            return Result.Failure(UserErrors.InvalidProfileType);
+
+
         if (await _userManager.FindByEmailAsync(request.Email) is not null)
             return Result.Failure(UserErrors.DuplicatedEmail);
 
@@ -171,6 +177,16 @@ public class AuthService(
             var e = result.Errors.First();
             return Result.Failure(new Error(e.Code, e.Description, StatusCodes.Status400BadRequest));
         }
+        var roleName = request.ProfileType == ProfileType.Owner ? "Owner" : "Renter";
+        var roleResult = await _userManager.AddToRoleAsync(user, roleName);
+        if (!roleResult.Succeeded)
+        {
+            await _userManager.DeleteAsync(user); // rollback user creation
+            var e = roleResult.Errors.First();
+            return Result.Failure(new Error(e.Code, e.Description, StatusCodes.Status400BadRequest));
+        }
+
+
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

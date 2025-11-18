@@ -25,9 +25,13 @@ public static class UserErrors
     public static readonly Error DuplicatedConfirmation =
         new("User.DuplicatedConfirmation", "Email already confirmed", StatusCodes.Status400BadRequest);
 
-    public static readonly Error UserNotFound = new(
-    "User.NotFound",
-    "User not found",
-    StatusCodes.Status404NotFound
-);
+    public static readonly Error UserNotFound =
+        new("User.NotFound", "User not found", StatusCodes.Status404NotFound);
+
+    public static readonly Error InvalidProfileType =
+        new("User.InvalidProfileType", "Cannot register as Admin. Only Owner or Renter allowed.", StatusCodes.Status400BadRequest);
+
+
+
+       
 }
