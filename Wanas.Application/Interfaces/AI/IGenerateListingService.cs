@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Wanas.Application.DTOs.AI;
+﻿using Wanas.Application.DTOs.AI;
 
 namespace Wanas.Application.Interfaces.AI
 {

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Wanas.Application.Interfaces.AI;
 
 namespace Wanas.Infrastructure.AI
