@@ -21,6 +21,8 @@ namespace Wanas.Domain.Entities
         public int TotalBathrooms { get; set; }
         public bool HasKitchen { get; set; }
         public bool HasInternet { get; set; }
+        public bool IsPetFriendly { get; set; }
+        public bool IsSmokingAllowed { get; set; }
 
         // HasFridge, HasStove, HasAirConditioner, NoOfAirConditioners, HasFans, NoOfFans, HasWashingMachine
 

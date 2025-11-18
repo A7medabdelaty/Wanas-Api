@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Wanas.Domain.Entities;
+﻿using Wanas.Domain.Entities;
+using Wanas.Domain.Models;
 
 namespace Wanas.Domain.Repositories
 {
-    public interface IListingRepository
+    public interface IListingRepository:IGenericRepository<Listing>
     {
         Task<List<Listing>> GetActiveListingsAsync();
+        Task<(IEnumerable<Listing> Listings, int TotalCount)> SearchListingsAsync(ListingSearchFilters filters);
+
     }
 }
