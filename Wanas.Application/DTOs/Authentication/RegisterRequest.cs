@@ -1,4 +1,5 @@
-﻿namespace Wanas.Application.DTOs.Authentication;
+﻿
+namespace Wanas.Application.DTOs.Authentication;
 public record RegisterRequest(
     string Email,
     string Password,

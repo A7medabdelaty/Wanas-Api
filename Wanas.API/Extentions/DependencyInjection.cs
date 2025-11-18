@@ -42,6 +42,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IUserService, UserService>();
 
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
 

@@ -7,15 +7,19 @@ namespace Wanas.Domain.Entities
     public class ApplicationUser : IdentityUser
     {
         public string FullName { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
-        public string Bio { get; set; } = string.Empty;
-        public ProfileType ProfileType { get; set; }
-        public int Age { get; set; }
-        public string PhoneNumber { get; set; } = string.Empty;
+        public string? City { get; set; } 
+        public string? Bio { get; set; } 
+        public ProfileType? ProfileType { get; set; }
+        public int? Age { get; set; }
+        public string? Photo { get; set; } 
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public string Photo { get; set; } = string.Empty;
         public bool IsDeleted { get; set; } = false;
-        public virtual UserPreference UserPreference { get; set; } = null!;
+
+        public bool IsProfileCompleted { get; set; } = false;
+        public bool IsPreferenceCompleted { get; set; } = false;
+        public bool IsFirstLogin { get; set; } = true;
+        public virtual UserPreference? UserPreference { get; set; }
         public HashSet<Bed>? Beds { get; set; } = new();
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
         public ICollection<Match> Matches { get; set; } = new List<Match>();

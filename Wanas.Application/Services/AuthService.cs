@@ -70,7 +70,10 @@ public class AuthService(
             token,
             expiresIn,
             refreshToken,
-            refreshExpires
+            refreshExpires,
+            user.IsFirstLogin,
+            user.IsProfileCompleted,
+            user.IsPreferenceCompleted
         ));
     }
 
@@ -115,7 +118,10 @@ public class AuthService(
             newJwt,
             expiresIn,
             newRefresh,
-            newRefreshExpires
+            newRefreshExpires,
+            user.IsFirstLogin,
+            user.IsProfileCompleted,
+            user.IsPreferenceCompleted
         ));
     }
 
@@ -156,6 +162,7 @@ public class AuthService(
         user.NormalizedUserName = userName.ToUpper();
         user.Email = request.Email;
         user.NormalizedEmail = request.Email.ToUpper();
+        
 
         var result = await _userManager.CreateAsync(user, request.Password);
 

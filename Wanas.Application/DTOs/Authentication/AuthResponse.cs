@@ -7,5 +7,9 @@ public record AuthResponse(
     string Token,
     int ExpiresIn,
     string RefreshToken,
-    DateTime RefreshTokenExpiration
+    DateTime RefreshTokenExpiration,
+
+    bool IsFirstLogin,
+    bool IsProfileCompleted,
+    bool IsPreferenceCompleted
 );
