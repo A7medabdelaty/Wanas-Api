@@ -32,6 +32,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
+            services.AddScoped<IListingSearchService, ListingSearchService>();
 
             #region RAG DEPENDENCIES
 
@@ -77,6 +78,11 @@ namespace Wanas.API.Extentions
             {
                 cfg.AddProfile<MappingProfile>();
             }, typeof(MappingProfile).Assembly);
+
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<ListingProfile>();
+            }, typeof(ListingProfile).Assembly);
 
             return services;
         }
