@@ -1,4 +1,5 @@
 ﻿
+using Wanas.Application.DTOs.Chatbot;
 using Wanas.Application.Interfaces.AI;
 
 namespace Wanas.Application.Services
@@ -11,11 +12,16 @@ namespace Wanas.Application.Services
         {
             _openAIProvider = openAIProvider;
         }
-         public async Task<string> SendMessageAsync(string message)
+        public async Task<string> SendMessageAsync(ChatbotRequestDto request)
         {
-            return await _openAIProvider.GenerateTextAsync(message);
-        }
+            var aiResult = await _openAIProvider.GenerateTextAsync(request.Message);
+            return aiResult;
 
-    }
+            //return new ChatbotResponseDto
+            //{
+            //    Reply = aiResult
+            //};
+        }
+        }
     
 }

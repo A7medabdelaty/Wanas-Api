@@ -1,7 +1,9 @@
-﻿namespace Wanas.Application.Interfaces.AI
+﻿using Wanas.Application.DTOs.Chatbot;
+
+namespace Wanas.Application.Interfaces.AI
 {
     public interface IChatbotService
     {
-        Task<string> SendMessageAsync(string message);
+        Task<string> SendMessageAsync(ChatbotRequestDto message);
     }
 }
