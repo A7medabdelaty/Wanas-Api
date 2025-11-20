@@ -11,10 +11,10 @@ namespace Wanas.Application.Services
 {
     public class ListingSearchService : IListingSearchService
     {
-        private readonly IUnitOfWork _uow;
+        private readonly AppDbContext _uow;
         private readonly IMapper _mapper;
 
-        public ListingSearchService(IUnitOfWork uow, IMapper mapper)
+        public ListingSearchService(AppDbContext uow, IMapper mapper)
         {
             _uow = uow;
             _mapper = mapper;

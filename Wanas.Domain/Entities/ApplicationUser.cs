@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Wanas.Domain.Enums;
 
 namespace Wanas.Domain.Entities
 {
-    // needs configuration
     public class ApplicationUser : IdentityUser
     {
         public string FullName { get; set; }
@@ -14,7 +13,14 @@ namespace Wanas.Domain.Entities
         public new string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string Photo { get; set; }
+
+        // Admin Management Properties
         public bool IsDeleted { get; set; } = false;
+        public bool IsSuspended { get; set; }
+        public DateTime? SuspendedUntil { get; set; }
+        public bool IsBanned { get; set; }
+        public bool IsVerified { get; set; }
+
         public virtual UserPreference UserPreference { get; set; }
         public HashSet<Bed>? Beds { get; set; } = new();
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();

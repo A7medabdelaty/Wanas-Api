@@ -29,5 +29,8 @@ namespace Wanas.Infrastructure.Persistence
         public DbSet<ReportPhoto> ReportPhotos { get; set; }
         public DbSet<ApartmentListing> ApartmentListings { get; set; }
         public DbSet<Comment> Comments { get; set; }
+
+        public DbSet<AuditLog> AuditLogs { get; set; }
+
     }
 }

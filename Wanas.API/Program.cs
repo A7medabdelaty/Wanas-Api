@@ -21,6 +21,8 @@ builder.Services.AddCors(options =>
   });
 });
 
+
+
 // Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -61,6 +63,8 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+
+app.UseAuthentication();  
 
 app.UseAuthorization();
 

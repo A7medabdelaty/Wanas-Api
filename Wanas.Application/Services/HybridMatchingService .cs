@@ -8,12 +8,12 @@ namespace Wanas.Application.Services
     {
         private readonly IMatchingService _traditionalMatcher;
         private readonly IChromaService _chromaService;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly AppDbContext _unitOfWork;
 
         public HybridMatchingService(
             IMatchingService traditionalMatcher,
             IChromaService chromaService,
-            IUnitOfWork unitOfWork)
+            AppDbContext unitOfWork)
         {
             _traditionalMatcher = traditionalMatcher;
             _chromaService = chromaService;

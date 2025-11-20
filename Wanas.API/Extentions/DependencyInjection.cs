@@ -1,8 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Wanas.API.RealTime;
+using Wanas.Application.Handlers.Admin;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
+using Wanas.Application.Validators;
+using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.Persistence;
 using Wanas.Infrastructure.Repositories;
@@ -17,6 +22,27 @@ namespace Wanas.API.Extentions
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+            // Identity Configuration
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+
+                // Lockout settings
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<AppDBContext>()
+            .AddDefaultTokenProviders();
+
             // Repositories - Register all repositories needed by UnitOfWork
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
@@ -24,13 +50,15 @@ namespace Wanas.API.Extentions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
             services.AddScoped<IListingRepository, ListingRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
             // Unit of Work
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<AppDbContext, UnitOfWork>();
 
             // Services (Application Layer)
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IAuditLogService, AuditLogService>();
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
             services.AddScoped<IListingSearchService, ListingSearchService>();
 
@@ -72,6 +100,15 @@ namespace Wanas.API.Extentions
             // });
 
             #endregion
+
+
+
+            // FluentValidation registration if used
+            services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();
+
+
+            // MediatR handlers
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SuspendUserCommandHandler>());
 
             // AutoMapper
             services.AddAutoMapper(cfg =>

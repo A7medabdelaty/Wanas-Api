@@ -1,9 +1,12 @@
-﻿using Wanas.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Wanas.Application.Interfaces;
+using Wanas.Domain.Entities;
+using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.Persistence;
 
 namespace Wanas.Infrastructure.Repositories
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : AppDbContext
     {
         private readonly AppDBContext _context;
 
@@ -13,6 +16,7 @@ namespace Wanas.Infrastructure.Repositories
         public IUserRepository Users { get; }
         public IUserPreferenceRepository UserPreferences { get; }
         public IListingRepository Listings { get; }
+        public IAuditLogRepository AuditLogs { get; }
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -20,7 +24,8 @@ namespace Wanas.Infrastructure.Repositories
                           IChatParticipantRepository chatParticipants,
                           IUserRepository users,
                           IUserPreferenceRepository userPreferences,
-                          IListingRepository listings)
+                          IListingRepository listings,
+                          IAuditLogRepository auditLogs)
         {
             _context = context;
             Chats = chats;
@@ -29,6 +34,7 @@ namespace Wanas.Infrastructure.Repositories
             Users = users;
             UserPreferences = userPreferences;
             Listings = listings;
+            AuditLogs = auditLogs;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();

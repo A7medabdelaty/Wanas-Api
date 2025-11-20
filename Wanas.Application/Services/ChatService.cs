@@ -8,11 +8,11 @@ namespace Wanas.Application.Services
 {
     public class ChatService : IChatService
     {
-        private readonly IUnitOfWork _uow;
+        private readonly AppDbContext _uow;
         private readonly IMapper _mapper;
         private readonly IRealTimeNotifier _notifier;
 
-        public ChatService(IUnitOfWork uow, IMapper mapper, IRealTimeNotifier notifier)
+        public ChatService(AppDbContext uow, IMapper mapper, IRealTimeNotifier notifier)
         {
             _uow = uow;
             _mapper = mapper;

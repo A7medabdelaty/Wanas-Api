@@ -7,7 +7,7 @@ namespace Wanas.Application.Services
 {
     public class MatchingService : IMatchingService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly AppDbContext _unitOfWork;
 
         // Scoring constants
         private const int CityMatchScore = 30;
@@ -20,7 +20,7 @@ namespace Wanas.Application.Services
         private const int SocialLevelCompatibilityScore = 5;
         private const int MinimumScoreThreshold = 20;
 
-        public MatchingService(IUnitOfWork unitOfWork)
+        public MatchingService(AppDbContext unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
