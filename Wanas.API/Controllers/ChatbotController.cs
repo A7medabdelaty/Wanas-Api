@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.DTOs.Chatbot;
 using Wanas.Application.Interfaces.AI;
