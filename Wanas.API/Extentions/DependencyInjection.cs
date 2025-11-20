@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wanas.API.RealTime;
 using Wanas.Application.Interfaces;
+using Wanas.Application.Interfaces.AI;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
 using Wanas.Domain.Repositories;
+using Wanas.Infrastructure.AI;
 using Wanas.Infrastructure.Persistence;
 using Wanas.Infrastructure.Repositories;
 
@@ -21,6 +23,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
             services.AddScoped<IListingRepository, ListingRepository>();
@@ -39,6 +42,9 @@ namespace Wanas.API.Extentions
             // 1. HTTP Clients
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
             services.AddHttpClient<IChromaService, ChromaService>();
+            services.AddHttpClient<IAIProvider, OpenAIProvider>();
+            services.AddHttpClient<IAIProvider, GroqProvider>();
+
 
             // 2. Configuration
             services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
@@ -49,6 +55,7 @@ namespace Wanas.API.Extentions
 
             // 4. Keep original matching service as concrete implementation
             services.AddScoped<MatchingService>();
+            services.AddScoped<IReportService, ReportService>();
 
             #endregion
 
@@ -78,6 +85,7 @@ namespace Wanas.API.Extentions
             {
                 cfg.AddProfile<MappingProfile>();
             }, typeof(MappingProfile).Assembly);
+            services.AddAutoMapper(cfg => {cfg.AddProfile<ReportProfile>();}, typeof(ReportProfile).Assembly);
 
             services.AddAutoMapper(cfg =>
             {

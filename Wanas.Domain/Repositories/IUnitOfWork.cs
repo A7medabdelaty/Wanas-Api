@@ -8,6 +8,9 @@
         IUserRepository Users { get; }
         IUserPreferenceRepository UserPreferences { get; }
         IListingRepository Listings { get; }
+
+        IReportPhotoRepository ReportPhotos { get; }
+        IReportRepository Reports { get; }
         Task<int> CommitAsync();
     }
 }
