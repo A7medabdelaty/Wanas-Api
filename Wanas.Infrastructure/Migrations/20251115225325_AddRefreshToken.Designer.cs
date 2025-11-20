@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wanas.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Wanas.Infrastructure.Persistence;
 namespace Wanas.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251115225325_AddRefreshToken")]
+    partial class AddRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,11 +34,6 @@ namespace Wanas.Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -52,10 +50,6 @@ namespace Wanas.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasDiscriminator().HasValue("IdentityRole");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -143,13 +137,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = "808cfe62-dd5b-4c25-837d-3df87add03cb",
-                            RoleId = "1bb1f291-7b9c-4071-9db8-7a8240138a44"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -238,10 +225,11 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Age")
+                    b.Property<int>("Age")
                         .HasColumnType("int");
 
                     b.Property<string>("Bio")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -272,15 +260,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsFirstLogin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPreferenceCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsProfileCompleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -299,6 +278,7 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -306,6 +286,7 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Photo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfileType")
@@ -348,9 +329,6 @@ namespace Wanas.Infrastructure.Migrations
                             EmailConfirmed = true,
                             FullName = "Wanas Admin",
                             IsDeleted = false,
-                            IsFirstLogin = true,
-                            IsPreferenceCompleted = false,
-                            IsProfileCompleted = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@WANAS.COM",
                             NormalizedUserName = "ADMIN@WANAS.COM",
@@ -950,48 +928,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.ToTable("UserPreferences");
                 });
 
-            modelBuilder.Entity("Wanas.Domain.Entities.ApplicationRole", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.HasDiscriminator().HasValue("ApplicationRole");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "1bb1f291-7b9c-4071-9db8-7a8240138a44",
-                            ConcurrencyStamp = "94016b54-918e-496a-a280-c20e922839a8",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN",
-                            IsDefault = false,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = "cc1e603c-66e6-4f71-bf93-cff53ed896d3",
-                            ConcurrencyStamp = "c5df770b-786a-4cd0-aa0f-8b67eb126db9",
-                            Name = "Owner",
-                            NormalizedName = "OWNER",
-                            IsDefault = false,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = "81ae9adf-5636-4cbb-ac47-96eefcc348c0",
-                            ConcurrencyStamp = "76ccf8b9-9885-458b-811a-4bdd707c235e",
-                            Name = "Renter",
-                            NormalizedName = "RENTER",
-                            IsDefault = true,
-                            IsDeleted = false
-                        });
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1336,7 +1272,8 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Navigation("Reports");
 
-                    b.Navigation("UserPreference");
+                    b.Navigation("UserPreference")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Chat", b =>

@@ -6,6 +6,18 @@ namespace Wanas.Domain.Entities
     // needs configuration
     public class ApplicationUser : IdentityUser
     {
+
+        //Mandatory Fields
+        public string FullName { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public ProfileType ProfileType { get; set; } = ProfileType.Renter;
+
+        //Optional Fields
+        public string? Bio { get; set; } 
+        public int? Age { get; set; }
+        public string? Photo { get; set; }
+
+        // System Fields
         public string FullName { get; set; }
         public string City { get; set; }
         public string Bio { get; set; }
@@ -13,9 +25,15 @@ namespace Wanas.Domain.Entities
         public int Age { get; set; }
         public new string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public string Photo { get; set; }
         public bool IsDeleted { get; set; } = false;
-        public virtual UserPreference UserPreference { get; set; }
+
+        // Completion Flags
+        public bool IsProfileCompleted { get; set; } = false;
+        public bool IsPreferenceCompleted { get; set; } = false;
+        public bool IsFirstLogin { get; set; } = true;
+
+        // Navigation Properties
+        public virtual UserPreference? UserPreference { get; set; }
         public HashSet<Bed>? Beds { get; set; } = new();
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
         public ICollection<Match> Matches { get; set; } = new List<Match>();
@@ -24,5 +42,7 @@ namespace Wanas.Domain.Entities
         public ICollection<MessageReadReceipt> MessageReadReceipts { get; set; } = new List<MessageReadReceipt>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
+
+        public List<RefreshToken> RefreshTokens { get; set; } = [];
     }
 }

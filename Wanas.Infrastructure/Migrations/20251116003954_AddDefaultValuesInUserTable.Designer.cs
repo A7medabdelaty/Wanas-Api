@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wanas.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Wanas.Infrastructure.Persistence;
 namespace Wanas.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251116003954_AddDefaultValuesInUserTable")]
+    partial class AddDefaultValuesInUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -238,10 +241,11 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Age")
+                    b.Property<int>("Age")
                         .HasColumnType("int");
 
                     b.Property<string>("Bio")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -272,15 +276,6 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsFirstLogin")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPreferenceCompleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsProfileCompleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -299,6 +294,7 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -306,6 +302,7 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Photo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfileType")
@@ -348,9 +345,6 @@ namespace Wanas.Infrastructure.Migrations
                             EmailConfirmed = true,
                             FullName = "Wanas Admin",
                             IsDeleted = false,
-                            IsFirstLogin = true,
-                            IsPreferenceCompleted = false,
-                            IsProfileCompleted = false,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@WANAS.COM",
                             NormalizedUserName = "ADMIN@WANAS.COM",
@@ -1336,7 +1330,8 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Navigation("Reports");
 
-                    b.Navigation("UserPreference");
+                    b.Navigation("UserPreference")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Chat", b =>
