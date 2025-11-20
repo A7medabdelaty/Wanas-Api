@@ -44,6 +44,7 @@ namespace Wanas.API.Extentions
             services.AddHttpClient<IChromaService, ChromaService>();
             services.AddHttpClient<IAIProvider, OpenAIProvider>();
             services.AddHttpClient<IAIProvider, GroqProvider>();
+            services.AddHttpClient<IChatbotService, ChatbotService>();
 
 
             // 2. Configuration
