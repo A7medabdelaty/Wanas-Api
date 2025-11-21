@@ -30,5 +30,9 @@ namespace Wanas.Domain.Entities
         public ICollection<MessageReadReceipt> MessageReadReceipts { get; set; } = new List<MessageReadReceipt>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
+
+        // Appeal relationships
+        public ICollection<Appeal> Appeals { get; set; } = new List<Appeal>();
+        public ICollection<Appeal> ReviewedAppeals { get; set; } = new List<Appeal>();
     }
 }
