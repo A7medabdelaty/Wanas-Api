@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Wanas.API.Authorization;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
@@ -13,20 +15,16 @@ builder.Services.AddControllers();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-    {
-        policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .SetIsOriginAllowed(_ => true);
+{
+   policy
+       .AllowAnyHeader()
+    .AllowAnyMethod()
+     .AllowCredentials()
+      .SetIsOriginAllowed(_ => true);
   });
 });
 
 
-
-// Swagger Configuration
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplicationServices(builder.Configuration);
 

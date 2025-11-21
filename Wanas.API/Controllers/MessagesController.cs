@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.DTOs.Message;
 using Wanas.Application.Interfaces;
 
@@ -6,7 +7,7 @@ namespace Wanas.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize(Policy = "VerifiedUser")]
     public class MessagesController : ControllerBase
     {
         private readonly IMessageService _messageService;

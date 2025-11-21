@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Wanas.API.Authorization;
 using Wanas.API.RealTime;
 using Wanas.Application.Handlers.Admin;
 using Wanas.Application.Interfaces;
@@ -103,6 +105,23 @@ namespace Wanas.API.Extentions
             #endregion
 
 
+            #region Verify User Service Registration
+            // Authorization policies
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("VerifiedUser", policy =>
+                policy.Requirements.Add(new VerifiedUserRequirement()));
+            });
+
+            // Register authorization handlers
+            services.AddScoped<IAuthorizationHandler, VerifiedUserHandler>();
+            #endregion
+
+            #region Swagger Configuration
+            // Swagger Configuration
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
+            #endregion
 
             // FluentValidation registration if used
             services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();

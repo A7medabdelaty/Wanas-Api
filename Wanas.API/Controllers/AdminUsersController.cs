@@ -1,8 +1,9 @@
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Wanas.Application.Commands.Admin;
+using Wanas.Application.Common;
 using Wanas.Application.Queries.Admin;
 using Wanas.Domain.Enums;
 
@@ -131,6 +132,74 @@ namespace Wanas.API.Controllers
             });
         }
 
+        // POST api/admin/users/{id}/verify
+        [HttpPost("{id}/verify")]
+        public async Task<IActionResult> VerifyUser(string id, [FromBody] VerifyUserRequest request)
+        {
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub")
+                ?? string.Empty;
+
+            var command = new VerifyUserCommand(
+                TargetUserId: id,
+                AdminId: adminId,
+                Reason: request.Reason
+            );
+
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return NotFound(new { message = "User not found, already verified, or cannot be verified (banned/suspended)." });
+
+            return Ok(new
+            {
+                message = "User verified successfully.",
+                userId = id,
+                verifiedAt = DateTime.UtcNow
+            });
+        }
+
+        // POST api/admin/users/{id}/unverify
+        [HttpPost("{id}/unverify")]
+        public async Task<IActionResult> UnverifyUser(string id, [FromBody] UnverifyUserRequest request)
+        {
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub")
+                ?? string.Empty;
+
+            var command = new UnverifyUserCommand(
+                TargetUserId: id,
+                AdminId: adminId,
+                Reason: request.Reason
+            );
+
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return NotFound(new { message = "User not found or already unverified." });
+
+            return Ok(new
+            {
+                message = "User unverified successfully.",
+                userId = id,
+                unverifiedAt = DateTime.UtcNow
+            });
+        }
+
+        // GET api/admin/users/unverified
+        [HttpGet("unverified")]
+        public async Task<IActionResult> GetUnverifiedUsers()
+        {
+            var query = new GetUnverifiedUsersQuery();
+            var users = await _mediator.Send(query);
+
+            return Ok(new
+            {
+                totalCount = users.Count(),
+                users
+            });
+        }
+
         // GET api/admin/appeals
         [HttpGet("appeals")]
         public async Task<IActionResult> GetAppeals([FromQuery] AppealStatus? status = null)
@@ -191,6 +260,16 @@ namespace Wanas.API.Controllers
     }
 
     public class UnbanUserRequest
+    {
+        public string? Reason { get; set; }
+    }
+
+    public class VerifyUserRequest
+    {
+        public string? Reason { get; set; }
+    }
+
+    public class UnverifyUserRequest
     {
         public string? Reason { get; set; }
     }

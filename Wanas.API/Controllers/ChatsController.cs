@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
 
@@ -6,7 +7,7 @@ namespace Wanas.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize(Policy = "VerifiedUser")] // Only verified users can access chats
     public class ChatsController : ControllerBase
     {
         private readonly IChatService _chatService;
