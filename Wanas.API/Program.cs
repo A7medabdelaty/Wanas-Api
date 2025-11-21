@@ -1,5 +1,6 @@
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
+using Wanas.API.Middlewares;
 using Wanas.Application.Interfaces;
 
 
@@ -65,6 +66,9 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
 app.UseAuthentication();  
+
+// Add User Status Check Middleware (must be after Authentication)
+app.UseMiddleware<UserStatusMiddleware>();
 
 app.UseAuthorization();
 
