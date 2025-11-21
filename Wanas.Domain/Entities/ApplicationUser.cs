@@ -5,6 +5,18 @@ namespace Wanas.Domain.Entities
 {
     public class ApplicationUser : IdentityUser
     {
+
+        //Mandatory Fields
+        public string FullName { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public ProfileType ProfileType { get; set; } = ProfileType.Renter;
+
+        //Optional Fields
+        public string? Bio { get; set; } 
+        public int? Age { get; set; }
+        public string? Photo { get; set; }
+
+        // System Fields
         public string FullName { get; set; }
         public string City { get; set; }
         public string Bio { get; set; }
@@ -22,6 +34,15 @@ namespace Wanas.Domain.Entities
         public bool IsVerified { get; set; }
 
         public virtual UserPreference UserPreference { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
+        // Completion Flags
+        public bool IsProfileCompleted { get; set; } = false;
+        public bool IsPreferenceCompleted { get; set; } = false;
+        public bool IsFirstLogin { get; set; } = true;
+
+        // Navigation Properties
+        public virtual UserPreference? UserPreference { get; set; }
         public HashSet<Bed>? Beds { get; set; } = new();
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
         public ICollection<Match> Matches { get; set; } = new List<Match>();
@@ -34,5 +55,6 @@ namespace Wanas.Domain.Entities
         // Appeal relationships
         public ICollection<Appeal> Appeals { get; set; } = new List<Appeal>();
         public ICollection<Appeal> ReviewedAppeals { get; set; } = new List<Appeal>();
+        public List<RefreshToken> RefreshTokens { get; set; } = [];
     }
 }

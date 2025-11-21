@@ -67,6 +67,7 @@ app.UseAuthentication();
 
 // Add User Status Check Middleware (must be after Authentication)
 app.UseMiddleware<UserStatusMiddleware>();
+app.UseAuthentication();
 
 app.UseAuthorization();
 

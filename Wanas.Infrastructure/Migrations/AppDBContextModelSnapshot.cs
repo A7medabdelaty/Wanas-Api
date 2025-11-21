@@ -31,6 +31,11 @@ namespace Wanas.Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -47,6 +52,10 @@ namespace Wanas.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasDiscriminator().HasValue("IdentityRole");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -134,6 +143,13 @@ namespace Wanas.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "808cfe62-dd5b-4c25-837d-3df87add03cb",
+                            RoleId = "1bb1f291-7b9c-4071-9db8-7a8240138a44"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -287,11 +303,10 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("Age")
+                    b.Property<int?>("Age")
                         .HasColumnType("int");
 
                     b.Property<string>("Bio")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -316,8 +331,8 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsBanned")
                         .HasColumnType("bit");
@@ -329,6 +344,13 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsVerified")
+                    b.Property<bool>("IsFirstLogin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPreferenceCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsProfileCompleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
@@ -349,7 +371,6 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -357,7 +378,6 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Photo")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ProfileType")
@@ -388,6 +408,36 @@ namespace Wanas.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "808cfe62-dd5b-4c25-837d-3df87add03cb",
+                            AccessFailedCount = 0,
+                            Age = 30,
+                            Bio = "System Administrator",
+                            City = "Cairo",
+                            ConcurrencyStamp = "d7b60902-76de-41cd-b394-4bcb7ad058e3",
+                            CreatedAt = new DateTime(2025, 11, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "admin@wanas.com",
+                            EmailConfirmed = true,
+                            FullName = "Wanas Admin",
+                            IsDeleted = false,
+                            IsFirstLogin = true,
+                            IsPreferenceCompleted = false,
+                            IsProfileCompleted = false,
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@WANAS.COM",
+                            NormalizedUserName = "ADMIN@WANAS.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAELa2X0xFqZjvpTNRlgpsUPiLoNS8BFTI6VQSb4aUwPk2Wk3UMJ90QYH832zEDknnkA==",
+                            PhoneNumber = "01234567890",
+                            PhoneNumberConfirmed = false,
+                            Photo = "",
+                            ProfileType = "Admin",
+                            SecurityStamp = "71ac7750-1375-4d94-9b71-cfd70509373f",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@wanas.com"
+                        });
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.AuditLog", b =>
@@ -1007,6 +1057,48 @@ namespace Wanas.Infrastructure.Migrations
                     b.ToTable("UserPreferences");
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.ApplicationRole", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasDiscriminator().HasValue("ApplicationRole");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1bb1f291-7b9c-4071-9db8-7a8240138a44",
+                            ConcurrencyStamp = "94016b54-918e-496a-a280-c20e922839a8",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN",
+                            IsDefault = false,
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = "cc1e603c-66e6-4f71-bf93-cff53ed896d3",
+                            ConcurrencyStamp = "c5df770b-786a-4cd0-aa0f-8b67eb126db9",
+                            Name = "Owner",
+                            NormalizedName = "OWNER",
+                            IsDefault = false,
+                            IsDeleted = false
+                        },
+                        new
+                        {
+                            Id = "81ae9adf-5636-4cbb-ac47-96eefcc348c0",
+                            ConcurrencyStamp = "76ccf8b9-9885-458b-811a-4bdd707c235e",
+                            Name = "Renter",
+                            NormalizedName = "RENTER",
+                            IsDefault = true,
+                            IsDeleted = false
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1085,6 +1177,41 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("ReviewedByAdmin");
 
                     b.Navigation("User");
+            modelBuilder.Entity("Wanas.Domain.Entities.ApplicationUser", b =>
+                {
+                    b.OwnsMany("Wanas.Domain.Entities.RefreshToken", "RefreshTokens", b1 =>
+                        {
+                            b1.Property<string>("UserId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<DateTime>("CreatedOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime>("ExpiresOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime?>("RevokedOn")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("UserId", "Id");
+
+                            b1.ToTable("RefreshTokens", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Bed", b =>
@@ -1338,6 +1465,7 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Navigation("UserPreference")
                         .IsRequired();
+                    b.Navigation("UserPreference");
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Chat", b =>
