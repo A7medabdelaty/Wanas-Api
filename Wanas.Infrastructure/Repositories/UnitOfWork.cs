@@ -1,9 +1,12 @@
-﻿using Wanas.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Wanas.Application.Interfaces;
+using Wanas.Domain.Entities;
+using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.Persistence;
 
 namespace Wanas.Infrastructure.Repositories
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : AppDbContext
     {
         private readonly AppDBContext _context;
 
@@ -13,6 +16,8 @@ namespace Wanas.Infrastructure.Repositories
         public IUserRepository Users { get; }
         public IUserPreferenceRepository UserPreferences { get; }
         public IListingRepository Listings { get; }
+        public IAuditLogRepository AuditLogs { get; }
+        public IAppealRepository Appeals { get; }
 
 
         public IReportRepository Reports { get; }
@@ -26,7 +31,9 @@ namespace Wanas.Infrastructure.Repositories
                           IReportPhotoRepository reportPhotos,
                           IUserRepository users,
                           IUserPreferenceRepository userPreferences,
-                          IListingRepository listings)
+                          IListingRepository listings,
+                          IAuditLogRepository auditLogs,
+                          IAppealRepository appeals)
         {
             _context = context;
             Chats = chats;
@@ -35,6 +42,8 @@ namespace Wanas.Infrastructure.Repositories
             Users = users;
             UserPreferences = userPreferences;
             Listings = listings;
+            AuditLogs = auditLogs;
+            Appeals = appeals;
             Reports = reports;
             ReportPhotos = reportPhotos;
         }

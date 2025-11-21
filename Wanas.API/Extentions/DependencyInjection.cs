@@ -1,4 +1,8 @@
-﻿using FluentValidation;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Wanas.API.Authorization;
 using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
@@ -9,11 +13,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
 using Wanas.API.RealTime;
+using Wanas.Application.Handlers.Admin;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Interfaces.AI;
 using Wanas.Application.Interfaces.Authentication;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
+using Wanas.Application.Validators;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.AI;
@@ -33,6 +39,27 @@ namespace Wanas.API.Extentions
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+            // Identity Configuration
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 8;
+
+                // Lockout settings
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<AppDBContext>()
+            .AddDefaultTokenProviders();
+
             // Repositories - Register all repositories needed by UnitOfWork
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
@@ -41,15 +68,18 @@ namespace Wanas.API.Extentions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
             services.AddScoped<IListingRepository, ListingRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IAppealRepository, AppealRepository>();
 
             // Unit of Work
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<AppDbContext, UnitOfWork>();
 
             // Services (Application Layer)
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IAuditLogService, AuditLogService>();
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
             services.AddScoped<IListingSearchService, ListingSearchService>();
 
@@ -99,6 +129,32 @@ namespace Wanas.API.Extentions
             services.AddScoped<IUserService, UserService>();
 
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
+
+
+            #region Verify User Service Registration
+            // Authorization policies
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("VerifiedUser", policy =>
+                policy.Requirements.Add(new VerifiedUserRequirement()));
+            });
+
+            // Register authorization handlers
+            services.AddScoped<IAuthorizationHandler, VerifiedUserHandler>();
+            #endregion
+
+            #region Swagger Configuration
+            // Swagger Configuration
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
+            #endregion
+
+            // FluentValidation registration if used
+            services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();
+
+
+            // MediatR handlers
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SuspendUserCommandHandler>());
 
             // AutoMapper
             services.AddAutoMapper(cfg =>

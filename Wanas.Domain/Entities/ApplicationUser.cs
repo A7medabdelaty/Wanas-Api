@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Wanas.Domain.Enums;
 
 namespace Wanas.Domain.Entities
 {
-    // needs configuration
     public class ApplicationUser : IdentityUser
     {
 
@@ -25,6 +24,16 @@ namespace Wanas.Domain.Entities
         public int Age { get; set; }
         public new string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public string Photo { get; set; }
+
+        // Admin Management Properties
+        public bool IsDeleted { get; set; } = false;
+        public bool IsSuspended { get; set; }
+        public DateTime? SuspendedUntil { get; set; }
+        public bool IsBanned { get; set; }
+        public bool IsVerified { get; set; }
+
+        public virtual UserPreference UserPreference { get; set; }
         public bool IsDeleted { get; set; } = false;
 
         // Completion Flags
@@ -43,6 +52,9 @@ namespace Wanas.Domain.Entities
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
 
+        // Appeal relationships
+        public ICollection<Appeal> Appeals { get; set; } = new List<Appeal>();
+        public ICollection<Appeal> ReviewedAppeals { get; set; } = new List<Appeal>();
         public List<RefreshToken> RefreshTokens { get; set; } = [];
     }
 }

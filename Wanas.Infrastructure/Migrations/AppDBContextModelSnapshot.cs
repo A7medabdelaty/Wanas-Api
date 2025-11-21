@@ -207,6 +207,16 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("HasKitchen")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPetFriendly")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsSmokingAllowed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("ListingId")
                         .HasColumnType("int");
 
@@ -228,6 +238,61 @@ namespace Wanas.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ApartmentListings");
+                });
+
+            modelBuilder.Entity("Wanas.Domain.Entities.Appeal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdminResponse")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("AppealType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewedByAdminId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Appeals_CreatedAt");
+
+                    b.HasIndex("ReviewedByAdminId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Appeals_Status");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Appeals_UserId");
+
+                    b.HasIndex("UserId", "Status")
+                        .HasDatabaseName("IX_Appeals_UserId_Status");
+
+                    b.ToTable("Appeals", (string)null);
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.ApplicationUser", b =>
@@ -269,9 +334,16 @@ namespace Wanas.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVerified")
                     b.Property<bool>("IsFirstLogin")
                         .HasColumnType("bit");
 
@@ -314,6 +386,9 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("SuspendedUntil")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -363,6 +438,35 @@ namespace Wanas.Infrastructure.Migrations
                             TwoFactorEnabled = false,
                             UserName = "admin@wanas.com"
                         });
+                });
+
+            modelBuilder.Entity("Wanas.Domain.Entities.AuditLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AdminId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("Wanas.Domain.Entities.Bed", b =>
@@ -520,6 +624,9 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MonthlyPrice")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -1054,6 +1161,22 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("Listing");
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.Appeal", b =>
+                {
+                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "ReviewedByAdmin")
+                        .WithMany("ReviewedAppeals")
+                        .HasForeignKey("ReviewedByAdminId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "User")
+                        .WithMany("Appeals")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ReviewedByAdmin");
+
+                    b.Navigation("User");
             modelBuilder.Entity("Wanas.Domain.Entities.ApplicationUser", b =>
                 {
                     b.OwnsMany("Wanas.Domain.Entities.RefreshToken", "RefreshTokens", b1 =>
@@ -1320,6 +1443,8 @@ namespace Wanas.Infrastructure.Migrations
 
             modelBuilder.Entity("Wanas.Domain.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("Appeals");
+
                     b.Navigation("Beds");
 
                     b.Navigation("ChatParticipants");
@@ -1336,6 +1461,10 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Navigation("Reports");
 
+                    b.Navigation("ReviewedAppeals");
+
+                    b.Navigation("UserPreference")
+                        .IsRequired();
                     b.Navigation("UserPreference");
                 });
 

@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.Interfaces;
 
 namespace Wanas.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "VerifiedUser")]
     public class MatchingController : ControllerBase
     {
         private readonly IMatchingService _matchingService;
