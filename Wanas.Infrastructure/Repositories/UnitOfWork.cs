@@ -17,6 +17,7 @@ namespace Wanas.Infrastructure.Repositories
         public IUserPreferenceRepository UserPreferences { get; }
         public IListingRepository Listings { get; }
         public IAuditLogRepository AuditLogs { get; }
+        public IAppealRepository Appeals { get; }
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -25,7 +26,8 @@ namespace Wanas.Infrastructure.Repositories
                           IUserRepository users,
                           IUserPreferenceRepository userPreferences,
                           IListingRepository listings,
-                          IAuditLogRepository auditLogs)
+                          IAuditLogRepository auditLogs,
+                          IAppealRepository appeals)
         {
             _context = context;
             Chats = chats;
@@ -35,6 +37,7 @@ namespace Wanas.Infrastructure.Repositories
             UserPreferences = userPreferences;
             Listings = listings;
             AuditLogs = auditLogs;
+            Appeals = appeals;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();

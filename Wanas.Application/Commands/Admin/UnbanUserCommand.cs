@@ -2,10 +2,9 @@ using MediatR;
 
 namespace Wanas.Application.Commands.Admin
 {
-    public record SuspendUserCommand(
+    public record UnbanUserCommand(
         string TargetUserId,
         string AdminId,
-        int? DurationDays,
         string? Reason
-        ) : IRequest<bool>;
+    ) : IRequest<bool>;
 }

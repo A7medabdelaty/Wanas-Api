@@ -9,6 +9,7 @@
         IUserPreferenceRepository UserPreferences { get; }
         IListingRepository Listings { get; }
         IAuditLogRepository AuditLogs { get; }
+        IAppealRepository Appeals { get; }
         Task<int> CommitAsync();
     }
 }

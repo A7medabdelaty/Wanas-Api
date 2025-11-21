@@ -51,6 +51,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
             services.AddScoped<IListingRepository, ListingRepository>();
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IAppealRepository, AppealRepository>();
 
             // Unit of Work
             services.AddScoped<AppDbContext, UnitOfWork>();

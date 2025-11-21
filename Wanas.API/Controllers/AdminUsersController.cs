@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Wanas.Application.Commands.Admin;
+using Wanas.Application.Queries.Admin;
+using Wanas.Domain.Enums;
 
 namespace Wanas.API.Controllers
 {
@@ -74,6 +76,102 @@ namespace Wanas.API.Controllers
                 bannedAt = DateTime.UtcNow
             });
         }
+
+        // POST api/admin/users/{id}/unsuspend
+        [HttpPost("{id}/unsuspend")]
+        public async Task<IActionResult> UnsuspendUser(string id, [FromBody] UnsuspendUserRequest request)
+        {
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                  ?? User.FindFirstValue("sub")
+                 ?? string.Empty;
+
+            var command = new UnsuspendUserCommand(
+                TargetUserId: id,
+                AdminId: adminId,
+                Reason: request.Reason
+            );
+
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return NotFound(new { message = "User not found, not suspended, or operation failed." });
+
+            return Ok(new
+            {
+                message = "User suspension lifted successfully.",
+                userId = id,
+                unsuspendedAt = DateTime.UtcNow
+            });
+        }
+
+        // POST api/admin/users/{id}/unban
+        [HttpPost("{id}/unban")]
+        public async Task<IActionResult> UnbanUser(string id, [FromBody] UnbanUserRequest request)
+        {
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub")
+                ?? string.Empty;
+
+            var command = new UnbanUserCommand(
+                TargetUserId: id,
+                AdminId: adminId,
+                Reason: request.Reason
+            );
+
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return NotFound(new { message = "User not found, not banned, or operation failed." });
+
+            return Ok(new
+            {
+                message = "User ban lifted successfully.",
+                userId = id,
+                unbannedAt = DateTime.UtcNow
+            });
+        }
+
+        // GET api/admin/appeals
+        [HttpGet("appeals")]
+        public async Task<IActionResult> GetAppeals([FromQuery] AppealStatus? status = null)
+        {
+            var query = new GetAppealsQuery(status);
+            var appeals = await _mediator.Send(query);
+
+            return Ok(new
+            {
+                totalCount = appeals.Count(),
+                appeals
+            });
+        }
+
+        // POST api/admin/appeals/{id}/review
+        [HttpPost("appeals/{id}/review")]
+        public async Task<IActionResult> ReviewAppeal(Guid id, [FromBody] ReviewAppealRequest request)
+        {
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? User.FindFirstValue("sub")
+               ?? string.Empty;
+
+            var command = new ReviewAppealCommand(
+                AppealId: id,
+                AdminId: adminId,
+                IsApproved: request.IsApproved,
+                AdminResponse: request.AdminResponse
+            );
+
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return NotFound(new { message = "Appeal not found or already reviewed." });
+
+            return Ok(new
+            {
+                message = request.IsApproved ? "Appeal approved successfully." : "Appeal rejected.",
+                appealId = id,
+                reviewedAt = DateTime.UtcNow
+            });
+        }
     }
 
     public class SuspendUserRequest
@@ -85,5 +183,21 @@ namespace Wanas.API.Controllers
     public class BanUserRequest
     {
         public string Reason { get; set; } = string.Empty;
+    }
+
+    public class UnsuspendUserRequest
+    {
+        public string? Reason { get; set; }
+    }
+
+    public class UnbanUserRequest
+    {
+        public string? Reason { get; set; }
+    }
+
+    public class ReviewAppealRequest
+    {
+        public bool IsApproved { get; set; }
+        public string? AdminResponse { get; set; }
     }
 }
