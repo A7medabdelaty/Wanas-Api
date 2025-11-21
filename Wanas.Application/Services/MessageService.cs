@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Wanas.Application.DTOs.Message;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -8,11 +8,11 @@ namespace Wanas.Application.Services
 {
     public class MessageService : IMessageService
     {
-        private readonly AppDbContext _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IRealTimeNotifier _notifier;
 
-        public MessageService(AppDbContext uow, IMapper mapper, IRealTimeNotifier notifier)
+        public MessageService(IUnitOfWork uow, IMapper mapper, IRealTimeNotifier notifier)
         {
             _uow = uow;
             _mapper = mapper;

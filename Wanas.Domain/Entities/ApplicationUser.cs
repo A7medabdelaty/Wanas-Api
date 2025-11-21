@@ -5,7 +5,6 @@ namespace Wanas.Domain.Entities
 {
     public class ApplicationUser : IdentityUser
     {
-
         //Mandatory Fields
         public string FullName { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
@@ -17,14 +16,8 @@ namespace Wanas.Domain.Entities
         public string? Photo { get; set; }
 
         // System Fields
-        public string FullName { get; set; }
-        public string City { get; set; }
-        public string Bio { get; set; }
-        public ProfileType ProfileType { get; set; }
-        public int Age { get; set; }
         public new string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public string Photo { get; set; }
 
         // Admin Management Properties
         public bool IsDeleted { get; set; } = false;
@@ -32,9 +25,6 @@ namespace Wanas.Domain.Entities
         public DateTime? SuspendedUntil { get; set; }
         public bool IsBanned { get; set; }
         public bool IsVerified { get; set; }
-
-        public virtual UserPreference UserPreference { get; set; }
-        public bool IsDeleted { get; set; } = false;
 
         // Completion Flags
         public bool IsProfileCompleted { get; set; } = false;

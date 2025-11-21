@@ -1,6 +1,6 @@
 ﻿namespace Wanas.Domain.Repositories
 {
-    public interface AppDbContext : IDisposable
+    public interface IUnitOfWork : IDisposable
     {
         IChatRepository Chats { get; }
         IMessageRepository Messages { get; }

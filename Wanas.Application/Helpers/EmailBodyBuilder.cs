@@ -1,4 +1,4 @@
-﻿namespace Wanas.Application.Helpers;
+namespace Wanas.Application.Helpers;
 
 public static class EmailBodyBuilder
 {

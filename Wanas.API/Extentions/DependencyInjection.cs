@@ -1,14 +1,12 @@
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Wanas.API.Authorization;
-using FluentValidation.AspNetCore;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
@@ -39,8 +37,8 @@ namespace Wanas.API.Extentions
             services.AddDbContext<AppDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            // Identity Configuration
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            // Identity Configuration (single registration to avoid duplicate schemes)
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
                 // Password settings
                 options.Password.RequireDigit = true;
@@ -60,161 +58,13 @@ namespace Wanas.API.Extentions
             .AddEntityFrameworkStores<AppDBContext>()
             .AddDefaultTokenProviders();
 
-            // Repositories - Register all repositories needed by UnitOfWork
-            services.AddScoped<IChatRepository, ChatRepository>();
-            services.AddScoped<IMessageRepository, MessageRepository>();
-            services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
-            services.AddScoped<IReportRepository, ReportRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
-            services.AddScoped<IListingRepository, ListingRepository>();
-            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
-            services.AddScoped<IAppealRepository, AppealRepository>();
-
-            // Unit of Work
-            services.AddScoped<AppDbContext, UnitOfWork>();
-
-            // Services (Application Layer)
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IChatService, ChatService>();
-            services.AddScoped<IMessageService, MessageService>();
-            services.AddScoped<IAuditLogService, AuditLogService>();
-            services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
-            services.AddScoped<IListingSearchService, ListingSearchService>();
-
-            #region RAG DEPENDENCIES
-
-            // 1. HTTP Clients
-            services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
-            services.AddHttpClient<IChromaService, ChromaService>();
-            services.AddHttpClient<IAIProvider, OpenAIProvider>();
-            services.AddHttpClient<IAIProvider, GroqProvider>();
-            services.AddHttpClient<IChatbotService, ChatbotService>();
-
-
-            // 2. Configuration
-            services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
-
-            // 3. Service Registrations
-            services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
-            services.AddScoped<IChromaService, ChromaService>();
-
-            // 4. Keep original matching service as concrete implementation
-            services.AddScoped<MatchingService>();
-            services.AddScoped<IReportService, ReportService>();
-
-            #endregion
-
-            #region MATCHING SERVICE SELECTION
-
-            // Choose one of the following IMatchingService implementations:
-            
-            // Option A: Use StaticTestMatchingService (current default)
-            services.AddScoped<IMatchingService, StaticTestMatchingService>();
-
-            // Option B: Use basic MatchingService
-            // services.AddScoped<IMatchingService, MatchingService>();
-
-            // Option C: Use HybridMatchingService (RAG + Traditional)
-            // services.AddScoped<IMatchingService>(provider =>
-            // {
-            //     var traditional = provider.GetRequiredService<MatchingService>();
-            //     var chroma = provider.GetRequiredService<IChromaService>();
-            //     var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
-            //     return new HybridMatchingService(traditional, chroma, unitOfWork);
-            // });
-
-            #endregion
-            services.AddScoped<IUserService, UserService>();
-
-            services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
-
-
-            #region Verify User Service Registration
-            // Authorization policies
-            services.AddAuthorization(options =>
+            // Additional Identity options
+            services.Configure<IdentityOptions>(options =>
             {
-                options.AddPolicy("VerifiedUser", policy =>
-                policy.Requirements.Add(new VerifiedUserRequirement()));
+                options.SignIn.RequireConfirmedEmail = true;
             });
 
-            // Register authorization handlers
-            services.AddScoped<IAuthorizationHandler, VerifiedUserHandler>();
-            #endregion
-
-            #region Swagger Configuration
-            // Swagger Configuration
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
-            #endregion
-
-            // FluentValidation registration if used
-            services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();
-
-
-            // MediatR handlers
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SuspendUserCommandHandler>());
-
-            // AutoMapper
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.AddProfile<MappingProfile>();
-            }, typeof(MappingProfile).Assembly);
-            services.AddAutoMapper(cfg => {cfg.AddProfile<ReportProfile>();}, typeof(ReportProfile).Assembly);
-
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.AddProfile<ListingProfile>();
-            }, typeof(ListingProfile).Assembly);
-
-
-            // EmailService Configuration
-            services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
-            services.AddProblemDetails();
-            services.AddHttpContextAccessor();
-
-            //Mapster Configuration
-            services.AddMapsterConfig();
-
-            // FluentValidation Configuration
-            services.AddFluentValidationConfig();
-
-            // Authentication Configuration
-            services.AddAuthConfig(configuration);
-
-            return services;
-        }
-
-        private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
-        {
-            var mappingConfig = TypeAdapterConfig.GlobalSettings;
-            mappingConfig.Scan(Assembly.GetExecutingAssembly());
-
-            services.AddSingleton<IMapper>(new Mapper(mappingConfig));
-
-            return services;
-        }
-
-        private static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
-        {
-            services
-                .AddFluentValidationAutoValidation()
-                .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
-            return services;
-        }
-        private static IServiceCollection AddAuthConfig(this IServiceCollection services,
-        IConfiguration configuration)
-        {
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-            .AddEntityFrameworkStores<AppDBContext>()
-            .AddDefaultTokenProviders();
-
-            services.AddSingleton<IJwtProvider, JwtProvider>();
-            services.AddScoped<SignInManager<ApplicationUser>>();
-
-            //services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+            // JWT Options binding & authentication setup
             services.AddOptions<JwtOptions>()
                 .BindConfiguration(JwtOptions.SectionName)
                 .ValidateDataAnnotations()
@@ -242,13 +92,97 @@ namespace Wanas.API.Extentions
                 };
             });
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.SignIn.RequireConfirmedEmail = true;
-                options.User.RequireUniqueEmail = true;
-            });
+            services.AddSingleton<IJwtProvider, JwtProvider>();
 
+            // Repositories - Register all repositories needed by UnitOfWork
+            services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IReportPhotoRepository, ReportPhotoRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
+            services.AddScoped<IListingRepository, ListingRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IAppealRepository, AppealRepository>();
+
+            // Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Services (Application Layer)
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IAuditLogService, AuditLogService>();
+            services.AddScoped<IListingSearchService, ListingSearchService>();
+            services.AddScoped<IGenerateListingService, GenerateListingService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IReportService, ReportService>();
+
+            // Real-time notifier (singleton)
+            services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
+
+            #region RAG DEPENDENCIES
+            services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
+            services.AddHttpClient<IChromaService, ChromaService>();
+            services.AddHttpClient<IAIProvider, OpenAIProvider>();
+            services.AddHttpClient<IAIProvider, GroqProvider>();
+            services.AddHttpClient<IChatbotService, ChatbotService>();
+
+            services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
+            services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
+            services.AddScoped<IChromaService, ChromaService>();
+            services.AddScoped<MatchingService>();
+            #endregion
+
+            #region MATCHING SERVICE SELECTION
+            services.AddScoped<IMatchingService, StaticTestMatchingService>();
+            #endregion
+
+            #region Authorization
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("VerifiedUser", policy =>
+                policy.Requirements.Add(new VerifiedUserRequirement()));
+            });
+            services.AddScoped<IAuthorizationHandler, VerifiedUserHandler>();
+            #endregion
+
+            #region Swagger
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
+            #endregion
+
+            services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SuspendUserCommandHandler>());
+
+            // AutoMapper
+            services.AddAutoMapper(cfg => { cfg.AddProfile<MappingProfile>(); }, typeof(MappingProfile).Assembly);
+            services.AddAutoMapper(cfg => { cfg.AddProfile<ReportProfile>(); }, typeof(ReportProfile).Assembly);
+            services.AddAutoMapper(cfg => { cfg.AddProfile<ListingProfile>(); }, typeof(ListingProfile).Assembly);
+
+            services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+            services.AddProblemDetails();
+            services.AddHttpContextAccessor();
+
+            services.AddMapsterConfig();
+            services.AddFluentValidationConfig();
+
+            return services;
+        }
+
+        private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
+        {
+            var mappingConfig = TypeAdapterConfig.GlobalSettings;
+            mappingConfig.Scan(Assembly.GetExecutingAssembly());
+            services.AddSingleton<IMapper>(new Mapper(mappingConfig));
+            return services;
+        }
+
+        private static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
+        {
+            services.AddFluentValidationAutoValidation();
             return services;
         }
     }

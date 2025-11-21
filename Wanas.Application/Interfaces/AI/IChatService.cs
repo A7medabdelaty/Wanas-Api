@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Chatbot;
+using Wanas.Application.DTOs.Chatbot;
 
 namespace Wanas.Application.Interfaces.AI
 {

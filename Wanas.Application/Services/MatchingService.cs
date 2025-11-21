@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Matching;
+using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Repositories;
 using Wanas.Domain.Entities;
@@ -7,7 +7,7 @@ namespace Wanas.Application.Services
 {
     public class MatchingService : IMatchingService
     {
-        private readonly AppDbContext _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         // Scoring constants
         private const int CityMatchScore = 30;
@@ -20,7 +20,7 @@ namespace Wanas.Application.Services
         private const int SocialLevelCompatibilityScore = 5;
         private const int MinimumScoreThreshold = 20;
 
-        public MatchingService(AppDbContext unitOfWork)
+        public MatchingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }

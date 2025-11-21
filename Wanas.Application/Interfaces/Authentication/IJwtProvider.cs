@@ -1,4 +1,4 @@
-﻿using Wanas.Domain.Entities;
+using Wanas.Domain.Entities;
 
 namespace Wanas.Application.Interfaces.Authentication;
 public interface IJwtProvider

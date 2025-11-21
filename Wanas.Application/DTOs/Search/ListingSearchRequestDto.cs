@@ -1,4 +1,4 @@
-﻿namespace Wanas.Application.DTOs.Search
+namespace Wanas.Application.DTOs.Search
 {
     public class ListingSearchRequestDto
     {

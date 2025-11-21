@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Matching;
+using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 
 namespace Wanas.Application.Services
@@ -14,29 +14,29 @@ namespace Wanas.Application.Services
 
         public async Task<List<MatchingResultDto>> MatchUserAsync(string userId)
         {
-            Console.WriteLine($"🔍 Starting Matching Test for user: {userId}...");
+            Console.WriteLine($"?? Starting Matching Test for user: {userId}...");
 
             // Create semantic query based on test user preferences
             var semanticQuery = "Apartment in Cairo. extrovert social lifestyle. late sleep schedule. " +
                                "medium noise tolerance. Smoking: allow. Pets: notallow. " +
                                "About me: I'm a software engineer who loves coding and needs quiet space for focus";
 
-            Console.WriteLine($"📝 Semantic Query: {semanticQuery}");
+            Console.WriteLine($"?? Semantic Query: {semanticQuery}");
 
             // Use mock semantic search (bypass ChromaDB for now)
             var semanticListingIds = await MockSemanticSearchAsync(semanticQuery, topK: 5);
 
-            Console.WriteLine($"🎯 Semantic Search Found: {string.Join(", ", semanticListingIds)}");
+            Console.WriteLine($"?? Semantic Search Found: {string.Join(", ", semanticListingIds)}");
 
             // Generate test results with RAG-boosted scores
             var results = GenerateTestResults(semanticListingIds);
 
-            Console.WriteLine($"✅ Matching Complete. Found {results.Count} enhanced matches");
+            Console.WriteLine($"? Matching Complete. Found {results.Count} enhanced matches");
 
             // Log the results
             foreach (var result in results)
             {
-                Console.WriteLine($"🏠 Listing {result.ListingId}: {result.ListingTitle} - Score: {result.Score}");
+                Console.WriteLine($"?? Listing {result.ListingId}: {result.ListingTitle} - Score: {result.Score}");
             }
 
             return results;
@@ -116,7 +116,7 @@ namespace Wanas.Application.Services
                 {
                     result.Score += 25; // RAG boost
                     //result.IsRAGBoosted = true;
-                    Console.WriteLine($"🚀 RAG Boosted Listing {result.ListingId}: {result.ListingTitle}");
+                    Console.WriteLine($"?? RAG Boosted Listing {result.ListingId}: {result.ListingTitle}");
                 }
             }
 

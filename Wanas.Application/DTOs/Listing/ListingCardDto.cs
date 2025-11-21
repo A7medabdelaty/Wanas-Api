@@ -1,4 +1,4 @@
-﻿namespace Wanas.Application.DTOs.Listing
+namespace Wanas.Application.DTOs.Listing
 {
     public class ListingCardDto
     {

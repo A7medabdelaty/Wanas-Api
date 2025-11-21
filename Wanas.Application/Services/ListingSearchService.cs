@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Wanas.Application.DTOs.Listing;
@@ -11,10 +11,10 @@ namespace Wanas.Application.Services
 {
     public class ListingSearchService : IListingSearchService
     {
-        private readonly AppDbContext _uow;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public ListingSearchService(AppDbContext uow, IMapper mapper)
+        public ListingSearchService(IUnitOfWork uow, IMapper mapper)
         {
             _uow = uow;
             _mapper = mapper;

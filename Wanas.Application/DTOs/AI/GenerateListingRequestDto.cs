@@ -1,4 +1,4 @@
-﻿
+
 namespace Wanas.Application.DTOs.AI
 {
     public class GenerateListingRequestDto

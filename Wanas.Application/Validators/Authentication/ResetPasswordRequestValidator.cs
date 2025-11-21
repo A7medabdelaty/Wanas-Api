@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Wanas.Application.Abstractions;
 using Wanas.Application.DTOs.Authentication;
 

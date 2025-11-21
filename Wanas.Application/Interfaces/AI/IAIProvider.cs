@@ -1,4 +1,4 @@
-﻿
+
 namespace Wanas.Application.Interfaces.AI
 {
     public interface IAIProvider

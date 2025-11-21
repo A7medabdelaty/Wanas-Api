@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Message;
+using Wanas.Application.DTOs.Message;
 
 namespace Wanas.Application.Interfaces
 {

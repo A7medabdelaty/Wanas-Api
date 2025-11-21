@@ -6,7 +6,7 @@ using Wanas.Infrastructure.Persistence;
 
 namespace Wanas.Infrastructure.Repositories
 {
-    public class UnitOfWork : AppDbContext
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDBContext _context;
 

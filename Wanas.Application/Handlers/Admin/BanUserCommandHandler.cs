@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Wanas.Application.Commands.Admin;
 using Wanas.Application.Interfaces;

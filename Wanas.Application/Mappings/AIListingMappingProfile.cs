@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Wanas.Application.DTOs.AI;
 using Wanas.Domain.Entities;
 

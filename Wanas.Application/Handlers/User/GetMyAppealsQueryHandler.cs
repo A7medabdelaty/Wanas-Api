@@ -10,10 +10,10 @@ namespace Wanas.Application.Handlers.User
 {
     public class GetMyAppealsQueryHandler : IRequestHandler<GetMyAppealsQuery, IEnumerable<AppealDto>>
     {
-        private readonly AppDbContext _db;
+        private readonly IUnitOfWork _db;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public GetMyAppealsQueryHandler(AppDbContext db, UserManager<ApplicationUser> userManager)
+        public GetMyAppealsQueryHandler(IUnitOfWork db, UserManager<ApplicationUser> userManager)
         {
             _db = db;
             _userManager = userManager;

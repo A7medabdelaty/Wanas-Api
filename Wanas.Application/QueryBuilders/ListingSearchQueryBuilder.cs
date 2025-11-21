@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Search;
+using Wanas.Application.DTOs.Search;
 using Wanas.Domain.Entities;
 
 namespace Wanas.Application.QueryBuilders

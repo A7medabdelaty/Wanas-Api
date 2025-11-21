@@ -11,11 +11,11 @@ namespace Wanas.Application.Handlers.User
     public class SubmitAppealCommandHandler : IRequestHandler<SubmitAppealCommand, Result<Guid>>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppDbContext _db;
+        private readonly IUnitOfWork _db;
 
         public SubmitAppealCommandHandler(
             UserManager<ApplicationUser> userManager,
-            AppDbContext db)
+            IUnitOfWork db)
         {
             _userManager = userManager;
             _db = db;

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using System.Text.Json;
 using Wanas.Application.DTOs.AI;
 using Wanas.Application.Interfaces.AI;

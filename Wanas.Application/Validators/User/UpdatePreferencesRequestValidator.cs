@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Wanas.Application.DTOs.User;
 
 namespace Wanas.Application.Validators.User;

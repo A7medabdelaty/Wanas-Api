@@ -1,4 +1,4 @@
-﻿namespace Wanas.Application.DTOs.Authentication;
+namespace Wanas.Application.DTOs.Authentication;
 public record ResendConfirmationEmailRequest(
     string Email
 );

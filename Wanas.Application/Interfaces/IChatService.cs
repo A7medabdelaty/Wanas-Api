@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Chat;
+using Wanas.Application.DTOs.Chat;
 
 namespace Wanas.Application.Interfaces
 {

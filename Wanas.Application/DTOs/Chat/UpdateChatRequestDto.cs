@@ -1,4 +1,4 @@
-﻿namespace Wanas.Application.DTOs.Chat
+namespace Wanas.Application.DTOs.Chat
 {
     public class UpdateChatRequestDto
     {

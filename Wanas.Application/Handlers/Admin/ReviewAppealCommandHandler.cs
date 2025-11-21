@@ -11,13 +11,13 @@ namespace Wanas.Application.Handlers.Admin
     public class ReviewAppealCommandHandler : IRequestHandler<ReviewAppealCommand, bool>
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AppDbContext _db;
+        private readonly IUnitOfWork _db;
         private readonly IAuditLogService _audit;
         private readonly IMediator _mediator;
 
         public ReviewAppealCommandHandler(
             UserManager<ApplicationUser> userManager,
-            AppDbContext db,
+            IUnitOfWork db,
             IAuditLogService audit,
             IMediator mediator)
         {

@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Listing;
+using Wanas.Application.DTOs.Listing;
 
 namespace Wanas.Application.DTOs.Search
 {

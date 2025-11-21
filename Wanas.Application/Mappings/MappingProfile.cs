@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.DTOs.Message;
 using Wanas.Domain.Entities;

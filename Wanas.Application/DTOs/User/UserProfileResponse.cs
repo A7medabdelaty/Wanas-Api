@@ -1,4 +1,4 @@
-﻿using Wanas.Domain.Enums;
+using Wanas.Domain.Enums;
 
 namespace Wanas.Application.DTOs.User;
 public record UserProfileResponse(

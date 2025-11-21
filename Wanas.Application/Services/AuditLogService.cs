@@ -1,4 +1,4 @@
-﻿using Wanas.Application.Interfaces;
+using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
 
@@ -6,9 +6,9 @@ namespace Wanas.Application.Services
 {
     public class AuditLogService : IAuditLogService
     {
-        private readonly AppDbContext _db;
+        private readonly IUnitOfWork _db;
 
-        public AuditLogService(AppDbContext db)
+        public AuditLogService(IUnitOfWork db)
         {
             _db = db;
         }

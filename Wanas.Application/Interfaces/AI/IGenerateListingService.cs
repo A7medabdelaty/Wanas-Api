@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.AI;
+using Wanas.Application.DTOs.AI;
 
 namespace Wanas.Application.Interfaces.AI
 {

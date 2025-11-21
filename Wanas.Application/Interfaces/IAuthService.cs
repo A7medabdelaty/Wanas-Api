@@ -1,4 +1,4 @@
-﻿using Wanas.Application.Abstractions;
+using Wanas.Application.Abstractions;
 using Wanas.Application.DTOs.Authentication;
 
 namespace Wanas.Application.Interfaces;

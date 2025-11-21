@@ -1,4 +1,4 @@
-﻿using Wanas.Application.DTOs.Matching;
+using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
@@ -8,12 +8,12 @@ namespace Wanas.Application.Services
     {
         private readonly IMatchingService _traditionalMatcher;
         private readonly IChromaService _chromaService;
-        private readonly AppDbContext _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public HybridMatchingService(
             IMatchingService traditionalMatcher,
             IChromaService chromaService,
-            AppDbContext unitOfWork)
+            IUnitOfWork unitOfWork)
         {
             _traditionalMatcher = traditionalMatcher;
             _chromaService = chromaService;

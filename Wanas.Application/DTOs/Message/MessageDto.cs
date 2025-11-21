@@ -1,4 +1,4 @@
-﻿namespace Wanas.Application.DTOs.Message
+namespace Wanas.Application.DTOs.Message
 {
     public class MessageDto
     {

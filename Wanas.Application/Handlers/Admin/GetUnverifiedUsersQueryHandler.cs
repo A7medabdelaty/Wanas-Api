@@ -24,8 +24,6 @@ namespace Wanas.Application.Handlers.Admin
                 .OrderBy(u => u.CreatedAt)
                 .ToListAsync(cancellationToken);
 
-           
-
             // Map to DTOs
             var userDtos = unverifiedUsers.Select(u => new UserDto
             {
@@ -34,7 +32,7 @@ namespace Wanas.Application.Handlers.Admin
                 Email = u.Email ?? string.Empty,
                 PhoneNumber = u.PhoneNumber,
                 City = u.City,
-                Age = u.Age,
+                Age = u.Age ?? 0,
                 IsVerified = u.IsVerified,
                 IsSuspended = u.IsSuspended,
                 IsBanned = u.IsBanned,
