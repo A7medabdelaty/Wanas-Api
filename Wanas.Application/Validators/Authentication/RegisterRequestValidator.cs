@@ -33,8 +33,10 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
         RuleFor(x => x.ProfileType)
             .NotNull().WithMessage("Profile type is required")
-            .Must(pt => pt == ProfileType.Owner || pt == ProfileType.Renter)
+            .Must(pt => (pt == ProfileType.Owner || pt == ProfileType.Renter))
             .WithMessage("Profile type must be Owner or Renter only");
-
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty().WithMessage("Phone number is required")
+            .Matches(RegexPatterns.PhoneNumber).WithMessage("Invalid phone number format");
     }
 }

@@ -6,6 +6,7 @@ public record RegisterRequest(
     string Email,
     string Password,
     string FullName,
-    string City,              
+    string City,
+    string PhoneNumber,
     ProfileType ProfileType  
 );
