@@ -24,6 +24,8 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.ClientCascade);
+
+            builder.Property(c => c.Content).HasMaxLength(1000);
         }
     }
 }
