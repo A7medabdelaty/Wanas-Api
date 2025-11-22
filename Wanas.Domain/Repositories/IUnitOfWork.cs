@@ -10,9 +10,10 @@
         IListingRepository Listings { get; }
         IAuditLogRepository AuditLogs { get; }
         IAppealRepository Appeals { get; }
-
         IReportPhotoRepository ReportPhotos { get; }
         IReportRepository Reports { get; }
+        ITrafficLogRepository TrafficLogs { get; }
+        IDailyMetricsRepository DailyMetrics { get; }
         Task<int> CommitAsync();
     }
 }

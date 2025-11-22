@@ -1,12 +1,20 @@
-using Microsoft.AspNetCore.Authorization;
-using Wanas.API.Authorization;
+using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
-using Wanas.Application.Interfaces;
+
+
+// Configure Serilog (basic console + file rolling)
+Log.Logger = new LoggerConfiguration()
+ .Enrich.FromLogContext()
+ .WriteTo.Console()
+ .WriteTo.File("Logs/requests-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit:7)
+ .CreateLogger();
+
 
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 builder.Services.AddSignalR();
 
@@ -16,12 +24,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
 {
-   policy
-       .AllowAnyHeader()
-    .AllowAnyMethod()
-     .AllowCredentials()
-      .SetIsOriginAllowed(_ => true);
-  });
+    policy
+     .AllowAnyHeader()
+     .AllowAnyMethod()
+      .AllowCredentials()
+       .SetIsOriginAllowed(_ => true);
+});
 });
 
 
@@ -63,8 +71,8 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
-app.UseAuthentication();  
-
+app.UseAuthentication();
+app.UseMiddleware<TrafficLoggingMiddleware>();
 // Add User Status Check Middleware (must be after Authentication)
 app.UseMiddleware<UserStatusMiddleware>();
 

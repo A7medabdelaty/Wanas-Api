@@ -31,5 +31,7 @@ namespace Wanas.Infrastructure.Persistence
         public DbSet<Comment> Comments { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<Appeal> Appeals { get; set; }
+        public DbSet<TrafficLog> TrafficLogs { get; set; }
+        public DbSet<DailyMetrics> DailyMetrics { get; set; }
     }
 }
