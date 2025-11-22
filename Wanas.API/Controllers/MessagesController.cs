@@ -7,7 +7,7 @@ namespace Wanas.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize(Policy = "VerifiedUser")]
     public class MessagesController : ControllerBase
     {
         private readonly IMessageService _messageService;
@@ -17,7 +17,7 @@ namespace Wanas.API.Controllers
             _messageService = messageService;
         }
 
-        // GET: api/messages/chat/{chatId}?limit=50
+        // ✅ Get messages by chat ID
         [HttpGet("chat/{chatId}")]
         public async Task<IActionResult> GetMessagesByChat(int chatId, [FromQuery] int limit = 50)
         {
@@ -25,7 +25,7 @@ namespace Wanas.API.Controllers
             return Ok(messages);
         }
 
-        // POST: api/messages
+        // ✅ Send message
         [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] CreateMessageRequestDto request)
         {
@@ -34,6 +34,39 @@ namespace Wanas.API.Controllers
 
             var message = await _messageService.SendMessageAsync(request);
             return Ok(message);
+        }
+
+        // ✅ Edit message
+        [HttpPut("{messageId}")]
+        public async Task<IActionResult> EditMessage(int messageId, [FromBody] string newContent)
+        {
+            var success = await _messageService.EditMessageAsync(messageId, newContent);
+            if (!success)
+                return NotFound("Message not found.");
+
+            return Ok("Message edited successfully.");
+        }
+
+        // ✅ Delete message
+        [HttpDelete("{messageId}")]
+        public async Task<IActionResult> DeleteMessage(int messageId)
+        {
+            var success = await _messageService.DeleteMessageAsync(messageId);
+            if (!success)
+                return NotFound("Message not found.");
+
+            return Ok("Message deleted successfully.");
+        }
+
+        // ✅ Mark a specific message as read
+        [HttpPost("{messageId}/read/{userId}")]
+        public async Task<IActionResult> MarkMessageAsRead(int messageId, string userId)
+        {
+            var success = await _messageService.MarkMessageAsReadAsync(messageId, userId);
+            if (!success)
+                return NotFound("Message not found.");
+
+            return Ok("Message marked as read.");
         }
     }
 }

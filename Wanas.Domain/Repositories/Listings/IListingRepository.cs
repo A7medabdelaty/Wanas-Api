@@ -9,5 +9,7 @@ namespace Wanas.Domain.Repositories.Listings
         Task<IEnumerable<Listing>> GetListingsByCityAsync(string city);
         Task<IEnumerable<Listing>> GetActiveListingsAsync();
         Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword);
+        IQueryable<Listing> GetQueryableWithIncludes();
+        IQueryable<Listing> ApplyKeywordSearch(IQueryable<Listing> query, string keyword);
     }
 }

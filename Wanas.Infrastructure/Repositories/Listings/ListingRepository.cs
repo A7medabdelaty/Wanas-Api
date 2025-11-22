@@ -54,5 +54,28 @@ namespace Wanas.Infrastructure.Repositories.Listings
                 .Where(l => l.Title.ToLower().Contains(keyword.ToLower()))
                 .ToListAsync();
         }
+
+        public IQueryable<Listing> GetQueryableWithIncludes()
+        {
+            return _context.Listings
+                .AsNoTracking()
+                .Include(x => x.ApartmentListing)
+                .Include(x => x.ListingPhotos)
+                .Include(x => x.User)
+                .Include(x => x.Comments);
+        }
+        public IQueryable<Listing> ApplyKeywordSearch(IQueryable<Listing> query, string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return query;
+
+            keyword = keyword.ToLower().Trim();
+
+            return query.Where(x =>
+                x.Title.ToLower().Contains(keyword) ||
+                x.Description.ToLower().Contains(keyword) ||
+                x.City.ToLower().Contains(keyword)
+            );
+        }
     }
 }

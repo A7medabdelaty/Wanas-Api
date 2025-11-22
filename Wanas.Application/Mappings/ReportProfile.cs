@@ -1,4 +1,4 @@
-﻿
+
 
 using AutoMapper;
 using Wanas.Application.DTOs.Reports;
@@ -13,15 +13,23 @@ namespace Wanas.Application.Mappings
             // Map DTO to Entity for submission
             CreateMap<CreateReportDto, Report>()
                 .ForMember(dest => dest.Status, opt => opt.Ignore()) // Status is set in the service or by default value (Pending)
-                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) // CreatedAt is set in the service or by the database
-                .ForMember(dest => dest.ReporterId, opt => opt.Ignore()) // ReporterId comes from the service method parameter
-                .ForMember(dest => dest.ReportPhotos, opt => opt.Ignore()); // Photos are mapped in the service logic
+                .ForMember(dest => dest.ReportPhotos,
+                           opt => opt.MapFrom(src =>
+                                (src.PhotoUrls ?? new List<string>())
+                                    .Select(url => new ReportPhoto { URL = url }).ToList()))
+                .ForMember(dest => dest.CreatedAt,
+                           opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.Reporter, opt => opt.Ignore()) // set in service (attach user)
+                .ForMember(dest => dest.ReporterId, opt => opt.Ignore()) // set in service from current user
+                .ForMember(dest => dest.ReportId, opt => opt.Ignore()); // DB generates id
 
-            // Map Entity back to Response DTO
+
+            // Report -> ReportResponseDto (for sending to clients)
             CreateMap<Report, ReportResponseDto>()
-                // Manually map the collection of ReportPhotos to a list of URLs
-                .ForMember(dest => dest.PhotoUrls, opt => opt.MapFrom(src => src.ReportPhotos.Select(p => p.URL)));
-
+                .ForMember(dest => dest.PhotoUrls,
+                           opt => opt.MapFrom(src => src.ReportPhotos.Select(p => p.URL).ToList()))
+                .ForMember(dest => dest.ReorterId,
+                           opt => opt.MapFrom(src => src.ReporterId));
             //  Photo URL from the DTO to Entity
             CreateMap<string, ReportPhoto>()
                 .ForMember(dest => dest.URL, opt => opt.MapFrom(src => src))

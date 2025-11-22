@@ -1,4 +1,7 @@
-﻿using Wanas.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Wanas.Application.Interfaces;
+using Wanas.Domain.Entities;
+using Wanas.Domain.Repositories;
 using Wanas.Domain.Repositories.Listings;
 using Wanas.Infrastructure.Persistence;
 
@@ -11,21 +14,48 @@ namespace Wanas.Infrastructure.Repositories
         public IChatRepository Chats { get; }
         public IMessageRepository Messages { get; }
         public IChatParticipantRepository ChatParticipants { get; }
+        public IUserRepository Users { get; }
+        public IUserPreferenceRepository UserPreferences { get; }
+        public IListingRepository Listings { get; }
+        public IAuditLogRepository AuditLogs { get; }
+        public IAppealRepository Appeals { get; }
         public IReviewRepository Reviews { get; }
         //public IListingRepository Listings { get; }
         //public IListingPhotoRepository ListingPhotos { get; }
         //public ICommentRepository Comments { get; }
 
+
+        public IReportRepository Reports { get; }
+        public IReportPhotoRepository ReportPhotos { get; }
+
+        public IListingPhotoRepository ListingPhotos { get; }
+
+        public ICommentRepository Comments { get; }
+
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
                           IMessageRepository messages,
                           IChatParticipantRepository chatParticipants,
+                          IReportRepository reports,
+                          IReportPhotoRepository reportPhotos,
+                          IUserRepository users,
+                          IUserPreferenceRepository userPreferences,
+                          IListingRepository listings,
+                          IAuditLogRepository auditLogs,
+                          IAppealRepository appeals,
                           IReviewRepository reviews)
         {
             _context = context;
             Chats = chats;
             Messages = messages;
             ChatParticipants = chatParticipants;
+            Users = users;
+            UserPreferences = userPreferences;
+            Listings = listings;
+            AuditLogs = auditLogs;
+            Appeals = appeals;
+            Reports = reports;
+            ReportPhotos = reportPhotos;
             Reviews = reviews;
             //Listings = listings;    
             //ListingPhotos = listingPhotos;
