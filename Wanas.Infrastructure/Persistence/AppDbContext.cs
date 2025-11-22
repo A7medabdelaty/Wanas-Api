@@ -33,5 +33,9 @@ namespace Wanas.Infrastructure.Persistence
         public DbSet<Appeal> Appeals { get; set; }
         public DbSet<TrafficLog> TrafficLogs { get; set; }
         public DbSet<DailyMetrics> DailyMetrics { get; set; }
+        // Revenue
+        public DbSet<Commission> Commissions { get; set; }
+        public DbSet<Payout> Payouts { get; set; }
+        public DbSet<Refund> Refunds { get; set; }
     }
 }

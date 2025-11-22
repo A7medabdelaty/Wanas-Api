@@ -107,6 +107,10 @@ namespace Wanas.API.Extentions
             services.AddScoped<IAppealRepository, AppealRepository>();
             services.AddScoped<ITrafficLogRepository, TrafficLogRepository>();
             services.AddScoped<IDailyMetricsRepository, DailyMetricsRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<ICommissionRepository, CommissionRepository>();
+            services.AddScoped<IPayoutRepository, PayoutRepository>();
+            services.AddScoped<IRefundRepository, RefundRepository>();
 
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -123,7 +127,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IListingModerationService, ListingModerationService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
-            
+            services.AddScoped<IRevenueService, RevenueService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();

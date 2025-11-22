@@ -14,6 +14,11 @@
         IReportRepository Reports { get; }
         ITrafficLogRepository TrafficLogs { get; }
         IDailyMetricsRepository DailyMetrics { get; }
+        // Revenue
+        IPaymentRepository Payments { get; }
+        ICommissionRepository Commissions { get; }
+        IPayoutRepository Payouts { get; }
+        IRefundRepository Refunds { get; }
         Task<int> CommitAsync();
     }
 }

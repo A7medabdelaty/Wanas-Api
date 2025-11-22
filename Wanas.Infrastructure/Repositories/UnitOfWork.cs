@@ -22,6 +22,10 @@ namespace Wanas.Infrastructure.Repositories
         public IReportPhotoRepository ReportPhotos { get; }
         public ITrafficLogRepository TrafficLogs { get; }
         public IDailyMetricsRepository DailyMetrics { get; }
+        public IPaymentRepository Payments { get; }
+        public ICommissionRepository Commissions { get; }
+        public IPayoutRepository Payouts { get; }
+        public IRefundRepository Refunds { get; }
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -35,7 +39,11 @@ namespace Wanas.Infrastructure.Repositories
                           IAuditLogRepository auditLogs,
                           IAppealRepository appeals,
                           ITrafficLogRepository trafficLogs,
-                          IDailyMetricsRepository dailyMetrics)
+                          IDailyMetricsRepository dailyMetrics,
+                          IPaymentRepository payments,
+                          ICommissionRepository commissions,
+                          IPayoutRepository payouts,
+                          IRefundRepository refunds)
         {
             _context = context;
             Chats = chats;
@@ -50,6 +58,10 @@ namespace Wanas.Infrastructure.Repositories
             ReportPhotos = reportPhotos;
             TrafficLogs = trafficLogs;
             DailyMetrics = dailyMetrics;
+            Payments = payments;
+            Commissions = commissions;
+            Payouts = payouts;
+            Refunds = refunds;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
