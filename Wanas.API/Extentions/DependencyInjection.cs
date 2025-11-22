@@ -119,6 +119,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IGenerateListingService, GenerateListingService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IReportService, ReportService>();
+            
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
@@ -127,8 +128,8 @@ namespace Wanas.API.Extentions
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
             services.AddHttpClient<IChromaService, ChromaService>();
             services.AddHttpClient<IAIProvider, OpenAIProvider>();
-            services.AddHttpClient<IAIProvider, GroqProvider>();
-            services.AddHttpClient<IChatbotService, ChatbotService>();
+            //services.AddHttpClient<IAIProvider, GroqProvider>();
+            services.AddScoped<IChatbotService, ChatbotService>();
 
             services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
             services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
