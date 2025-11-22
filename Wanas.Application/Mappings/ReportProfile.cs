@@ -1,12 +1,10 @@
-
-
 using AutoMapper;
 using Wanas.Application.DTOs.Reports;
 using Wanas.Domain.Entities;
 
 namespace Wanas.Application.Mappings
 {
-    public class ReportProfile:Profile
+    public class ReportProfile : Profile
     {
         public ReportProfile()
         {

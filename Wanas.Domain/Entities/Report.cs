@@ -13,5 +13,13 @@ namespace Wanas.Domain.Entities
         public string ReporterId { get; set; }
         public virtual ApplicationUser Reporter { get; set; } = null!;
         public virtual ICollection<ReportPhoto> ReportPhotos { get; set; } = new HashSet<ReportPhoto>();
+        // New escalation / review properties
+        public bool IsEscalated { get; set; } = false;
+        public DateTime? EscalatedAt { get; set; }
+        public string? EscalationReason { get; set; }
+        public string? ReviewedByAdminId { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public string? AdminNote { get; set; }
+        public ReportSeverity Severity { get; set; } = ReportSeverity.Medium;
     }
 }

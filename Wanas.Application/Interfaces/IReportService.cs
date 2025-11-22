@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Wanas.Application.DTOs.Reports;
+using Wanas.Domain.Enums;
 
 namespace Wanas.Application.Interfaces
 {
@@ -11,9 +12,10 @@ namespace Wanas.Application.Interfaces
     {
         Task<ReportResponseDto> SubmitReportAsync(CreateReportDto reportDto, string reporterId);
 
-        //Maybe use them later if ...if we treat with admin 
-        // Task<IEnumerable<ReportResponseDto>> GetAllReportsAsync(); 
-        // Task<ReportResponseDto?> GetReportByIdAsync(int reportId);
-        // Task UpdateReportStatusAsync(int reportId, ReportStatus newStatus);
+        // Admin operations
+        Task<IEnumerable<ReportResponseDto>> GetReportsAsync(ReportStatus? status = null, bool? escalated = null, ReportSeverity? severity = null);
+        Task<ReportResponseDto?> GetReportByIdAsync(int reportId);
+        Task<bool> UpdateReportStatusAsync(int reportId, ReportStatus newStatus, string? adminId, string? adminNote, ReportSeverity? severity);
+        Task<bool> EscalateReportAsync(int reportId, string adminId, string? reason, bool cancel = false);
     }
 }
