@@ -119,6 +119,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IGenerateListingService, GenerateListingService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IListingModerationService, ListingModerationService>();
             
 
             // Real-time notifier (singleton)

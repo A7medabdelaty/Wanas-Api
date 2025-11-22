@@ -1,6 +1,8 @@
-﻿namespace Wanas.Domain.Entities
+﻿using Wanas.Domain.Enums;
+
+namespace Wanas.Domain.Entities
 {
-  public class Listing
+    public class Listing
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -15,6 +17,13 @@
         public HashSet<ListingPhoto> ListingPhotos { get; set; } = new();
         public HashSet<Payment> Payments { get; set; } = new();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-      public ICollection<Match> Matches { get; set; } = new List<Match>();
+        public ICollection<Match> Matches { get; set; } = new List<Match>();
+        // Moderation fields
+        public ListingModerationStatus ModerationStatus { get; set; } = ListingModerationStatus.Pending;
+        public string? ModeratedByAdminId { get; set; }
+        public DateTime? ModeratedAt { get; set; }
+        public string? ModerationNote { get; set; }
+        public bool IsFlagged { get; set; } = false;
+        public string? FlagReason { get; set; }
     }
 }
