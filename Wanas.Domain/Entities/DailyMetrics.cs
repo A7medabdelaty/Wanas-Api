@@ -2,7 +2,7 @@ namespace Wanas.Domain.Entities
 {
     public class DailyMetrics
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public DateOnly Date { get; set; }
         public int TotalListings { get; set; }
         public int PendingListings { get; set; }

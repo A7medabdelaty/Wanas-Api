@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wanas.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class intialCreation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -100,6 +100,46 @@ namespace Wanas.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Chats", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DailyMetrics",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Date = table.Column<DateOnly>(type: "date", nullable: false),
+                    TotalListings = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    PendingListings = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    ApprovedListings = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    RejectedListings = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    FlaggedListings = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    TotalUsers = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    ActiveUsers = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    Requests = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    LastCalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyMetrics", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrafficLogs",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Method = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StatusCode = table.Column<int>(type: "int", nullable: false),
+                    DurationMs = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrafficLogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -251,7 +291,13 @@ namespace Wanas.Infrastructure.Migrations
                     MonthlyPrice = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ModerationStatus = table.Column<int>(type: "int", nullable: false),
+                    ModeratedByAdminId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModeratedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModerationNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsFlagged = table.Column<bool>(type: "bit", nullable: false),
+                    FlagReason = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -262,6 +308,35 @@ namespace Wanas.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payouts",
+                columns: table => new
+                {
+                    PayoutId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    HostUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GrossAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CommissionTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NetAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payouts", x => x.PayoutId);
+                    table.ForeignKey(
+                        name: "FK_Payouts_AspNetUsers_HostUserId",
+                        column: x => x.HostUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -298,7 +373,14 @@ namespace Wanas.Infrastructure.Migrations
                     Reason = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    ReporterId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    ReporterId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsEscalated = table.Column<bool>(type: "bit", nullable: false),
+                    EscalatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EscalationReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReviewedByAdminId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReviewedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AdminNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Severity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -653,6 +735,52 @@ namespace Wanas.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Commissions",
+                columns: table => new
+                {
+                    CommissionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PaymentId = table.Column<int>(type: "int", nullable: false),
+                    PlatformPercent = table.Column<decimal>(type: "decimal(5,4)", nullable: false),
+                    PlatformAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Commissions", x => x.CommissionId);
+                    table.ForeignKey(
+                        name: "FK_Commissions_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "PaymentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Refunds",
+                columns: table => new
+                {
+                    RefundId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PaymentId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Refunds", x => x.RefundId);
+                    table.ForeignKey(
+                        name: "FK_Refunds_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "PaymentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Beds",
                 columns: table => new
                 {
@@ -816,6 +944,21 @@ namespace Wanas.Infrastructure.Migrations
                 column: "ParentCommentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Commissions_PaymentId",
+                table: "Commissions",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DailyMetrics_ActiveUsers",
+                table: "DailyMetrics",
+                column: "ActiveUsers");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DailyMetrics_Requests",
+                table: "DailyMetrics",
+                column: "Requests");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ListingPhotos_ListingId",
                 table: "ListingPhotos",
                 column: "ListingId");
@@ -875,6 +1018,26 @@ namespace Wanas.Infrastructure.Migrations
                 name: "IX_Payments_UserId",
                 table: "Payments",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payouts_HostUserId_Status",
+                table: "Payouts",
+                columns: new[] { "HostUserId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payouts_PeriodEnd",
+                table: "Payouts",
+                column: "PeriodEnd");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payouts_PeriodStart",
+                table: "Payouts",
+                column: "PeriodStart");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Refunds_PaymentId",
+                table: "Refunds",
+                column: "PaymentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReportPhotos_ReportId",
@@ -952,6 +1115,12 @@ namespace Wanas.Infrastructure.Migrations
                 name: "Comments");
 
             migrationBuilder.DropTable(
+                name: "Commissions");
+
+            migrationBuilder.DropTable(
+                name: "DailyMetrics");
+
+            migrationBuilder.DropTable(
                 name: "ListingPhotos");
 
             migrationBuilder.DropTable(
@@ -961,16 +1130,22 @@ namespace Wanas.Infrastructure.Migrations
                 name: "MessageReadReceipts");
 
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "Payouts");
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "Refunds");
 
             migrationBuilder.DropTable(
                 name: "ReportPhotos");
 
             migrationBuilder.DropTable(
                 name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "TrafficLogs");
 
             migrationBuilder.DropTable(
                 name: "UserPreferences");
@@ -983,6 +1158,9 @@ namespace Wanas.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "Reports");

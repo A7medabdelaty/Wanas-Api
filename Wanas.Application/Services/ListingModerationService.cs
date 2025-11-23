@@ -36,33 +36,81 @@ namespace Wanas.Application.Services
             await _audit.LogAsync("ListingModerated", adminId, listing.UserId, $"ListingId={listingId}; Status={newStatus}; Note={note}");
             return true;
         }
+
         public async Task<bool> FlagAsync(int listingId, string adminId, string reason)
         {
             var listing = await _uow.Listings.GetByIdAsync(listingId);
             if (listing == null) return false;
-            listing.IsFlagged = true;
+            listing.IsFlagged = !listing.IsFlagged;
             listing.FlagReason = reason;
             listing.ModeratedByAdminId = adminId;
             listing.ModeratedAt = DateTime.UtcNow;
             _uow.Listings.Update(listing);
             await _uow.CommitAsync();
-            await _audit.LogAsync("ListingFlagged", adminId, listing.UserId, $"ListingId={listingId}; Reason={reason}");
+            string FlagText = listing.IsFlagged ? "ListingFlagged" : "ListingUnflagged";
+            await _audit.LogAsync(FlagText, adminId, listing.UserId, $"ListingId={listingId}; Reason={reason}");
             return true;
         }
-        public async Task<bool> UnflagAsync(int listingId, string adminId, string? note = null)
-        {
-            var listing = await _uow.Listings.GetByIdAsync(listingId);
-            if (listing == null) return false;
-            listing.IsFlagged = false;
-            listing.FlagReason = null;
-            listing.ModeratedByAdminId = adminId;
-            listing.ModeratedAt = DateTime.UtcNow;
-            if (note != null) listing.ModerationNote = note;
-            _uow.Listings.Update(listing);
-            await _uow.CommitAsync();
-            await _audit.LogAsync("ListingUnflagged", adminId, listing.UserId, $"ListingId={listingId}; Note={note}");
-            return true;
-        }
+
+        #region Previous Flagging Method
+        //public async Task<bool> FlagAsync(int listingId, string adminId, string reason)
+        //{
+        //    var listing = await _uow.Listings.GetByIdAsync(listingId);
+        //    if (listing == null) return false;
+        //    if (string.IsNullOrWhiteSpace(reason)) reason = "(no reason)";
+        //    // Already flagged: only update reason if changed
+        //    if (listing.IsFlagged)
+        //    {
+        //        if (!string.Equals(listing.FlagReason, reason, StringComparison.Ordinal))
+        //        {
+        //            listing.FlagReason = reason;
+        //            listing.ModeratedByAdminId = adminId;
+        //            listing.ModeratedAt = DateTime.UtcNow;
+        //            _uow.Listings.Update(listing);
+        //            await _uow.CommitAsync();
+        //            await _audit.LogAsync("ListingFlagReasonUpdated", adminId, listing.UserId, $"ListingId={listingId}; Reason={reason}");
+        //        }
+        //        return true; // idempotent
+        //    }
+        //    // First time flagging
+        //    listing.IsFlagged = true;
+        //    listing.FlagReason = reason;
+        //    listing.ModeratedByAdminId = adminId;
+        //    listing.ModeratedAt = DateTime.UtcNow;
+        //    _uow.Listings.Update(listing);
+        //    await _uow.CommitAsync();
+        //    await _audit.LogAsync("ListingFlagged", adminId, listing.UserId, $"ListingId={listingId}; Reason={reason}");
+        //    return true;
+        //}
+        //public async Task<bool> UnflagAsync(int listingId, string adminId, string? note = null)
+        //{
+        //    var listing = await _uow.Listings.GetByIdAsync(listingId);
+        //    if (listing == null) return false;
+        //    // If not flagged, only optionally append moderation note, do not log unflag again.
+        //    if (!listing.IsFlagged)
+        //    {
+        //        if (!string.IsNullOrWhiteSpace(note))
+        //        {
+        //            listing.ModerationNote = note;
+        //            listing.ModeratedByAdminId = adminId;
+        //            listing.ModeratedAt = DateTime.UtcNow;
+        //            _uow.Listings.Update(listing);
+        //            await _uow.CommitAsync();
+        //            await _audit.LogAsync("ListingUnflagNoteAdded", adminId, listing.UserId, $"ListingId={listingId}; Note={note}");
+        //        }
+        //        return true; // idempotent
+        //    }
+        //    listing.IsFlagged = false;
+        //    listing.FlagReason = null;
+        //    listing.ModeratedByAdminId = adminId;
+        //    listing.ModeratedAt = DateTime.UtcNow;
+        //    if (note != null) listing.ModerationNote = note;
+        //    _uow.Listings.Update(listing);
+        //    await _uow.CommitAsync();
+        //    await _audit.LogAsync("ListingUnflagged", adminId, listing.UserId, $"ListingId={listingId}; Note={note}");
+        //    return true;
+        //}
+        #endregion
         public async Task<IEnumerable<ListingModerationDto>> GetPendingAsync()
         {
             var pending = await _uow.Listings.FindAsync(l => l.ModerationStatus == ListingModerationStatus.Pending);

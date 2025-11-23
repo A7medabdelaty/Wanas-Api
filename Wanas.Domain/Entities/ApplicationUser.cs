@@ -46,5 +46,6 @@ namespace Wanas.Domain.Entities
         public ICollection<Appeal> Appeals { get; set; } = new List<Appeal>();
         public ICollection<Appeal> ReviewedAppeals { get; set; } = new List<Appeal>();
         public List<RefreshToken> RefreshTokens { get; set; } = [];
+        public ICollection<Payout> Payouts { get; set; } = new List<Payout>();
     }
 }
