@@ -125,29 +125,6 @@ namespace Wanas.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payouts",
-                columns: table => new
-                {
-                    PayoutId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    HostUserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    GrossAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CommissionTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    NetAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Payouts", x => x.PayoutId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TrafficLogs",
                 columns: table => new
                 {
@@ -331,6 +308,35 @@ namespace Wanas.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payouts",
+                columns: table => new
+                {
+                    PayoutId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    HostUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GrossAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CommissionTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    NetAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Currency = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payouts", x => x.PayoutId);
+                    table.ForeignKey(
+                        name: "FK_Payouts_AspNetUsers_HostUserId",
+                        column: x => x.HostUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -735,7 +741,7 @@ namespace Wanas.Infrastructure.Migrations
                     CommissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PaymentId = table.Column<int>(type: "int", nullable: false),
-                    PlatformPercent = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PlatformPercent = table.Column<decimal>(type: "decimal(5,4)", nullable: false),
                     PlatformAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CalculatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -758,8 +764,8 @@ namespace Wanas.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PaymentId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -1012,6 +1018,21 @@ namespace Wanas.Infrastructure.Migrations
                 name: "IX_Payments_UserId",
                 table: "Payments",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payouts_HostUserId_Status",
+                table: "Payouts",
+                columns: new[] { "HostUserId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payouts_PeriodEnd",
+                table: "Payouts",
+                column: "PeriodEnd");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payouts_PeriodStart",
+                table: "Payouts",
+                column: "PeriodStart");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Refunds_PaymentId",

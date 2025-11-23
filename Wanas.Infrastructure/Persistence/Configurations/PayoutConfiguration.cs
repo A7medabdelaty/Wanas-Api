@@ -16,6 +16,10 @@ namespace Wanas.Infrastructure.Persistence.Configurations
             builder.HasIndex(p => new { p.HostUserId, p.Status });
             builder.HasIndex(p => p.PeriodStart);
             builder.HasIndex(p => p.PeriodEnd);
+            builder.HasOne(p => p.HostUser)
+                   .WithMany(u => u.Payouts)
+                   .HasForeignKey(p => p.HostUserId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

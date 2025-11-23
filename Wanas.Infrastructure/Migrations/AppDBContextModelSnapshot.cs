@@ -623,7 +623,7 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("PlatformPercent")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(5,4)");
 
                     b.HasKey("CommissionId");
 
@@ -957,14 +957,15 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("Currency")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<decimal>("GrossAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("HostUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("NetAmount")
                         .HasColumnType("decimal(18,2)");
@@ -983,9 +984,16 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("PayoutId");
+
+                    b.HasIndex("PeriodEnd");
+
+                    b.HasIndex("PeriodStart");
+
+                    b.HasIndex("HostUserId", "Status");
 
                     b.ToTable("Payouts");
                 });
@@ -1012,11 +1020,13 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("RefundId");
 
@@ -1644,6 +1654,17 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Wanas.Domain.Entities.Payout", b =>
+                {
+                    b.HasOne("Wanas.Domain.Entities.ApplicationUser", "HostUser")
+                        .WithMany("Payouts")
+                        .HasForeignKey("HostUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HostUser");
+                });
+
             modelBuilder.Entity("Wanas.Domain.Entities.Refund", b =>
                 {
                     b.HasOne("Wanas.Domain.Entities.Payment", "Payment")
@@ -1734,6 +1755,8 @@ namespace Wanas.Infrastructure.Migrations
                     b.Navigation("MessageReadReceipts");
 
                     b.Navigation("Messages");
+
+                    b.Navigation("Payouts");
 
                     b.Navigation("Reports");
 

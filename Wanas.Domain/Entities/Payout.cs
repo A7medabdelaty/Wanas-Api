@@ -14,5 +14,6 @@ namespace Wanas.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ProcessedAt { get; set; }
         public string? Notes { get; set; }
+        public ApplicationUser HostUser { get; set; }
     }
 }
