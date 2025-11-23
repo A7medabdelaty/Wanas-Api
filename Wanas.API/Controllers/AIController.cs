@@ -26,7 +26,7 @@ namespace Wanas.API.Controllers
         [Authorize]
         public async Task<IActionResult> GenerateListing([FromBody] GenerateListingRequestDto request)
         {
-            var userId = User.FindFirst("id")?.Value;
+            var userId = User.Claims.("id")?.Value;
 
             if (userId == null) return Unauthorized();  
 
