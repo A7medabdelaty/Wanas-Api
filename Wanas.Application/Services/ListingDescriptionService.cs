@@ -6,7 +6,7 @@ namespace Wanas.Application.Services
     public class ListingDescriptionService:IListingDescriptionService
     {
         private readonly IAIProvider _ai;
-        public ListingDescriptionService(IAIProvider ai)
+        public ListingDescriptionService(IAIProvider ai )
         {
             _ai = ai;
         }

@@ -34,8 +34,8 @@ namespace Wanas.API.Controllers
         //    return Ok(response);
         //}
 
+        //[Authorize]
         [HttpPost("generate-description")]
-        [Authorize]
         public async Task<IActionResult> GenerateDescription([FromBody] GenerateDescriptionDto dto)
         {
             var text = await _listingDescriptionService.GenerateDescriptionAsync(dto);

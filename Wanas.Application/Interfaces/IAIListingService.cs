@@ -1,14 +1,14 @@
 
-using Wanas.Application.DTOs.AI;
+//using Wanas.Application.DTOs.AI;
 
-namespace Wanas.Application.Interfaces
-{
-    public interface IAIListingService
-    {
+//namespace Wanas.Application.Interfaces
+//{
+//    public interface IAIListingService
+//    {
 
-        Task<GeneratedListingResponseDto> GenerateListingAsync(GenerateListingRequestDto request, string ownerId);
+//        Task<GeneratedListingResponseDto> GenerateListingAsync(GenerateListingRequestDto request, string ownerId);
 
 
 
-    }
-}
+//    }
+//}

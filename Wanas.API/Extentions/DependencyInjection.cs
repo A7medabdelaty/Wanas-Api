@@ -122,7 +122,8 @@ namespace Wanas.API.Extentions
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IAuditLogService, AuditLogService>();
             services.AddScoped<IListingSearchService, ListingSearchService>();
-            services.AddScoped<IGenerateListingService, GenerateListingService>();
+            services.AddScoped<IListingDescriptionService, ListingDescriptionService>();
+            //services.AddScoped<IGenerateListingService, GenerateListingService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IListingModerationService, ListingModerationService>();
