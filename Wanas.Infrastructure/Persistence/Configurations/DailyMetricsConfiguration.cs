@@ -10,7 +10,6 @@ namespace Wanas.Infrastructure.Persistence.Configurations
         {
             builder.ToTable("DailyMetrics");
 
-            builder.HasKey(x => x.Date);
             builder.Property(x => x.Date).HasColumnType("date");
             builder.Property(x => x.LastCalculatedAt).HasColumnType("datetime2");
 
