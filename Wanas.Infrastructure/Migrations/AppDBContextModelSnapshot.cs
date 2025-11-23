@@ -634,8 +634,11 @@ namespace Wanas.Infrastructure.Migrations
 
             modelBuilder.Entity("Wanas.Domain.Entities.DailyMetrics", b =>
                 {
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ActiveUsers")
                         .ValueGeneratedOnAdd()
@@ -646,6 +649,9 @@ namespace Wanas.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
 
                     b.Property<int>("FlaggedListings")
                         .ValueGeneratedOnAdd()
@@ -680,7 +686,7 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.HasKey("Date");
+                    b.HasKey("Id");
 
                     b.HasIndex("ActiveUsers");
 

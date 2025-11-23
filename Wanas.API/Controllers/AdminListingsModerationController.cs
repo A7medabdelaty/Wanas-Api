@@ -1,8 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
+using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
 
 namespace Wanas.API.Controllers
@@ -46,16 +47,29 @@ namespace Wanas.API.Controllers
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
             var ok = await _moderationService.FlagAsync(id, adminId, req.Reason);
             if (!ok) return NotFound(new { message = "Listing not found" });
-            return Ok(new { message = "Listing flagged", listingId = id });
+            return Ok(new { message = "Listing Flag Changed", listingId = id });
         }
-        public class UnflagRequest { public string? Note { get; set; } }
-        [HttpPost("{id}/unflag")]
-        public async Task<IActionResult> Unflag(int id, [FromBody] UnflagRequest req)
-        {
-            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var ok = await _moderationService.UnflagAsync(id, adminId, req.Note);
-            if (!ok) return NotFound(new { message = "Listing not found" });
-            return Ok(new { message = "Listing unflagged", listingId = id });
-        }
+
+        #region previous flagging method
+
+        //public class FlagRequest { public string Reason { get; set; } = string.Empty; }
+        //[HttpPost("{id}/flag")]
+        //public async Task<IActionResult> Flag(int id, [FromBody] FlagRequest req)
+        //{
+        //    var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        //    var ok = await _moderationService.FlagAsync(id, adminId, req.Reason);
+        //    if (!ok) return NotFound(new { message = "Listing not found" });
+        //    return Ok(new { message = "Listing flagged", listingId = id });
+        //}
+        //public class UnflagRequest { public string? Note { get; set; } }
+        //[HttpPost("{id}/unflag")]
+        //public async Task<IActionResult> Unflag(int id, [FromBody] UnflagRequest req)
+        //{
+        //    var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+        //    var ok = await _moderationService.UnflagAsync(id, adminId, req.Note);
+        //    if (!ok) return NotFound(new { message = "Listing not found" });
+        //    return Ok(new { message = "Listing unflagged", listingId = id });
+        //}
+        #endregion
     }
 }
