@@ -18,7 +18,7 @@ namespace Wanas.Application.DTOs.AI
 
         public bool HasKitchen { get; set; }
         public bool HasInternet { get; set; }
-        public bool HasAirConditioning { get; set; }
+        public bool HasAirConditioner { get; set; }
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }
 

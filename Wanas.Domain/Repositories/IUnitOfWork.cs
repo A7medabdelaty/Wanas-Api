@@ -21,7 +21,7 @@ namespace Wanas.Domain.Repositories
         ICommissionRepository Commissions { get; }
         IPayoutRepository Payouts { get; }
         IRefundRepository Refunds { get; }
-        Task<int> CommitAsync();
+        //Task<int> CommitAsync();
 
         IReviewRepository Reviews { get; }
         IListingRepository Listings { get; }

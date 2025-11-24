@@ -44,9 +44,7 @@ namespace Wanas.Infrastructure.Repositories
                           IReviewRepository reviews,
                           IListingRepository listings,
                           IListingPhotoRepository listingPhotos,
-                          ICommentRepository comments)
-                          IAuditLogRepository auditLogs,
-                          IAppealRepository appeals,
+                          ICommentRepository comments,
                           ITrafficLogRepository trafficLogs,
                           IDailyMetricsRepository dailyMetrics,
                           IPaymentRepository payments,
