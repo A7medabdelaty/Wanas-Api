@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
+using Wanas.Domain.Repositories.Listings;
 using Wanas.Infrastructure.Persistence;
 
 namespace Wanas.Infrastructure.Repositories
@@ -15,9 +16,10 @@ namespace Wanas.Infrastructure.Repositories
         public IChatParticipantRepository ChatParticipants { get; }
         public IUserRepository Users { get; }
         public IUserPreferenceRepository UserPreferences { get; }
-        public IListingRepository Listings { get; }
         public IAuditLogRepository AuditLogs { get; }
         public IAppealRepository Appeals { get; }
+        public IReviewRepository Reviews { get; }
+        public IListingRepository Listings { get; }
         public IReportRepository Reports { get; }
         public IReportPhotoRepository ReportPhotos { get; }
         public ITrafficLogRepository TrafficLogs { get; }
@@ -26,6 +28,8 @@ namespace Wanas.Infrastructure.Repositories
         public ICommissionRepository Commissions { get; }
         public IPayoutRepository Payouts { get; }
         public IRefundRepository Refunds { get; }
+        public IListingPhotoRepository ListingPhotos { get; }
+        public ICommentRepository Comments { get; }
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -35,7 +39,12 @@ namespace Wanas.Infrastructure.Repositories
                           IReportPhotoRepository reportPhotos,
                           IUserRepository users,
                           IUserPreferenceRepository userPreferences,
+                          IAuditLogRepository auditLogs,
+                          IAppealRepository appeals,
+                          IReviewRepository reviews,
                           IListingRepository listings,
+                          IListingPhotoRepository listingPhotos,
+                          ICommentRepository comments)
                           IAuditLogRepository auditLogs,
                           IAppealRepository appeals,
                           ITrafficLogRepository trafficLogs,
@@ -62,6 +71,12 @@ namespace Wanas.Infrastructure.Repositories
             Commissions = commissions;
             Payouts = payouts;
             Refunds = refunds;
+            Reviews = reviews;
+            Listings = listings;
+            ListingPhotos = listingPhotos;
+            Comments = comments;
+            Listings = listings;
+            ListingPhotos = listingPhotos;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();

@@ -1,15 +1,15 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Wanas.API.Authorization;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
+using Wanas.API.Authorization;
 using Wanas.API.RealTime;
 using Wanas.Application.Handlers.Admin;
 using Wanas.Application.Interfaces;
@@ -18,12 +18,18 @@ using Wanas.Application.Interfaces.Authentication;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
 using Wanas.Application.Validators;
+using Wanas.Application.Validators.Authentication;
+using Wanas.Application.Validators.Listing;
+using Wanas.Application.Validators.Review;
+using Wanas.Application.Validators.User;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
+using Wanas.Domain.Repositories.Listings;
 using Wanas.Infrastructure.AI;
 using Wanas.Infrastructure.Authentication;
 using Wanas.Infrastructure.Persistence;
 using Wanas.Infrastructure.Repositories;
+using Wanas.Infrastructure.Repositories.Listings;
 using Wanas.Infrastructure.Services;
 using Wanas.Infrastructure.Settings;
 
@@ -98,6 +104,10 @@ namespace Wanas.API.Extentions
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IMessageRepository, MessageRepository>();
             services.AddScoped<IChatParticipantRepository, ChatParticipantRepository>();
+            services.AddScoped<IReviewRepository, ReviewRepository>();
+            services.AddScoped<IListingRepository, ListingRepository>();
+            services.AddScoped<IListingPhotoRepository, ListingPhotoRepository>();
+            services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
             services.AddScoped<IReportPhotoRepository, ReportPhotoRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -126,12 +136,17 @@ namespace Wanas.API.Extentions
             //services.AddScoped<IGenerateListingService, GenerateListingService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IListingService, ListingService>();
+            services.AddScoped<ICommentService, CommentService>();
+
             services.AddScoped<IListingModerationService, ListingModerationService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IRevenueService, RevenueService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
+
 
             #region RAG DEPENDENCIES
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
@@ -164,13 +179,52 @@ namespace Wanas.API.Extentions
             services.AddSwaggerGen();
             #endregion
 
+
+
+            // Validators
+            services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdateListingDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<CreateCommentDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdateListingDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<CreateRoomDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdateRoomDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<BedDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<ConfirmEmailRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<ForgetPasswordRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<RefreshTokenRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<ResendConfirmationEmailRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<ResetPasswordRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<CreateReviewDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdateReviewDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<CompletePreferencesRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<CompleteProfileRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdatePreferencesRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<UpdateProfileRequestValidator>();
+            services.AddValidatorsFromAssemblyContaining<BanUserCommandValidator>();
+            // services.AddValidatorsFromAssemblyContaining<CreateReportDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<ReviewAppealCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<SubmitAppealCommandValidator>();
             services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<UnbanUserCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<UnsuspendUserCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<UnverifyUserCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<VerifyUserCommandValidator>();
+
+
+
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SuspendUserCommandHandler>());
+
 
             // AutoMapper
             services.AddAutoMapper(cfg => { cfg.AddProfile<MappingProfile>(); }, typeof(MappingProfile).Assembly);
             services.AddAutoMapper(cfg => { cfg.AddProfile<ReportProfile>(); }, typeof(ReportProfile).Assembly);
             services.AddAutoMapper(cfg => { cfg.AddProfile<ListingProfile>(); }, typeof(ListingProfile).Assembly);
+            services.AddAutoMapper(cfg => { cfg.AddProfile<ReviewProfile>(); }, typeof(ReviewProfile).Assembly);
+            services.AddAutoMapper(cfg => { cfg.AddProfile<CommentProfile>(); }, typeof(CommentProfile).Assembly);
+            services.AddAutoMapper(cfg => { cfg.AddProfile<AIListingMappingProfile>(); }, typeof(AIListingMappingProfile).Assembly);
+
 
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.AddProblemDetails();
