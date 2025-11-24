@@ -1,11 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wanas.Domain.Entities;
-using Wanas.Domain.Repositories;
 using Wanas.Domain.Repositories.Listings;
 using Wanas.Infrastructure.Persistence;
 
@@ -21,7 +15,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
         public async Task<IEnumerable<Comment>> GetCommentsByListingAsync(int listingId)
         {
             return await _context.Comments
-                .Where(c => c.ListingId == listingId && c.DeletedAt == null)
+                .Where(c => c.ListingId == listingId)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
@@ -29,17 +23,18 @@ namespace Wanas.Infrastructure.Repositories.Listings
         public async Task<IEnumerable<Comment>> GetCommentsByUserAsync(string userId)
         {
             return await _context.Comments
-                .Where(c => c.AuthorId == userId && c.DeletedAt == null)
+                .Where(c => c.AuthorId == userId)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Comment>> GetRepliesAsync(int parentCommentId)
+        public async Task<Comment?> GetCommentWithAuthorAndRepliesAsync(int commentId)
         {
             return await _context.Comments
-                .Where(c => c.ParentCommentId == parentCommentId && c.DeletedAt == null)
-                .OrderBy(c => c.CreatedAt)
-                .ToListAsync();
+                .Include(c => c.Author)
+                .Include(c => c.Replies)
+                    .ThenInclude(r => r.Author)
+                .FirstOrDefaultAsync(c => c.Id == commentId);
         }
     }
 }

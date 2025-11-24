@@ -21,10 +21,11 @@ namespace Wanas.Domain.Entities
         public int TotalBathrooms { get; set; }
         public bool HasKitchen { get; set; }
         public bool HasInternet { get; set; }
+        public bool HasAirConditioner { get; set; }
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }
 
-        // HasFridge, HasStove, HasAirConditioner, NoOfAirConditioners, HasFans, NoOfFans, HasWashingMachine
+        // HasFridge, HasStove, NoOfAirConditioners, HasFans, NoOfFans, HasWashingMachine
 
         public ICollection<Room> Rooms { get; set; } = new List<Room>();
         public ICollection<Bed> Beds { get; set; } = new List<Bed>();

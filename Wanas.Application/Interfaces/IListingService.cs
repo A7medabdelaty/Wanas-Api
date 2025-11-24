@@ -5,7 +5,7 @@ namespace Wanas.Application.Interfaces
 { 
     public interface IListingService
     {
-        // Listing CRUD
+        Task<IEnumerable<ListingCardDto>> GetAllListingsAsync();
         Task<ListingDetailsDto> GetListingByIdAsync(int id);
         Task<IEnumerable<ListingDetailsDto>> GetListingsByUserAsync(string userId);
         Task<IEnumerable<ListingDetailsDto>> GetListingsByCityAsync(string city);
@@ -18,12 +18,7 @@ namespace Wanas.Application.Interfaces
 
         // Listing Photos
         Task AddPhotosToListingAsync(int listingId, List<IFormFile> photos);
-        Task<bool> RemovePhotoAsync(int photoId);
-
-        // Comments
-        Task<CommentDto> AddCommentAsync(CreateCommentDto dto, string userId);
-        Task<CommentDto> UpdateCommentAsync(int commentId, UpdateCommentDto dto);
-        Task<bool> DeleteCommentAsync(int commentId);
+        Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId);
     }
 
 }

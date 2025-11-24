@@ -30,30 +30,16 @@ namespace Wanas.Application.Validators.Listing
             RuleFor(x => x.AreaInSqMeters)
                 .GreaterThan(0).WithMessage("Area must be greater than 0 sq meters.");
 
-            RuleFor(x => x.TotalRooms)
-                .GreaterThan(0).WithMessage("Total rooms must be greater than zero.");
-
-            RuleFor(x => x.AvailableRooms)
-                .GreaterThanOrEqualTo(0)
-                .WithMessage("Available rooms cannot be negative.")
-                .LessThanOrEqualTo(x => x.TotalRooms)
-                .WithMessage("Available rooms cannot exceed total rooms.");
-
-            RuleFor(x => x.TotalBeds)
-                .GreaterThan(0).WithMessage("Total beds must be greater than zero.");
-
-            RuleFor(x => x.AvailableBeds)
-                .GreaterThanOrEqualTo(0)
-                .WithMessage("Available beds cannot be negative.")
-                .LessThanOrEqualTo(x => x.TotalBeds)
-                .WithMessage("Available beds cannot exceed total beds.");
-
             RuleFor(x => x.TotalBathrooms)
                 .GreaterThan(0).WithMessage("Total bathrooms must be greater than zero.");
 
             RuleFor(x => x.Photos)
                 .NotNull().WithMessage("At least one photo is required.")
                 .Must(p => p.Count > 0).WithMessage("At least one photo must be uploaded.");
+
+            RuleFor(x => x.HasAirConditioner)
+               .NotNull()
+               .WithMessage("Air Conditioner must be specified.");
 
             RuleForEach(x => x.Photos).ChildRules(photo =>
             {

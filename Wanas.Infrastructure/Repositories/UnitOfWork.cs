@@ -16,20 +16,13 @@ namespace Wanas.Infrastructure.Repositories
         public IChatParticipantRepository ChatParticipants { get; }
         public IUserRepository Users { get; }
         public IUserPreferenceRepository UserPreferences { get; }
-        public IListingRepository Listings { get; }
         public IAuditLogRepository AuditLogs { get; }
         public IAppealRepository Appeals { get; }
         public IReviewRepository Reviews { get; }
-        //public IListingRepository Listings { get; }
-        //public IListingPhotoRepository ListingPhotos { get; }
-        //public ICommentRepository Comments { get; }
-
-
+        public IListingRepository Listings { get; }
         public IReportRepository Reports { get; }
         public IReportPhotoRepository ReportPhotos { get; }
-
         public IListingPhotoRepository ListingPhotos { get; }
-
         public ICommentRepository Comments { get; }
 
         public UnitOfWork(AppDBContext context,
@@ -40,10 +33,12 @@ namespace Wanas.Infrastructure.Repositories
                           IReportPhotoRepository reportPhotos,
                           IUserRepository users,
                           IUserPreferenceRepository userPreferences,
-                          IListingRepository listings,
                           IAuditLogRepository auditLogs,
                           IAppealRepository appeals,
-                          IReviewRepository reviews)
+                          IReviewRepository reviews,
+                          IListingRepository listings,
+                          IListingPhotoRepository listingPhotos,
+                          ICommentRepository comments)
         {
             _context = context;
             Chats = chats;
@@ -57,9 +52,11 @@ namespace Wanas.Infrastructure.Repositories
             Reports = reports;
             ReportPhotos = reportPhotos;
             Reviews = reviews;
-            //Listings = listings;    
-            //ListingPhotos = listingPhotos;
-            //Comments = comments;
+            Listings = listings;
+            ListingPhotos = listingPhotos;
+            Comments = comments;
+            Listings = listings;
+            ListingPhotos = listingPhotos;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();

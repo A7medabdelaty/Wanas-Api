@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -19,16 +20,6 @@ namespace Wanas.Application.Services
             this.mapper = mapper;
             this.fileServ = fileServ;
         }
-        public async Task<CommentDto> AddCommentAsync(CreateCommentDto dto, string userId)
-        {
-            var comment = mapper.Map<Comment>(dto);
-            comment.AuthorId = userId;
-
-            await unit.Comments.AddAsync(comment);
-            await unit.CommitAsync();
-
-            return mapper.Map<CommentDto>(comment);
-        }
 
         public async Task AddPhotosToListingAsync(int listingId, List<IFormFile> photos)
         {
@@ -46,17 +37,57 @@ namespace Wanas.Application.Services
         }
 
         public async Task<ListingDetailsDto> CreateListingAsync(CreateListingDto dto, string userId)
-        {
+        { 
             var listing = mapper.Map<Listing>(dto);
             listing.UserId = userId;
             listing.IsActive = true;
 
-            if (dto.Photos != null && dto.Photos.Count > 0)
+            listing.ApartmentListing = mapper.Map<ApartmentListing>(dto);
+
+            foreach (var roomDto in dto.Rooms)
+            {
+                var room = new Room
+                {
+                    RoomNumber = roomDto.RoomNumber,
+                    BedsCount = roomDto.BedsCount,
+                    AvailableBeds = roomDto.AvailableBeds,
+                    PricePerBed = roomDto.PricePerBed,
+                    IsAvailable = roomDto.AvailableBeds > 0
+                };
+
+                if (roomDto.Beds != null)
+                {
+                    foreach (var bedDto in roomDto.Beds)
+                    {
+                        room.Beds.Add(new Bed
+                        {
+                            IsAvailable = bedDto.IsAvailable
+                        });
+                    }
+                }
+                else
+                {
+                    for (int b = 0; b < roomDto.BedsCount; b++)
+                    {
+                        room.Beds.Add(new Bed { IsAvailable = b < roomDto.AvailableBeds });
+                    }
+                }
+
+                listing.ApartmentListing.Rooms.Add(room);
+            }
+
+            listing.ApartmentListing.TotalRooms = listing.ApartmentListing.Rooms.Count;
+            listing.ApartmentListing.AvailableRooms = listing.ApartmentListing.Rooms.Count(r => r.AvailableBeds > 0);
+            listing.ApartmentListing.TotalBeds = listing.ApartmentListing.Rooms.Sum(r => r.BedsCount);
+            listing.ApartmentListing.AvailableBeds = listing.ApartmentListing.Rooms.Sum(r => r.AvailableBeds);
+
+            if (dto.Photos != null && dto.Photos.Any())
             {
                 listing.ListingPhotos = new HashSet<ListingPhoto>();
+
                 foreach (var file in dto.Photos)
                 {
-                    var url = await fileServ.SaveFileAsync(file);
+                    string url = await fileServ.SaveFileAsync(file);
                     listing.ListingPhotos.Add(new ListingPhoto { URL = url });
                 }
             }
@@ -65,16 +96,6 @@ namespace Wanas.Application.Services
             await unit.CommitAsync();
 
             return mapper.Map<ListingDetailsDto>(listing);
-        }
-
-        public async Task<bool> DeleteCommentAsync(int commentId)
-        {
-            var comment = await unit.Comments.GetByIdAsync(commentId);
-            if (comment == null) return false;
-
-            unit.Comments.Remove(comment);
-            await unit.CommitAsync();
-            return true;
         }
 
         public async Task<bool> DeleteListingAsync(int id)
@@ -91,6 +112,12 @@ namespace Wanas.Application.Services
         {
             var listings = await unit.Listings.GetActiveListingsAsync();
             return mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+        }
+
+        public async Task<IEnumerable<ListingCardDto>> GetAllListingsAsync()
+        {
+            var listings = await unit.Listings.GetAllListingsAsync();
+            return mapper.Map<IEnumerable<ListingCardDto>>(listings);
         }
 
         public async Task<ListingDetailsDto> GetListingByIdAsync(int id)
@@ -113,11 +140,13 @@ namespace Wanas.Application.Services
             return mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
         }
 
-        public async Task<bool> RemovePhotoAsync(int photoId)
+        public async Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId)
         {
             var photo = await unit.ListingPhotos.GetByIdAsync(photoId);
-            if (photo == null) return false;
+            if (photo == null || photo.ListingId != listingId || photo.Listing.UserId != userId)
+                return false;
 
+            await fileServ.DeleteFileAsync(photo.URL);
             unit.ListingPhotos.Remove(photo);
             await unit.CommitAsync();
             return true;
@@ -129,19 +158,6 @@ namespace Wanas.Application.Services
             return mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
         }
 
-        public async Task<CommentDto> UpdateCommentAsync(int commentId, UpdateCommentDto dto)
-        {
-            var comment = await unit.Comments.GetByIdAsync(commentId);
-            if (comment == null) return null;
-
-            mapper.Map(dto, comment);
-
-            unit.Comments.Update(comment);
-            await unit.CommitAsync();
-
-            return mapper.Map<CommentDto>(comment);
-        }
-
         public async Task<ListingDetailsDto> UpdateListingAsync(int id, UpdateListingDto dto)
         {
             var listing = await unit.Listings.GetListingWithDetailsAsync(id);
@@ -150,11 +166,47 @@ namespace Wanas.Application.Services
             mapper.Map(dto, listing);
             mapper.Map(dto, listing.ApartmentListing);
 
-            if (dto.NewPhotos != null && dto.NewPhotos.Count > 0)
+            if (dto.Rooms != null)
+            {
+                foreach (var roomDto in dto.Rooms)
+                {
+                    var room = listing.ApartmentListing.Rooms.FirstOrDefault(r => r.Id == roomDto.Id);
+                    if (room != null)
+                    {
+                        // Update room aggregates
+                        if (roomDto.BedsCount.HasValue)
+                            room.BedsCount = roomDto.BedsCount.Value;
+
+                        if (roomDto.AvailableBeds.HasValue)
+                        {
+                            room.AvailableBeds = roomDto.AvailableBeds.Value;
+
+                            // Update bed availability
+                            for (int i = 0; i < room.Beds.Count; i++)
+                            {
+                                room.Beds.ElementAt(i).IsAvailable = i < room.AvailableBeds;
+                            }
+                        }
+
+                        if (roomDto.PricePerBed.HasValue)
+                            room.PricePerBed = roomDto.PricePerBed.Value;
+
+                        // Update room availability
+                        room.IsAvailable = room.AvailableBeds > 0;
+                    }
+                }
+            }
+
+            listing.ApartmentListing.TotalRooms = listing.ApartmentListing.Rooms.Count;
+            listing.ApartmentListing.AvailableRooms = listing.ApartmentListing.Rooms.Count(r => r.AvailableBeds > 0);
+            listing.ApartmentListing.TotalBeds = listing.ApartmentListing.Rooms.Sum(r => r.BedsCount);
+            listing.ApartmentListing.AvailableBeds = listing.ApartmentListing.Rooms.Sum(r => r.AvailableBeds);
+
+            if (dto.NewPhotos != null && dto.NewPhotos.Any())
             {
                 foreach (var file in dto.NewPhotos)
                 {
-                    var url = await fileServ.SaveFileAsync(file);
+                    string url = await fileServ.SaveFileAsync(file);
                     listing.ListingPhotos.Add(new ListingPhoto { URL = url });
                 }
             }
@@ -164,5 +216,6 @@ namespace Wanas.Application.Services
 
             return mapper.Map<ListingDetailsDto>(listing);
         }
+
     }
 }

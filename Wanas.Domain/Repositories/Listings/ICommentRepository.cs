@@ -5,7 +5,7 @@ namespace Wanas.Domain.Repositories.Listings
     public interface ICommentRepository : IGenericRepository<Comment>
     {
         Task<IEnumerable<Comment>> GetCommentsByListingAsync(int listingId);
-        Task<IEnumerable<Comment>> GetRepliesAsync(int parentCommentId);
         Task<IEnumerable<Comment>> GetCommentsByUserAsync(string userId);
+        Task<Comment?> GetCommentWithAuthorAndRepliesAsync(int id);
     }
 }

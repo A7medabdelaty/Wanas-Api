@@ -15,17 +15,21 @@ namespace Wanas.Application.DTOs.Listing
         public string Floor { get; set; }
         public int AreaInSqMeters { get; set; }
 
-        public int TotalRooms { get; set; }
-        public int AvailableRooms { get; set; }
-        public int TotalBeds { get; set; }
-        public int AvailableBeds { get; set; }
+        //public int TotalRooms { get; set; }
+        //public int AvailableRooms { get; set; }
+        //public int TotalBeds { get; set; }
+        //public int AvailableBeds { get; set; }
         public int TotalBathrooms { get; set; }
 
         public bool HasKitchen { get; set; }
         public bool HasInternet { get; set; }
+        public bool HasAirConditioner { get; set; }
 
-        // Optional new photos
-        public List<IFormFile> NewPhotos { get; set; }
+        public bool IsPetFriendly { get; set; }
+        public bool IsSmokingAllowed { get; set; }
+
+        public List<UpdateRoomDto>? Rooms { get; set; } 
+        public List<IFormFile>? NewPhotos { get; set; }
     }
 
 }

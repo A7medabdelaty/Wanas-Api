@@ -55,6 +55,18 @@ namespace Wanas.Infrastructure.Repositories.Listings
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Listing>> GetAllListingsAsync()
+        {
+            return await _context.Listings
+                .Include(l => l.ListingPhotos)
+                .Include(l => l.UserId)
+                .Include(l => l.ApartmentListing)
+                   .ThenInclude(al => al.Rooms)
+                       .ThenInclude(r => r.Beds)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
         public IQueryable<Listing> GetQueryableWithIncludes()
         {
             return _context.Listings

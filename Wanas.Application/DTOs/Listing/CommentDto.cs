@@ -8,6 +8,6 @@ namespace Wanas.Application.DTOs.Listing
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public List<CommentDto> Replies { get; set; }
+        public List<CommentDto> Replies { get; set; } = new List<CommentDto>();
     }
 }
