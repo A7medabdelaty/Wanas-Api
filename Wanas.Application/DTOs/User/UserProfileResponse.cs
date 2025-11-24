@@ -11,7 +11,7 @@ public record UserProfileResponse(
     string? PhoneNumber,
     string? Bio,
     string? Photo,
-    bool IsFirstLogin,
+    bool? IsFirstLogin,
     bool IsProfileCompleted,
     bool IsPreferenceCompleted
 );

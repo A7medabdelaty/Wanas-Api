@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wanas.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class intialCreation : Migration
+    public partial class Intialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,7 +50,7 @@ namespace Wanas.Infrastructure.Migrations
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     IsProfileCompleted = table.Column<bool>(type: "bit", nullable: false),
                     IsPreferenceCompleted = table.Column<bool>(type: "bit", nullable: false),
-                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: false),
+                    IsFirstLogin = table.Column<bool>(type: "bit", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -825,7 +825,7 @@ namespace Wanas.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "Age", "Bio", "City", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "FullName", "IsBanned", "IsDeleted", "IsFirstLogin", "IsPreferenceCompleted", "IsProfileCompleted", "IsSuspended", "IsVerified", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "Photo", "ProfileType", "SecurityStamp", "SuspendedUntil", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "808cfe62-dd5b-4c25-837d-3df87add03cb", 0, 30, "System Administrator", "Cairo", "d7b60902-76de-41cd-b394-4bcb7ad058e3", new DateTime(2025, 11, 15, 0, 0, 0, 0, DateTimeKind.Utc), "admin@wanas.com", true, "Wanas Admin", false, false, true, false, false, false, false, false, null, "ADMIN@WANAS.COM", "ADMIN@WANAS.COM", "AQAAAAIAAYagAAAAELa2X0xFqZjvpTNRlgpsUPiLoNS8BFTI6VQSb4aUwPk2Wk3UMJ90QYH832zEDknnkA==", "01234567890", false, "", "Admin", "71ac7750-1375-4d94-9b71-cfd70509373f", null, false, "admin@wanas.com" });
+                values: new object[] { "808cfe62-dd5b-4c25-837d-3df87add03cb", 0, 30, "System Administrator", "Cairo", "d7b60902-76de-41cd-b394-4bcb7ad058e3", new DateTime(2025, 11, 15, 0, 0, 0, 0, DateTimeKind.Utc), "admin@wanas.com", true, "Wanas Admin", false, false, null, false, false, false, false, false, null, "ADMIN@WANAS.COM", "ADMIN@WANAS.COM", "AQAAAAIAAYagAAAAELa2X0xFqZjvpTNRlgpsUPiLoNS8BFTI6VQSb4aUwPk2Wk3UMJ90QYH832zEDknnkA==", "01234567890", false, "", "Admin", "71ac7750-1375-4d94-9b71-cfd70509373f", null, false, "admin@wanas.com" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",

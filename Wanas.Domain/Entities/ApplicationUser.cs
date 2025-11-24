@@ -29,7 +29,7 @@ namespace Wanas.Domain.Entities
         // Completion Flags
         public bool IsProfileCompleted { get; set; } = false;
         public bool IsPreferenceCompleted { get; set; } = false;
-        public bool IsFirstLogin { get; set; } = true;
+        public bool? IsFirstLogin { get; set; } 
 
         // Navigation Properties
         public virtual UserPreference? UserPreference { get; set; }

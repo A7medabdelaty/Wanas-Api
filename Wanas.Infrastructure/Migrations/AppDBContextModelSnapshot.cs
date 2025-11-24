@@ -340,7 +340,7 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsFirstLogin")
+                    b.Property<bool?>("IsFirstLogin")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPreferenceCompleted")
@@ -427,7 +427,6 @@ namespace Wanas.Infrastructure.Migrations
                             FullName = "Wanas Admin",
                             IsBanned = false,
                             IsDeleted = false,
-                            IsFirstLogin = true,
                             IsPreferenceCompleted = false,
                             IsProfileCompleted = false,
                             IsSuspended = false,

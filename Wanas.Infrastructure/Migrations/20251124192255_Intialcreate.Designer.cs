@@ -12,8 +12,8 @@ using Wanas.Infrastructure.Persistence;
 namespace Wanas.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20251123141331_intialCreation")]
-    partial class intialCreation
+    [Migration("20251124192255_Intialcreate")]
+    partial class Intialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -343,7 +343,7 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsFirstLogin")
+                    b.Property<bool?>("IsFirstLogin")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPreferenceCompleted")
@@ -430,7 +430,6 @@ namespace Wanas.Infrastructure.Migrations
                             FullName = "Wanas Admin",
                             IsBanned = false,
                             IsDeleted = false,
-                            IsFirstLogin = true,
                             IsPreferenceCompleted = false,
                             IsProfileCompleted = false,
                             IsSuspended = false,

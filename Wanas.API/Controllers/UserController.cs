@@ -37,20 +37,20 @@ public class UserController(
     }
 
     //  Skip Profile
-    [HttpPost("skip-profile")]
-    public async Task<IActionResult> SkipProfile(CancellationToken cancellationToken)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    //[HttpPost("skip-profile")]
+    //public async Task<IActionResult> SkipProfile(CancellationToken cancellationToken)
+    //{
+    //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+    //    if (string.IsNullOrEmpty(userId))
+    //        return Unauthorized();
 
-        _logger.LogInformation("User {UserId} skipping profile completion", userId);
+    //    _logger.LogInformation("User {UserId} skipping profile completion", userId);
 
-        var result = await _userService.SkipProfileCompletionAsync(userId, cancellationToken);
+    //    var result = await _userService.SkipProfileCompletionAsync(userId, cancellationToken);
 
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-    }
+    //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    //}
 
     // 3️⃣ Get Profile
     [HttpGet("profile")]
@@ -110,20 +110,20 @@ public class UserController(
     
     // Skip Preferences Completion
    
-    [HttpPost("skip-preferences")]
-    public async Task<IActionResult> SkipPreferences(CancellationToken cancellationToken)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    //[HttpPost("skip-preferences")]
+    //public async Task<IActionResult> SkipPreferences(CancellationToken cancellationToken)
+    //{
+    //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (string.IsNullOrEmpty(userId))
-            return Unauthorized();
+    //    if (string.IsNullOrEmpty(userId))
+    //        return Unauthorized();
 
-        _logger.LogInformation("User {UserId} skipping preferences completion", userId);
+    //    _logger.LogInformation("User {UserId} skipping preferences completion", userId);
 
-        var result = await _userService.SkipPreferencesCompletionAsync(userId, cancellationToken);
+    //    var result = await _userService.SkipPreferencesCompletionAsync(userId, cancellationToken);
 
-        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-    }
+    //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    //}
 
    
     // Get User Preferences
