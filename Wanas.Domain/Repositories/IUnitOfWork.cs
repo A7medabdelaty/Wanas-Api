@@ -1,13 +1,15 @@
-﻿namespace Wanas.Domain.Repositories
+﻿using Wanas.Domain.Repositories.Listings;
+
+namespace Wanas.Domain.Repositories
 {
     public interface IUnitOfWork : IDisposable
     {
+        Task<int> CommitAsync();
         IChatRepository Chats { get; }
         IMessageRepository Messages { get; }
         IChatParticipantRepository ChatParticipants { get; }
         IUserRepository Users { get; }
         IUserPreferenceRepository UserPreferences { get; }
-        IListingRepository Listings { get; }
         IAuditLogRepository AuditLogs { get; }
         IAppealRepository Appeals { get; }
         IReportPhotoRepository ReportPhotos { get; }
@@ -19,6 +21,11 @@
         ICommissionRepository Commissions { get; }
         IPayoutRepository Payouts { get; }
         IRefundRepository Refunds { get; }
-        Task<int> CommitAsync();
+        //Task<int> CommitAsync();
+
+        IReviewRepository Reviews { get; }
+        IListingRepository Listings { get; }
+        IListingPhotoRepository ListingPhotos { get; }
+        ICommentRepository Comments { get; }
     }
 }

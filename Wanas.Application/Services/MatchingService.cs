@@ -33,7 +33,7 @@ namespace Wanas.Application.Services
 
             var listings = await _unitOfWork.Listings.GetActiveListingsAsync();
 
-            var results = CalculateMatches(userId, preferences, listings);
+            var results = CalculateMatches(userId, preferences, listings.ToList());
 
             return results
                 .OrderByDescending(r => r.Score)

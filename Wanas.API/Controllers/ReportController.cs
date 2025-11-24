@@ -18,8 +18,8 @@ namespace Wanas.API.Controllers
             _reportService = reportService;
 
         }
+        //[Authorize]
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> SubmitReport([FromBody] CreateReportDto dto)
         {
             //Jwt thing
