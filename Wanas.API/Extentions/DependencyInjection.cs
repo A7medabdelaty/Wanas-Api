@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using dotenv.net;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Mapster;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
@@ -234,6 +237,19 @@ namespace Wanas.API.Extentions
 
             services.AddMapsterConfig();
             services.AddFluentValidationConfig();
+
+            // Cloudinary Init
+            DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+
+            services.AddSingleton(sp =>
+            {
+                var cloudinaryUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL");
+
+                var cloudinary = new Cloudinary(cloudinaryUrl);
+                cloudinary.Api.Secure = true;
+
+                return cloudinary;
+            });
 
             return services;
         }

@@ -11,11 +11,13 @@ using Wanas.Domain.Errors;
 namespace Wanas.Application.Services;
 public class UserService(
     UserManager<ApplicationUser> userManager,
-    ILogger<UserService> logger
+    IFileService fileService,
+ILogger<UserService> logger
 ) : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ILogger<UserService> _logger = logger;
+    private readonly IFileService _fileService = fileService;
 
     //  COMPLETE PROFILE
     public async Task<Result<UserProfileResponse>> CompleteProfileAsync(
@@ -28,15 +30,19 @@ public class UserService(
         if (user is null || user.IsDeleted)
             return Result.Failure<UserProfileResponse>(UserErrors.UserNotFound);
 
+        string? photoUrl = null;
+
+        if (request.PhotoFile is not null)
+        {
+            photoUrl = await _fileService.UploadImageAsync(request.PhotoFile);
+        }
         // Update with required fields
         user.Age = request.Age;
-        user.PhoneNumber = request.PhoneNumber;
         user.Bio = request.Bio;
-        user.Photo = request.Photo;
+        user.Photo = photoUrl;
 
         // Mark as completed
         user.IsProfileCompleted = true;
-        user.IsFirstLogin = false;
 
         var result = await _userManager.UpdateAsync(user);
 
@@ -67,51 +73,6 @@ public class UserService(
 
         return Result.Success(response);
     }
-
-    //  SKIP PROFILE
-    //public async Task<Result<UserProfileResponse>> SkipProfileCompletionAsync(
-    //    string userId,
-    //    CancellationToken cancellationToken = default)
-    //{
-    //    var user = await _userManager.FindByIdAsync(userId);
-
-    //    if (user is null || user.IsDeleted)
-    //        return Result.Failure<UserProfileResponse>(UserErrors.UserNotFound);
-
-        
-    //    user.IsFirstLogin = false;
-       
-
-    //    var result = await _userManager.UpdateAsync(user);
-
-    //    if (!result.Succeeded)
-    //    {
-    //        var error = result.Errors.First();
-    //        return Result.Failure<UserProfileResponse>(
-    //            new Error(error.Code, error.Description, StatusCodes.Status400BadRequest)
-    //        );
-    //    }
-
-    //    _logger.LogInformation("User {UserId} skipped profile completion", userId);
-
-
-    //    var response = new UserProfileResponse(
-    //        user.Id,
-    //        user.Email!,
-    //        user.FullName,
-    //        user.ProfileType,
-    //        user.Age,
-    //        user.City,
-    //        user.PhoneNumber,
-    //        user.Bio,
-    //        user.Photo,
-    //        user.IsFirstLogin,
-    //        user.IsProfileCompleted,
-    //        user.IsPreferenceCompleted
-    //    );
-
-    //    return Result.Success(response);
-    //}
 
     //  GET PROFILE
     public async Task<Result<UserProfileResponse>> GetUserProfileAsync(
@@ -286,52 +247,7 @@ public class UserService(
 
         return Result.Success(response);
     }
-    // SKIP PREFERENCES
-    // -----------------------------------------
-    //public async Task<Result<UserProfileResponse>> SkipPreferencesCompletionAsync(
-    //    string userId,
-    //    CancellationToken cancellationToken = default)
-    //{
-    //    var user = await _userManager.FindByIdAsync(userId);
 
-    //    if (user is null || user.IsDeleted)
-    //        return Result.Failure<UserProfileResponse>(UserErrors.UserNotFound);
-
-    //    // Mark first login as done
-    //    user.IsFirstLogin = false;
-    //    // IsPreferenceCompleted remains false
-
-    //    var result = await _userManager.UpdateAsync(user);
-
-    //    if (!result.Succeeded)
-    //    {
-    //        var error = result.Errors.First();
-    //        return Result.Failure<UserProfileResponse>(
-    //            new Error(error.Code, error.Description, StatusCodes.Status400BadRequest)
-    //        );
-    //    }
-
-    //    _logger.LogInformation("User {UserId} skipped preferences completion", userId);
-
-    //    // Return updated profile with flags
-        
-    //    var response = new UserProfileResponse(
-    //        user.Id,
-    //        user.Email!,
-    //        user.FullName,
-    //        user.ProfileType,
-    //        user.Age,
-    //        user.City,
-    //        user.PhoneNumber,
-    //        user.Bio,
-    //        user.Photo,
-    //        user.IsFirstLogin,
-    //        user.IsProfileCompleted,
-    //        user.IsPreferenceCompleted
-    //    );
-
-    //    return Result.Success(response);
-    //}
     // GET PREFERENCES
     // -----------------------------------------
     public async Task<Result<UserPreferencesResponse>> GetUserPreferencesAsync(

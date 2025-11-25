@@ -9,7 +9,7 @@ using Wanas.Application.Interfaces;
 namespace Wanas.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
+//[Authorize]
 public class UserController(
     IUserService userService,
     ILogger<UserController> logger) : ControllerBase
@@ -17,13 +17,14 @@ public class UserController(
     private readonly IUserService _userService = userService;
     private readonly ILogger<UserController> _logger = logger;
 
-    //  Complete Profile
+    // Complete Profile
     [HttpPost("complete-profile")]
     public async Task<IActionResult> CompleteProfile(
-        [FromBody] CompleteProfileRequest request,
+        [FromForm] CompleteProfileRequest request,
         CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = "808cfe62-dd5b-4c25-837d-3df87add03cb";
 
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
@@ -32,27 +33,10 @@ public class UserController(
 
         var result = await _userService.CompleteProfileAsync(userId, request, cancellationToken);
 
-
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
-    //  Skip Profile
-    //[HttpPost("skip-profile")]
-    //public async Task<IActionResult> SkipProfile(CancellationToken cancellationToken)
-    //{
-    //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-    //    if (string.IsNullOrEmpty(userId))
-    //        return Unauthorized();
-
-    //    _logger.LogInformation("User {UserId} skipping profile completion", userId);
-
-    //    var result = await _userService.SkipProfileCompletionAsync(userId, cancellationToken);
-
-    //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-    //}
-
-    // 3️⃣ Get Profile
+    // Get Profile
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
     {
@@ -66,7 +50,7 @@ public class UserController(
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
-    // 4️⃣ Update Profile
+    // Update Profile
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile(
         [FromBody] UpdateProfileRequest request,
