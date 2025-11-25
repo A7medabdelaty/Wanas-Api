@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
@@ -136,14 +135,12 @@ namespace Wanas.API.Extentions
             services.AddScoped<IAuditLogService, AuditLogService>();
             services.AddScoped<IListingSearchService, ListingSearchService>();
             services.AddScoped<IListingDescriptionService, ListingDescriptionService>();
-            //services.AddScoped<IGenerateListingService, GenerateListingService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IListingService, ListingService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IFileService, FileService>();
-
 
             services.AddScoped<IListingModerationService, ListingModerationService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
@@ -152,39 +149,29 @@ namespace Wanas.API.Extentions
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
 
-
-            #region RAG DEPENDENCIES
+            // RAG dependencies
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
             services.AddHttpClient<IChromaService, ChromaService>();
             services.AddHttpClient<IAIProvider, OpenAIProvider>();
-            //services.AddHttpClient<IAIProvider, GroqProvider>();
             services.AddScoped<IChatbotService, ChatbotService>();
 
             services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
             services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
             services.AddScoped<IChromaService, ChromaService>();
             services.AddScoped<MatchingService>();
-            #endregion
 
-            #region MATCHING SERVICE SELECTION
+            // matching service
             services.AddScoped<IMatchingService, StaticTestMatchingService>();
-            #endregion
-
-            #region Authorization
+            // auth service
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("VerifiedUser", policy =>
                 policy.Requirements.Add(new VerifiedUserRequirement()));
             });
             services.AddScoped<IAuthorizationHandler, VerifiedUserHandler>();
-            #endregion
-
-            #region Swagger
+            // swagger
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
-            #endregion
-
-
 
             // Validators
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
@@ -208,7 +195,6 @@ namespace Wanas.API.Extentions
             services.AddValidatorsFromAssemblyContaining<UpdatePreferencesRequestValidator>();
             services.AddValidatorsFromAssemblyContaining<UpdateProfileRequestValidator>();
             services.AddValidatorsFromAssemblyContaining<BanUserCommandValidator>();
-            // services.AddValidatorsFromAssemblyContaining<CreateReportDtoValidator>();
             services.AddValidatorsFromAssemblyContaining<ReviewAppealCommandValidator>();
             services.AddValidatorsFromAssemblyContaining<SubmitAppealCommandValidator>();
             services.AddValidatorsFromAssemblyContaining<SuspendUserCommandValidator>();
@@ -217,10 +203,7 @@ namespace Wanas.API.Extentions
             services.AddValidatorsFromAssemblyContaining<UnverifyUserCommandValidator>();
             services.AddValidatorsFromAssemblyContaining<VerifyUserCommandValidator>();
 
-
-
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SuspendUserCommandHandler>());
-
 
             // AutoMapper
             services.AddAutoMapper(cfg => { cfg.AddProfile<MappingProfile>(); }, typeof(MappingProfile).Assembly);
@@ -230,7 +213,6 @@ namespace Wanas.API.Extentions
             services.AddAutoMapper(cfg => { cfg.AddProfile<CommentProfile>(); }, typeof(CommentProfile).Assembly);
             services.AddAutoMapper(cfg => { cfg.AddProfile<AIListingMappingProfile>(); }, typeof(AIListingMappingProfile).Assembly);
 
-
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.AddProblemDetails();
             services.AddHttpContextAccessor();
@@ -238,9 +220,10 @@ namespace Wanas.API.Extentions
             services.AddMapsterConfig();
             services.AddFluentValidationConfig();
 
-            // Cloudinary Init
+            // .env configurations
             DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
 
+            // Cloudinary Init
             services.AddSingleton(sp =>
             {
                 var cloudinaryUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL");
