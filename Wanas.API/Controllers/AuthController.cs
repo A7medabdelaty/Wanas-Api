@@ -1,12 +1,11 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Wanas.API.Extentions;
 using Wanas.Application.DTOs.Authentication;
 using Wanas.Application.Interfaces;
 
 namespace Wanas.API.Controllers;
 
-[Route("[controller]")]
+[Route("api/[controller]")]
 [ApiController]
 public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {

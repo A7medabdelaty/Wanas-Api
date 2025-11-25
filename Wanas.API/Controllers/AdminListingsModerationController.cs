@@ -1,9 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
-using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
 
 namespace Wanas.API.Controllers

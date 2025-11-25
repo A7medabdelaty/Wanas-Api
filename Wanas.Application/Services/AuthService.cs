@@ -61,8 +61,15 @@ public class AuthService(
             Token = refreshToken,
             ExpiresOn = refreshExpires
         });
-
-        await _userManager.UpdateAsync(user);
+        if(user.IsFirstLogin is null)
+        {
+            user.IsFirstLogin = true;
+        }
+        else
+        {
+            user.IsFirstLogin = false;
+        }
+            await _userManager.UpdateAsync(user);
 
         return Result.Success(new AuthResponse(
             user.Id,

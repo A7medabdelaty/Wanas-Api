@@ -1,11 +1,8 @@
-
-
-using Wanas.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace Wanas.Application.DTOs.User;
 public record CompleteProfileRequest(
     int Age,
-    string PhoneNumber,
-    string? Bio = null,
-    string? Photo = null
+    string Bio,
+    IFormFile? PhotoFile
 );

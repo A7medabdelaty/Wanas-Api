@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.Commands.Admin;
-using Wanas.Application.Common;
 using Wanas.Application.Queries.Admin;
 using Wanas.Domain.Enums;
 
