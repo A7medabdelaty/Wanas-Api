@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Wanas.API.Extentions;
@@ -9,7 +8,7 @@ using Wanas.Application.Interfaces;
 namespace Wanas.API.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-//[Authorize]
+[Authorize]
 public class UserController(
     IUserService userService,
     ILogger<UserController> logger) : ControllerBase
@@ -23,8 +22,7 @@ public class UserController(
         [FromForm] CompleteProfileRequest request,
         CancellationToken cancellationToken)
     {
-        //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var userId = "808cfe62-dd5b-4c25-837d-3df87add03cb";
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
@@ -90,25 +88,6 @@ public class UserController(
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
-
-    
-    // Skip Preferences Completion
-   
-    //[HttpPost("skip-preferences")]
-    //public async Task<IActionResult> SkipPreferences(CancellationToken cancellationToken)
-    //{
-    //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-    //    if (string.IsNullOrEmpty(userId))
-    //        return Unauthorized();
-
-    //    _logger.LogInformation("User {UserId} skipping preferences completion", userId);
-
-    //    var result = await _userService.SkipPreferencesCompletionAsync(userId, cancellationToken);
-
-    //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-    //}
-
    
     // Get User Preferences
     
