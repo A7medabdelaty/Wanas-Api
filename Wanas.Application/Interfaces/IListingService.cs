@@ -11,7 +11,6 @@ namespace Wanas.Application.Interfaces
         Task<IEnumerable<ListingDetailsDto>> GetListingsByCityAsync(string city);
         Task<IEnumerable<ListingDetailsDto>> GetActiveListingsAsync();
         Task<IEnumerable<ListingDetailsDto>> SearchListingsByTitleAsync(string keyword);
-
         Task<ListingDetailsDto> CreateListingAsync(CreateListingDto dto, string userId);
         Task<ListingDetailsDto> UpdateListingAsync(int id, UpdateListingDto dto);
         Task<bool> DeleteListingAsync(int id);
