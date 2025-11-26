@@ -1,4 +1,5 @@
 using AutoMapper;
+using Newtonsoft.Json.Linq;
 using Wanas.Application.DTOs.Message;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -53,13 +54,18 @@ namespace Wanas.Application.Services
             return dto;
         }
 
-        public async Task<bool> DeleteMessageAsync(int messageId)
+        public async Task<bool> DeleteMessageAsync(int messageId,string userId)
         {
             var msg = await _uow.Messages.GetByIdAsync(messageId);
             if (msg == null)
                 return false;
 
+            // Only sender can delete
+            if (msg.SenderId != userId)
+                return false;
+
             var chatId = msg.ChatId;
+
             _uow.Messages.Remove(msg);
             await _uow.CommitAsync();
 
@@ -67,20 +73,24 @@ namespace Wanas.Application.Services
             return true;
         }
 
-        public async Task<bool> EditMessageAsync(int messageId, string newContent)
+        public async Task<bool> EditMessageAsync(int messageId, string newContent, string userId)
         {
             var msg = await _uow.Messages.GetByIdAsync(messageId);
             if (msg == null)
                 return false;
 
+            // Only sender can edit their own messages
+            if (msg.SenderId != userId)
+                return false;
+
             msg.TextContent = newContent;
             msg.IsEdited = true;
+
             _uow.Messages.Update(msg);
             await _uow.CommitAsync();
 
-            // Optionally broadcast the edited message
             var dto = _mapper.Map<MessageDto>(msg);
-            await _notifier.NotifyMessageReceivedAsync(dto); // reuse receive for updates
+
             return true;
         }
 

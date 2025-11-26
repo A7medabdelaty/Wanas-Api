@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Wanas.API.Responses;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
 
@@ -7,7 +9,7 @@ namespace Wanas.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "VerifiedUser")] // Only verified users can access chats
+    [Authorize]
     public class ChatsController : ControllerBase
     {
         private readonly IChatService _chatService;
@@ -17,23 +19,29 @@ namespace Wanas.API.Controllers
             _chatService = chatService;
         }
 
+        private string GetUserId() => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         // Get all chats for a specific user
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetUserChats(string userId)
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUserChats()
         {
+            var userId = GetUserId();
             var chats = await _chatService.GetUserChatsAsync(userId);
-            return Ok(chats);
+            return Ok(new ApiResponse(chats));
         }
 
         // Get full chat details with messages
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetChatDetails(int id)
+        [HttpGet("{chatId:int}")]
+        public async Task<IActionResult> GetChatDetails(int chatId)
         {
-            var chat = await _chatService.GetChatDetailsAsync(id);
-            if (chat == null)
-                return NotFound("Chat not found.");
+            if (chatId <= 0)
+                return BadRequest(new ApiError("InvalidChatId"));
 
-            return Ok(chat);
+            var chat = await _chatService.GetChatDetailsAsync(chatId);
+            if (chat == null)
+                return NotFound(new ApiError("ChatNotFound"));
+
+            return Ok(new ApiResponse(chat));
         }
 
         // Create a new chat
@@ -44,11 +52,11 @@ namespace Wanas.API.Controllers
                 return BadRequest(ModelState);
 
             var chat = await _chatService.CreateChatAsync(request);
-            return CreatedAtAction(nameof(GetChatDetails), new { id = chat.Id }, chat);
+            return CreatedAtAction(nameof(GetChatDetails), new { id = chat.Id }, new ApiResponse(chat));
         }
 
         // Update chat (rename or toggle group)
-        [HttpPut("{chatId}")]
+        [HttpPut("{chatId:int}")]
         public async Task<IActionResult> UpdateChat(int chatId, [FromBody] UpdateChatRequestDto request)
         {
             var chat = await _chatService.UpdateChatAsync(chatId, request);
@@ -59,7 +67,7 @@ namespace Wanas.API.Controllers
         }
 
         // Delete chat
-        [HttpDelete("{chatId}")]
+        [HttpDelete("{chatId:int}")]
         public async Task<IActionResult> DeleteChat(int chatId)
         {
             var success = await _chatService.DeleteChatAsync(chatId);
@@ -69,65 +77,76 @@ namespace Wanas.API.Controllers
         }
 
         // Add participant
-        [HttpPost("{chatId}/participants")]
+        [HttpPost("{chatId:int}/participants")]
         public async Task<IActionResult> AddParticipant(int chatId, [FromBody] AddParticipantRequestDto request)
         {
+            if (chatId <= 0)
+                return BadRequest(new ApiError("InvalidChatId"));
+
             request.ChatId = chatId;
+
             var result = await _chatService.AddParticipantAsync(request);
-
             if (!result)
-                return BadRequest("User already in chat or chat not found.");
+                return BadRequest(new ApiError("ParticipantAddFailed", "User already in chat or chat not found"));
 
-            return Ok("Participant added successfully.");
+            return Ok(ApiResponse.Ok(null, "Participant added successfully"));
         }
 
         // Remove participant
-        [HttpDelete("{chatId}/participants/{userId}")]
+        [HttpDelete("{chatId:int}/participants/{userId}")]
         public async Task<IActionResult> RemoveParticipant(int chatId, string userId)
         {
             var result = await _chatService.RemoveParticipantAsync(chatId, userId);
             if (!result)
-                return NotFound("Participant not found or already removed.");
+                return NotFound(new ApiError("ParticipantNotFound"));
 
-            return Ok("Participant removed successfully.");
+            return Ok(ApiResponse.Ok(null, "Participant removed successfully"));
         }
 
         // Leave chat (for user)
-        [HttpDelete("{chatId}/leave/{userId}")]
-        public async Task<IActionResult> LeaveChat(int chatId, string userId)
+        [HttpDelete("{chatId:int}/leave")]
+        public async Task<IActionResult> LeaveChat(int chatId)
         {
+            var userId = GetUserId();
+
             var result = await _chatService.LeaveChatAsync(chatId, userId);
             if (!result)
-                return NotFound("User not found in chat.");
+                return NotFound(new ApiError("UserNotInChat"));
 
-            return Ok("Left chat successfully.");
+            return Ok(ApiResponse.Ok(null, "Successfully left the chat"));
         }
 
         // Mark all messages in chat as read
-        [HttpPost("{chatId}/mark-read/{userId}")]
-        public async Task<IActionResult> MarkChatAsRead(int chatId, string userId)
+        [HttpPost("{chatId:int}/mark-read")]
+        public async Task<IActionResult> MarkChatAsRead(int chatId)
         {
+            var userId = GetUserId();
+
             var result = await _chatService.MarkChatAsReadAsync(chatId, userId);
             if (!result)
-                return NotFound("Chat not found.");
+                return NotFound(new ApiError("ChatNotFound"));
 
-            return Ok("Messages marked as read.");
+            return Ok(ApiResponse.Ok(null, "Messages marked as read"));
         }
 
         // Get count of unread messages for user
-        [HttpGet("user/{userId}/unread-count")]
-        public async Task<IActionResult> GetUnreadCount(string userId)
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadCount()
         {
+            var userId = GetUserId();
+
             var count = await _chatService.GetUnreadMessagesCountAsync(userId);
-            return Ok(new { UnreadCount = count });
+            return Ok(ApiResponse.Ok(new { UnreadCount = count }));
         }
 
         // Get recent chats summary for user
-        [HttpGet("user/{userId}/recent")]
-        public async Task<IActionResult> GetRecentChats(string userId)
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetRecentChats()
         {
+            var userId = GetUserId();
+
             var chats = await _chatService.GetRecentChatsAsync(userId);
-            return Ok(chats);
+            return Ok(ApiResponse.Ok(chats));
         }
     }
 }
