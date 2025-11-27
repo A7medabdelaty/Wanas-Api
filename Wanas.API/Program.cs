@@ -16,8 +16,6 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
-builder.Services.AddSignalR();
-
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
@@ -80,6 +78,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

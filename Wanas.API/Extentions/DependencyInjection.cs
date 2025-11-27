@@ -7,6 +7,7 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
@@ -148,6 +149,13 @@ namespace Wanas.API.Extentions
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
+
+            services.AddSignalR();
+            services.AddSingleton<IUserIdProvider, ClaimNameUserIdProvider>();
+
+            // register the real-time notifier (ensure namespace and class exist)
+            services.AddSingleton<Wanas.Application.Interfaces.IRealTimeNotifier, Wanas.API.RealTime.RealTimeNotifier>();
+
 
             // RAG dependencies
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();

@@ -1,5 +1,5 @@
 using AutoMapper;
-using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
 using Wanas.Application.DTOs.Message;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -54,7 +54,7 @@ namespace Wanas.Application.Services
             return dto;
         }
 
-        public async Task<bool> DeleteMessageAsync(int messageId,string userId)
+        public async Task<bool> DeleteMessageAsync(int messageId, string userId)
         {
             var msg = await _uow.Messages.GetByIdAsync(messageId);
             if (msg == null)
@@ -100,18 +100,32 @@ namespace Wanas.Application.Services
             if (msg == null)
                 return false;
 
-            if (!msg.ReadReceipts.Any(r => r.UserId == userId))
-            {
-                msg.ReadReceipts.Add(new MessageReadReceipt
-                {
-                    MessageId = messageId,
-                    UserId = userId,
-                    ReadAt = DateTime.UtcNow
-                });
-                await _uow.CommitAsync();
+            // First attempt an efficient DB-side check to see if a receipt already exists.
+            var existing = (await _uow.Messages.FindAsync(m =>
+                            m.Id == messageId && m.ReadReceipts.Any(r => r.UserId == userId)))
+                           .Any();
 
-                await _notifier.NotifyMessageReadAsync(msg.ChatId, messageId, userId);
+            if (existing)
+                return true;
+
+            // Add the receipt locally and try to commit.
+            msg.ReadReceipts.Add(new MessageReadReceipt
+            {
+                MessageId = messageId,
+                UserId = userId,
+                ReadAt = DateTime.UtcNow
+            });
+
+            try
+            {
+                await _uow.CommitAsync();
             }
+            catch (DbUpdateException)
+            {
+                return true;
+            }
+
+            await _notifier.NotifyMessageReadAsync(msg.ChatId, messageId, userId);
 
             return true;
         }

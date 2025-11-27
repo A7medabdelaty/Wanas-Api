@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 using Wanas.API.Responses;
 using Wanas.Application.DTOs.Message;
@@ -10,7 +9,7 @@ namespace Wanas.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "VerifiedUser")]
+    [Authorize]
     public class MessagesController : ControllerBase
     {
         private readonly IMessageService _messageService;
@@ -38,10 +37,10 @@ namespace Wanas.API.Controllers
         [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] CreateMessageRequestDto request)
         {
+            request.SenderId = GetUserId();
+
             if (!ModelState.IsValid)
                 return BadRequest(new ApiError("ValidationError", "Invalid data sent"));
-
-            request.SenderId = GetUserId();
 
             var message = await _messageService.SendMessageAsync(request);
             return Ok(ApiResponse.Ok(message, "Message sent successfully"));

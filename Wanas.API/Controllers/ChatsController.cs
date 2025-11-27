@@ -45,14 +45,14 @@ namespace Wanas.API.Controllers
         }
 
         // Create a new chat
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateChat([FromBody] CreateChatRequestDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var chat = await _chatService.CreateChatAsync(request);
-            return CreatedAtAction(nameof(GetChatDetails), new { id = chat.Id }, new ApiResponse(chat));
+            return CreatedAtAction(nameof(GetChatDetails), new { chatId = chat.Id }, new ApiResponse(chat));
         }
 
         // Update chat (rename or toggle group)
@@ -83,9 +83,8 @@ namespace Wanas.API.Controllers
             if (chatId <= 0)
                 return BadRequest(new ApiError("InvalidChatId"));
 
-            request.ChatId = chatId;
+            var result = await _chatService.AddParticipantAsync(chatId, request.UserId);
 
-            var result = await _chatService.AddParticipantAsync(request);
             if (!result)
                 return BadRequest(new ApiError("ParticipantAddFailed", "User already in chat or chat not found"));
 
