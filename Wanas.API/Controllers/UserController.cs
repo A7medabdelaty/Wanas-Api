@@ -51,7 +51,7 @@ public class UserController(
     // Update Profile
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile(
-        [FromBody] UpdateProfileRequest request,
+        [FromForm] UpdateProfileRequest request,
         CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
