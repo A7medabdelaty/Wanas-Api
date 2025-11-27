@@ -104,9 +104,9 @@ ILogger<UserService> logger
 
     //  UPDATE PROFILE
     public async Task<Result<UserProfileResponse>> UpdateProfileAsync(
-        string userId,
-        UpdateProfileRequest request,
-        CancellationToken cancellationToken = default)
+    string userId,
+    UpdateProfileRequest request,
+    CancellationToken cancellationToken = default)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -129,8 +129,12 @@ ILogger<UserService> logger
         if (request.Bio is not null)
             user.Bio = request.Bio;
 
-        if (request.Photo is not null)
-            user.Photo = request.Photo;
+        // Upload new photo if provided
+        if (request.PhotoFile is not null)
+        {
+            var photoUrl = await _fileService.UploadImageAsync(request.PhotoFile);
+            user.Photo = photoUrl;
+        }
 
         var result = await _userManager.UpdateAsync(user);
 
@@ -161,6 +165,7 @@ ILogger<UserService> logger
 
         return Result.Success(response);
     }
+
     // COMPLETE PREFERENCES
     // -----------------------------------------
     public async Task<Result<UserPreferencesResponse>> CompletePreferencesAsync(
