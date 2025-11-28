@@ -103,6 +103,19 @@ namespace Wanas.Application.Mappings
             CreateMap<UpdateRoomDto, Room>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcVal) => srcVal != null));
 
+            //  LISTING → LISTING CARD DTO
+            CreateMap<Listing, ListingCardDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City))
+                .ForMember(dest => dest.MonthlyPrice, opt => opt.MapFrom(src => src.ApartmentListing.MonthlyPrice))
+                .ForMember(dest => dest.MainPhotoUrl, opt => opt.MapFrom(src => src.ListingPhotos.FirstOrDefault() != null ? src.ListingPhotos.First().URL : null))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.AvailableRooms, opt => opt.MapFrom(src => src.ApartmentListing.Rooms.Count(r => r.IsAvailable)))
+                .ForMember(dest => dest.AvailableBeds, opt => opt.MapFrom(src => src.ApartmentListing.Rooms.Sum(r => r.AvailableBeds)))
+                .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet));
+
+
 
             //   REVERSE MAPS
             CreateMap<ApartmentListing, CreateListingDto>().ReverseMap();

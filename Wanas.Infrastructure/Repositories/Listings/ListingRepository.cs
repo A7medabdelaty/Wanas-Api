@@ -58,7 +58,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
         {
             return await _context.Listings
                 .Include(l => l.ListingPhotos)
-                .Include(l => l.UserId)
+                .Include(l => l.User)
                 .Include(l => l.ApartmentListing)
                    .ThenInclude(al => al.Rooms)
                        .ThenInclude(r => r.Beds)
