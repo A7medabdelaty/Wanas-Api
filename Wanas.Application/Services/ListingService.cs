@@ -45,42 +45,47 @@ namespace Wanas.Application.Services
             listing.UserId = userId;
             listing.IsActive = true;
 
-            listing.ApartmentListing = _mapper.Map<ApartmentListing>(dto);
+            listing.ApartmentListing = _mapper.Map<ApartmentListing>(dto) ?? new ApartmentListing();
             listing.ApartmentListing.Rooms ??= new List<Room>();
+            listing.ApartmentListing.Rooms.Clear();
+
             listing.ListingPhotos ??= new HashSet<ListingPhoto>();
 
             // rooms
-            foreach (var roomDto in dto.Rooms)
+            if (dto.Rooms != null)
             {
-                var room = new Room
+                foreach (var roomDto in dto.Rooms)
                 {
-                    RoomNumber = roomDto.RoomNumber,
-                    BedsCount = roomDto.BedsCount,
-                    AvailableBeds = roomDto.AvailableBeds,
-                    PricePerBed = roomDto.PricePerBed,
-                    IsAvailable = roomDto.AvailableBeds > 0,
-                    Beds = new List<Bed>()
-                };
+                    var room = new Room
+                    {
+                        RoomNumber = roomDto.RoomNumber,
+                        BedsCount = roomDto.BedsCount,
+                        AvailableBeds = roomDto.AvailableBeds,
+                        PricePerBed = roomDto.PricePerBed,
+                        IsAvailable = roomDto.AvailableBeds > 0,
+                        Beds = new List<Bed>()
+                    };
 
-                if (roomDto.Beds != null)
-                {
-                    foreach (var bedDto in roomDto.Beds)
+                    if (roomDto.Beds != null)
                     {
-                        room.Beds.Add(new Bed { IsAvailable = bedDto.IsAvailable });
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < roomDto.BedsCount; i++)
-                    {
-                        room.Beds.Add(new Bed
+                        foreach (var bedDto in roomDto.Beds)
                         {
-                            IsAvailable = i < roomDto.AvailableBeds
-                        });
+                            room.Beds.Add(new Bed { IsAvailable = bedDto.IsAvailable });
+                        }
                     }
-                }
+                    else
+                    {
+                        for (int i = 0; i < roomDto.BedsCount; i++)
+                        {
+                            room.Beds.Add(new Bed
+                            {
+                                IsAvailable = i < roomDto.AvailableBeds
+                            });
+                        }
+                    }
 
-                listing.ApartmentListing.Rooms.Add(room);
+                    listing.ApartmentListing.Rooms.Add(room);
+                }
             }
 
             UpdateApartmentListingAggregates(listing);
