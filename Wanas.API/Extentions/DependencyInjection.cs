@@ -124,6 +124,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<ICommissionRepository, CommissionRepository>();
             services.AddScoped<IPayoutRepository, PayoutRepository>();
             services.AddScoped<IRefundRepository, RefundRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
 
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();

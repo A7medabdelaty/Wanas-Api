@@ -14,14 +14,15 @@ namespace Wanas.Domain.Entities
 
         // public int NoOfApartmentsInAFloor { get; set; }
         public int AreaInSqMeters { get; set; }
-        public int TotalRooms { get; set; }
-        public int AvailableRooms { get; set; }
-        public int TotalBeds { get; set; }
-        public int AvailableBeds { get; set; }
+        //public int TotalRooms { get; set; }
+        //public int AvailableRooms { get; set; }
+        //public int TotalBeds { get; set; }
+        //public int AvailableBeds { get; set; }
         public int TotalBathrooms { get; set; }
         public bool HasKitchen { get; set; }
         public bool HasInternet { get; set; }
         public bool HasAirConditioner { get; set; }
+        public bool HasFans { get; set; }
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }
 

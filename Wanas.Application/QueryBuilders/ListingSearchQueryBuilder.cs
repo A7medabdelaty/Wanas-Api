@@ -27,11 +27,6 @@ namespace Wanas.Application.QueryBuilders
                 if (request.HasElevator == true)
                     query = query.Where(x => x.ApartmentListing.HasElevator);
 
-                if (request.OnlyAvailable == true)
-                    query = query.Where(x =>
-                        x.ApartmentListing.AvailableRooms > 0 ||
-                        x.ApartmentListing.AvailableBeds > 0);
-
                 return query;
             }
 
