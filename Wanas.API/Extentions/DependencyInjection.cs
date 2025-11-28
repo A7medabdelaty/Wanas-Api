@@ -170,6 +170,7 @@ namespace Wanas.API.Extentions
 
             // matching service
             services.AddScoped<IMatchingService, StaticTestMatchingService>();
+            services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
             // auth service
             services.AddAuthorization(options =>
             {
