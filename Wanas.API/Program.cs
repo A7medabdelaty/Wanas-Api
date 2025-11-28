@@ -1,3 +1,4 @@
+using dotenv.net;
 using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
@@ -14,6 +15,9 @@ Log.Logger = new LoggerConfiguration()
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+
 builder.Host.UseSerilog();
 
 builder.Services.AddSignalR();

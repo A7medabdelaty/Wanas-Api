@@ -5,6 +5,7 @@ namespace Wanas.Application.DTOs.Listing
     {
         public int Id { get; set; }
         public string AuthorName { get; set; }
+        public string? AuthorPhoto { get; set; }
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
 

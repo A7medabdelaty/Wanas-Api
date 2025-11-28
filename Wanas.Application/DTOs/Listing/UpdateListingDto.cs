@@ -24,6 +24,7 @@ namespace Wanas.Application.DTOs.Listing
         public bool HasKitchen { get; set; }
         public bool HasInternet { get; set; }
         public bool HasAirConditioner { get; set; }
+        public bool HasFans { get; set; }
 
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }

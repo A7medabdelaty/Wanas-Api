@@ -37,15 +37,14 @@ namespace Wanas.Infrastructure.Repositories.Listings
         {
             return await _context.Listings
                 .Include(l => l.User)
-                .Include(l => l.ListingPhotos)
-                .Include(l => l.ApartmentListing)
-                    .ThenInclude(a => a.Rooms)
-                .Include(l => l.ApartmentListing)
-                    .ThenInclude(a => a.Beds)
-                .Include(l => l.Comments)
-                .Include(l => l.Matches)
-                .Include(l => l.Payments)
-                .FirstOrDefaultAsync(l => l.Id == id);
+            .Include(l => l.ListingPhotos)
+            .Include(l => l.ApartmentListing)
+                .ThenInclude(a => a.Rooms)
+                    .ThenInclude(r => r.Beds)
+            .Include(l => l.Comments)
+            .Include(l => l.Matches)
+            .Include(l => l.Payments)
+            .FirstOrDefaultAsync(l => l.Id == id);
         }
 
         public async Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword)

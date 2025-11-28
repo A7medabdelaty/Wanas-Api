@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Wanas.Application.DTOs.Listing;
+using Wanas.Domain.Entities;
 
 namespace Wanas.Application.Interfaces
 { 
@@ -18,6 +19,7 @@ namespace Wanas.Application.Interfaces
         // Listing Photos
         Task AddPhotosToListingAsync(int listingId, List<IFormFile> photos);
         Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId);
+
     }
 
 }

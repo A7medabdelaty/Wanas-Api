@@ -30,6 +30,7 @@ namespace Wanas.Infrastructure.Repositories
         public IRefundRepository Refunds { get; }
         public IListingPhotoRepository ListingPhotos { get; }
         public ICommentRepository Comments { get; }
+        public IRoomRepository Rooms { get; }
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -50,7 +51,8 @@ namespace Wanas.Infrastructure.Repositories
                           IPaymentRepository payments,
                           ICommissionRepository commissions,
                           IPayoutRepository payouts,
-                          IRefundRepository refunds)
+                          IRefundRepository refunds,
+                          IRoomRepository rooms)
         {
             _context = context;
             Chats = chats;
@@ -75,6 +77,7 @@ namespace Wanas.Infrastructure.Repositories
             Comments = comments;
             Listings = listings;
             ListingPhotos = listingPhotos;
+            Rooms = rooms;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
