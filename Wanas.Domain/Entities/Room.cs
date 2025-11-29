@@ -9,7 +9,7 @@
         public decimal PricePerBed { get; set; }
         public bool HasAirConditioner { get; set; }
         public bool HasFan { get; set; }
-        public bool IsAvailable { get; set; }
+        public bool IsAvailable => Beds.Any(b => b.IsAvailable);
         public virtual ICollection<Bed> Beds { get; set; } = new List<Bed>();
         public int ApartmentListingId { get; set; }
         public ApartmentListing ApartmentListing { get; set; }
