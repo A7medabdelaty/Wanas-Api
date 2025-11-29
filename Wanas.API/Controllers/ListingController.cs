@@ -59,6 +59,8 @@ namespace Wanas.API.Controllers
             if (userId == null)
                 return Unauthorized();
             dto.Rooms = JsonConvert.DeserializeObject<List<CreateRoomDto>>(rooms);
+            Console.WriteLine("ROOMS RECEIVED:");
+            Console.WriteLine(rooms);
             try
             {
                 var listing = await _listService.CreateListingAsync(dto, userId);
