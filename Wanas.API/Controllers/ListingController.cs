@@ -31,6 +31,8 @@ namespace Wanas.API.Controllers
         public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetAll()
         {
             var listings = await _listService.GetAllListingsAsync();
+            if (listings == null || !listings.Any())
+                return NotFound("No listings found.");
             return Ok(listings);
         }
 
