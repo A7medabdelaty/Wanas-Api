@@ -1,7 +1,9 @@
+using dotenv.net;
 using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
+using Microsoft.Extensions.FileProviders;
 
 
 // Configure Serilog (basic console + file rolling)
@@ -14,9 +16,10 @@ Log.Logger = new LoggerConfiguration()
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog();
 
-builder.Services.AddSignalR();
+DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 
@@ -38,6 +41,14 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
+    ),
+    RequestPath = "/uploads" // <-- this will make files available at https://localhost:7279/uploads/filename.jpg
+});
 
 // Configure Swagger (works in all environments)
 if (app.Environment.IsDevelopment())
@@ -80,6 +91,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

@@ -21,11 +21,12 @@ namespace Wanas.Domain.Repositories
         ICommissionRepository Commissions { get; }
         IPayoutRepository Payouts { get; }
         IRefundRepository Refunds { get; }
-        //Task<int> CommitAsync();
 
         IReviewRepository Reviews { get; }
         IListingRepository Listings { get; }
         IListingPhotoRepository ListingPhotos { get; }
         ICommentRepository Comments { get; }
+
+        IRoomRepository Rooms { get; }
     }
 }

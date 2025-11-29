@@ -53,20 +53,20 @@ namespace Wanas.Application.Services
             return dto;
         }
 
-        public async Task<bool> AddParticipantAsync(AddParticipantRequestDto request)
+        public async Task<bool> AddParticipantAsync(int chatId, string userId)
         {
-            var chat = await _uow.Chats.GetChatWithParticipantsAsync(request.ChatId);
+            var chat = await _uow.Chats.GetChatWithParticipantsAsync(chatId);
             if (chat == null)
                 return false;
 
-            if (chat.ChatParticipants.Any(p => p.UserId == request.UserId))
+            if (chat.ChatParticipants.Any(p => p.UserId == userId))
                 return false;
 
-            var participant = new ChatParticipant { ChatId = request.ChatId, UserId = request.UserId };
+            var participant = new ChatParticipant { ChatId = chatId, UserId = userId };
             await _uow.ChatParticipants.AddAsync(participant);
             await _uow.CommitAsync();
 
-            await _notifier.NotifyParticipantAddedAsync(request.ChatId, request.UserId);
+            await _notifier.NotifyParticipantAddedAsync(chatId, userId);
             return true;
         }
 

@@ -39,7 +39,23 @@ namespace Wanas.Application.Validators.Listing
 
             RuleFor(x => x.HasAirConditioner)
                .NotNull()
-               .WithMessage("Air Conditioner must be specified.");
+               .WithMessage("Air Conditioner availabitity must be specified.");
+
+            RuleFor(x => x.HasFans)
+               .NotNull()
+               .WithMessage("Fans availabitity must be specified.");
+
+            RuleFor(x => x.HasElevator)
+               .NotNull()
+               .WithMessage("Elevator availabitity must be specified.");
+
+            RuleFor(x => x.HasInternet)
+               .NotNull()
+               .WithMessage("Internet availabitity must be specified.");
+
+            RuleFor(x => x.HasKitchen)
+               .NotNull()
+               .WithMessage("Kitchen availabitity must be specified.");
 
             RuleForEach(x => x.Photos).ChildRules(photo =>
             {

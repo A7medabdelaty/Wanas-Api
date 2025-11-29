@@ -46,10 +46,6 @@ namespace Wanas.Application.Validators.Listing
                 .WithMessage("Total bathrooms must be greater than zero.")
                 .When(x => x.TotalBathrooms != default);
 
-            RuleFor(x => x.HasAirConditioner)
-                .NotNull()
-                .WithMessage("Air Conditioner availability must be specified.");
-
             RuleForEach(x => x.NewPhotos)
                 .ChildRules(photo =>
                 {

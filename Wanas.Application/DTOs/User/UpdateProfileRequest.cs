@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Http;
 
 namespace Wanas.Application.DTOs.User;
 public record UpdateProfileRequest(
@@ -11,5 +8,5 @@ public record UpdateProfileRequest(
     string? City = null,
     string? PhoneNumber = null,
     string? Bio = null,
-    string? Photo = null
+    IFormFile? PhotoFile=null
 );

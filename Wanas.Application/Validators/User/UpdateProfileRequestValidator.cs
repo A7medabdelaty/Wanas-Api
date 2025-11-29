@@ -1,5 +1,6 @@
 
 using FluentValidation;
+using Wanas.Application.Abstractions;
 using Wanas.Application.DTOs.User;
 
 namespace Wanas.Application.Validators.User;
@@ -23,8 +24,7 @@ public class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequ
             .When(x => !string.IsNullOrWhiteSpace(x.City));
 
         RuleFor(x => x.PhoneNumber)
-            .Matches(@"^\+?[1-9]\d{1,14}$").WithMessage("Invalid phone number format")
-            .MaximumLength(20).WithMessage("Phone number must not exceed 20 characters")
+            .Matches(RegexPatterns.PhoneNumber).WithMessage("Invalid phone number format")
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
 
         RuleFor(x => x.Bio)

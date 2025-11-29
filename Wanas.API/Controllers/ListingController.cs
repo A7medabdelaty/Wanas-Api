@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Security.Claims;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
+using Wanas.Domain.Entities;
 
 namespace Wanas.API.Controllers
 {
@@ -29,6 +31,8 @@ namespace Wanas.API.Controllers
         public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetAll()
         {
             var listings = await _listService.GetAllListingsAsync();
+            if (listings == null || !listings.Any())
+                return NotFound("No listings found.");
             return Ok(listings);
         }
 
@@ -49,12 +53,12 @@ namespace Wanas.API.Controllers
         // create listing
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<ListingDetailsDto>> Create([FromForm] CreateListingDto dto)
+        public async Task<ActionResult<ListingDetailsDto>> Create([FromForm] CreateListingDto dto, [FromForm] string rooms)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
                 return Unauthorized();
-
+            dto.Rooms = JsonConvert.DeserializeObject<List<CreateRoomDto>>(rooms);
             try
             {
                 var listing = await _listService.CreateListingAsync(dto, userId);
@@ -73,10 +77,12 @@ namespace Wanas.API.Controllers
         // update listing
         [Authorize]
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ListingDetailsDto>> Update(int id, [FromForm] UpdateListingDto dto)
+        public async Task<ActionResult<ListingDetailsDto>> Update(int id, [FromForm] UpdateListingDto dto, [FromForm] string rooms)
         {
             if (id <= 0)
                 return BadRequest("Invalid id.");
+
+            dto.Rooms = JsonConvert.DeserializeObject<List<UpdateRoomDto>>(rooms);
 
             try
             {

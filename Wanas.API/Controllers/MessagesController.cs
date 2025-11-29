@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Wanas.API.Responses;
 using Wanas.Application.DTOs.Message;
 using Wanas.Application.Interfaces;
 
@@ -7,7 +9,7 @@ namespace Wanas.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "VerifiedUser")]
+    [Authorize]
     public class MessagesController : ControllerBase
     {
         private readonly IMessageService _messageService;
@@ -17,56 +19,83 @@ namespace Wanas.API.Controllers
             _messageService = messageService;
         }
 
-        // ✅ Get messages by chat ID
-        [HttpGet("chat/{chatId}")]
+        private string GetUserId()=> User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+       ?? throw new Exception("Invalid token: userId not found");
+
+        // Get messages by chat ID
+        [HttpGet("chat/{chatId:int}")]
         public async Task<IActionResult> GetMessagesByChat(int chatId, [FromQuery] int limit = 50)
         {
+            if (chatId <= 0)
+                return BadRequest(new ApiError("InvalidChatId"));
+
             var messages = await _messageService.GetMessagesByChatAsync(chatId, limit);
-            return Ok(messages);
+            return Ok(ApiResponse.Ok(messages));
         }
 
-        // ✅ Send message
+        // Send message
         [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] CreateMessageRequestDto request)
         {
+            request.SenderId = GetUserId();
+
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ApiError("ValidationError", "Invalid data sent"));
 
             var message = await _messageService.SendMessageAsync(request);
-            return Ok(message);
+            return Ok(ApiResponse.Ok(message, "Message sent successfully"));
         }
 
-        // ✅ Edit message
-        [HttpPut("{messageId}")]
-        public async Task<IActionResult> EditMessage(int messageId, [FromBody] string newContent)
+        // Edit message
+        [HttpPut("{messageId:int}")]
+        public async Task<IActionResult> EditMessage(int messageId, [FromBody] EditMessageRequestDto dto)
         {
-            var success = await _messageService.EditMessageAsync(messageId, newContent);
-            if (!success)
-                return NotFound("Message not found.");
+            if (messageId <= 0)
+                return BadRequest(new ApiError("InvalidMessageId"));
 
-            return Ok("Message edited successfully.");
+            var userId = GetUserId();
+
+            var success = await _messageService.EditMessageAsync(
+                messageId, dto.NewContent, userId);
+
+            if (!success)
+                return NotFound(new ApiError("MessageNotFoundOrForbidden"));
+
+            return Ok(ApiResponse.Ok(null, "Message edited successfully"));
         }
 
-        // ✅ Delete message
-        [HttpDelete("{messageId}")]
+        // Delete message
+        [HttpDelete("{messageId:int}")]
         public async Task<IActionResult> DeleteMessage(int messageId)
         {
-            var success = await _messageService.DeleteMessageAsync(messageId);
-            if (!success)
-                return NotFound("Message not found.");
+            if (messageId <= 0)
+                return BadRequest(new ApiError("InvalidMessageId"));
 
-            return Ok("Message deleted successfully.");
+            var userId = GetUserId();
+
+            var success = await _messageService.DeleteMessageAsync(messageId, userId);
+
+            if (!success)
+                return NotFound(new ApiError("MessageNotFoundOrForbidden"));
+
+            return Ok(ApiResponse.Ok(null, "Message deleted successfully"));
         }
 
-        // ✅ Mark a specific message as read
-        [HttpPost("{messageId}/read/{userId}")]
-        public async Task<IActionResult> MarkMessageAsRead(int messageId, string userId)
+        // Mark a specific message as read
+        [HttpPost("{messageId}/read")]
+        public async Task<IActionResult> MarkMessageAsRead(int messageId)
         {
-            var success = await _messageService.MarkMessageAsReadAsync(messageId, userId);
-            if (!success)
-                return NotFound("Message not found.");
+            if (messageId <= 0)
+                return BadRequest(new ApiError("InvalidMessageId"));
 
-            return Ok("Message marked as read.");
+            var userId = GetUserId();
+
+            var success = await _messageService.MarkMessageAsReadAsync(messageId, userId);
+
+            if (!success)
+                return NotFound(new ApiError("MessageNotFound"));
+
+            return Ok(ApiResponse.Ok(null, "Message marked as read"));
         }
     }
 }

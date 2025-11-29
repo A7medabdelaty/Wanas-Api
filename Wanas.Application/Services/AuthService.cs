@@ -73,8 +73,9 @@ public class AuthService(
 
         return Result.Success(new AuthResponse(
             user.Id,
-            user.Email!,
+            user.Email,
             user.FullName,
+            user.Photo,
             token,
             expiresIn,
             refreshToken,
@@ -123,6 +124,7 @@ public class AuthService(
             user.Id,
             user.Email!,
             user.FullName,
+            user.Photo,
             newJwt,
             expiresIn,
             newRefresh,
