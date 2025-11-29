@@ -11,6 +11,7 @@ namespace Wanas.Infrastructure.Persistence.Configurations
             builder.HasKey(r => r.Id);
             builder.Property(r => r.PricePerBed).HasColumnType("decimal(18,2)");
             builder.Property(r => r.IsAvailable).HasColumnType("bit");
+            builder.Ignore(r => r.IsAvailable);
 
             builder.HasOne(r => r.ApartmentListing)
                 .WithMany(a => a.Rooms)
