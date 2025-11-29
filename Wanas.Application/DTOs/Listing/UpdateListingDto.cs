@@ -12,7 +12,7 @@ namespace Wanas.Application.DTOs.Listing
         public int? MonthlyPrice { get; set; }
 
         public bool? HasElevator { get; set; }
-        public string? Floor { get; set; }
+        public int? Floor { get; set; }
         public int? AreaInSqMeters { get; set; }
 
         //public int TotalRooms { get; set; }

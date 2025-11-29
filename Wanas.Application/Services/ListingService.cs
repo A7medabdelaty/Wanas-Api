@@ -66,7 +66,6 @@ namespace Wanas.Application.Services
                         PricePerBed = roomDto.PricePerBed,
                         HasAirConditioner = roomDto.HasAirConditioner,
                         HasFan = roomDto.HasFan,
-                        IsAvailable = roomDto.AvailableBeds > 0,
                         ApartmentListing = listing.ApartmentListing, // Set navigation property for proper tracking
                         Beds = new List<Bed>()
                     };
@@ -76,7 +75,6 @@ namespace Wanas.Application.Services
                     {
                         room.Beds.Add(new Bed
                         {
-                            IsAvailable = i < roomDto.AvailableBeds,
                             Room = room // Set navigation property for proper tracking
                         });
                     }
@@ -189,7 +187,7 @@ namespace Wanas.Application.Services
             // 3️⃣ Update ApartmentListing fields (only non-null/has-value fields)
             var apartment = listing.ApartmentListing;
             if (dto.Address != null) apartment.Address = dto.Address;
-            if (dto.Floor != null) apartment.Floor = dto.Floor;
+            if (dto.Floor != null) apartment.Floor = (int) dto.Floor;
             if (dto.AreaInSqMeters.HasValue) apartment.AreaInSqMeters = dto.AreaInSqMeters.Value;
             if (dto.TotalBathrooms.HasValue) apartment.TotalBathrooms = dto.TotalBathrooms.Value;
 
@@ -216,13 +214,12 @@ namespace Wanas.Application.Services
                         if (roomDto.BedsCount.HasValue) room.BedsCount = roomDto.BedsCount.Value;
                         if (roomDto.AvailableBeds.HasValue) room.AvailableBeds = roomDto.AvailableBeds.Value;
                         if (roomDto.PricePerBed.HasValue) room.PricePerBed = roomDto.PricePerBed.Value;
-                        room.IsAvailable = room.AvailableBeds > 0;
 
                         // Update beds
                         room.Beds.Clear();
                         for (int i = 0; i < room.BedsCount; i++)
                         {
-                            room.Beds.Add(new Bed { IsAvailable = i < room.AvailableBeds });
+                            room.Beds.Add(new Bed {});
                         }
                     }
                 }
@@ -236,13 +233,12 @@ namespace Wanas.Application.Services
                         BedsCount = roomDto.BedsCount ?? 0,
                         AvailableBeds = roomDto.AvailableBeds ?? 0,
                         PricePerBed = roomDto.PricePerBed ?? 0,
-                        IsAvailable = (roomDto.AvailableBeds ?? 0) > 0,
                         Beds = new List<Bed>()
                     };
 
                     for (int i = 0; i < newRoom.BedsCount; i++)
                     {
-                        newRoom.Beds.Add(new Bed { IsAvailable = i < newRoom.AvailableBeds });
+                        newRoom.Beds.Add(new Bed {});
                     }
 
                     apartment.Rooms.Add(newRoom);

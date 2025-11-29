@@ -32,9 +32,9 @@ namespace Wanas.Application.Validators.Listing
                 .WithMessage("Monthly price must be greater than zero.");
 
             RuleFor(x => x.Floor)
-                .MaximumLength(50)
-                .WithMessage("Floor cannot exceed 50 characters.")
-                .When(x => !string.IsNullOrWhiteSpace(x.Floor));
+                .GreaterThan(-1)
+                .WithMessage("Invalid Floor Number.")
+                .When(x => x.Floor > -1);
 
             RuleFor(x => x.AreaInSqMeters)
                 .GreaterThan(0)
