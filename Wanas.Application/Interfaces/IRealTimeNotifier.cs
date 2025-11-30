@@ -6,6 +6,8 @@ namespace Wanas.Application.Interfaces
     public interface IRealTimeNotifier
     {
         Task NotifyChatCreatedAsync(ChatDto chat);
+        Task NotifyChatUpdatedAsync(ChatDto chat);
+        Task NotifyChatDeletedAsync(int chatId);
         Task NotifyParticipantAddedAsync(int chatId, string userId);
         Task NotifyParticipantRemovedAsync(int chatId, string userId);
         Task NotifyMessageReceivedAsync(MessageDto message);

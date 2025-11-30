@@ -11,8 +11,6 @@ namespace Wanas.Application.Mappings
         {
             // Chat → ChatDto
             CreateMap<Chat, ChatDto>()
-                .ForMember(dest => dest.Title,
-                    opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.ChatName,
                     opt => opt.MapFrom(src =>
                         !string.IsNullOrWhiteSpace(src.Name)
@@ -26,12 +24,7 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.UserId,
                     opt => opt.MapFrom(src => src.UserId))
                 .ForMember(dest => dest.UserName,
-                    opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null))
-                .ForMember(dest => dest.DisplayName,
-                    opt => opt.MapFrom(src =>
-                        src.User != null
-                            ? src.User.UserName
-                            : null));
+                    opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null));
 
             CreateMap<CreateChatRequestDto, Chat>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
