@@ -3,6 +3,7 @@ using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
+using Wanas.Application.Interfaces;
 
 
 // Configure Serilog (basic console + file rolling)

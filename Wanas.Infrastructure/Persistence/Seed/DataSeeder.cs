@@ -109,7 +109,7 @@ namespace Wanas.Infrastructure.Persistence.Seed
                     Address = $"{user.City} Central District",
                     MonthlyPrice = listing.MonthlyPrice,
                     HasElevator = true,
-                    Floor = ((user.Age ?? 21) % 10).ToString(),
+                    Floor = ((user.Age ?? 21) % 10),
                     AreaInSqMeters = 90 + i * 10,
                     TotalBathrooms = 1,
                     HasKitchen = true,
