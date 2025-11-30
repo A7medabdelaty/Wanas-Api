@@ -43,6 +43,20 @@ builder.Services.AddApplicationServices(builder.Configuration);
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
 
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
+    ),
+    RequestPath = "/uploads" // <-- this will make files available at https://localhost:7279/uploads/filename.jpg
+});
+
+
+
+
+
+
 // Configure Swagger (works in all environments)
 if (app.Environment.IsDevelopment())
 {
