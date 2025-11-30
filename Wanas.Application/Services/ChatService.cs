@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -22,36 +23,34 @@ namespace Wanas.Application.Services
         public async Task<IEnumerable<ChatDto>> GetUserChatsAsync(string userId)
         {
             var chats = await _uow.Chats.GetUserChatsAsync(userId);
-            var dtos = _mapper.Map<IEnumerable<ChatDto>>(chats).ToList();
+            var result = _mapper.Map<IEnumerable<ChatDto>>(chats);
 
-            foreach (var dto in dtos)
+            foreach (var chat in result)
             {
-                // 1 — Group chat: keep the assigned title
-                if (dto.IsGroup)
+                if (!chat.IsGroup && chat.Participants.Count == 2)
                 {
-                    dto.ChatName = dto.Title;
-                    continue;
-                }
-
-                // 2 — One-to-one chat: name = the other participant
-                var other = dto.Participants.FirstOrDefault(p => p.UserId != userId);
-                if (other != null)
-                {
-                    dto.ChatName = other.DisplayName ?? other.UserName ?? "User";
+                    var other = chat.Participants.First(x => x.UserId != userId);
+                    chat.ChatName = !string.IsNullOrWhiteSpace(other.DisplayName)
+                        ? other.DisplayName
+                        : other.UserName;
                 }
             }
 
-            return dtos;
+            return result;
         }
+
 
         public async Task<ChatDto> GetOrCreatePrivateChatAsync(string userId, string ownerId)
         {
-            // 1) Check if chat exists
             var existing = await _uow.Chats.GetPrivateChatBetweenAsync(userId, ownerId);
             if (existing != null)
-                return _mapper.Map<ChatDto>(existing);
+            {
+                var dto = _mapper.Map<ChatDto>(existing);
+                ApplyPrivateChatName(dto, userId);
+                return dto;
+            }
 
-            // 2) Create new one
+            // Create private chat
             var chat = new Chat
             {
                 IsGroup = false,
@@ -64,32 +63,51 @@ namespace Wanas.Application.Services
             await _uow.Chats.AddAsync(chat);
             await _uow.CommitAsync();
 
-            return _mapper.Map<ChatDto>(chat);
+            var createdDto = _mapper.Map<ChatDto>(chat);
+            ApplyPrivateChatName(createdDto, userId);
+            return createdDto;
         }
 
-        public async Task<ChatDto?> GetChatDetailsAsync(int chatId)
+        private void ApplyPrivateChatName(ChatDto dto, string userId)
+        {
+            if (!dto.IsGroup && dto.Participants.Count == 2)
+            {
+                var other = dto.Participants.First(x => x.UserId != userId);
+                dto.ChatName = !string.IsNullOrWhiteSpace(other.DisplayName)
+                    ? other.DisplayName
+                    : other.UserName;
+            }
+        }
+
+        public async Task<ChatDto?> GetChatDetailsAsync(int chatId, string userId)
         {
             var chat = await _uow.Chats.GetChatWithMessagesAsync(chatId);
-            return chat == null ? null : _mapper.Map<ChatDto>(chat);
+            if (chat == null)
+                return null;
+
+            var dto = _mapper.Map<ChatDto>(chat);
+
+            if (!dto.IsGroup)
+                ApplyPrivateChatName(dto, userId);
+
+            return dto;
         }
 
-        public async Task<ChatDto> CreateChatAsync(CreateChatRequestDto request)
+        public async Task<ChatDto> CreateChatAsync(string creatorId, CreateChatRequestDto request)
         {
             var chat = new Chat
             {
                 Name = request.ChatName,
-                IsGroup = request.IsGroup,
+                IsGroup = true,
                 CreatedAt = DateTime.UtcNow
             };
 
-            chat.ChatParticipants.Add(new ChatParticipant { UserId = request.UserId });
+            chat.ChatParticipants.Add(new ChatParticipant { UserId = creatorId });
 
             await _uow.Chats.AddAsync(chat);
             await _uow.CommitAsync();
 
             var dto = _mapper.Map<ChatDto>(chat);
-
-            // notify
             await _notifier.NotifyChatCreatedAsync(dto);
 
             return dto;
@@ -114,8 +132,10 @@ namespace Wanas.Application.Services
 
         public async Task<bool> RemoveParticipantAsync(int chatId, string userId)
         {
-            var participant = (await _uow.ChatParticipants.FindAsync(p => p.ChatId == chatId && p.UserId == userId))
-                                .FirstOrDefault();
+            var participant = (await _uow.ChatParticipants
+                .FindAsync(p => p.ChatId == chatId && p.UserId == userId))
+                .FirstOrDefault();
+
             if (participant == null)
                 return false;
 
@@ -134,17 +154,25 @@ namespace Wanas.Application.Services
 
             if (!string.IsNullOrWhiteSpace(request.NewName))
                 chat.Name = request.NewName;
-            if (request.IsGroup.HasValue)
-                chat.IsGroup = request.IsGroup.Value;
+
             chat.UpdatedAt = DateTime.UtcNow;
 
             _uow.Chats.Update(chat);
             await _uow.CommitAsync();
 
             var dto = _mapper.Map<ChatDto>(chat);
-            // Optionally notify about update:
-            await _notifier.NotifyChatCreatedAsync(dto); // re-use ChatCreated to inform clients of update
+
+            // Dedicated notifier for updates
+            await _notifier.NotifyChatUpdatedAsync(dto);
+
             return dto;
+        }
+
+        public async Task<IList<int>> GetUserChatIdsAsync(string userId)
+        {
+            var list = await _uow.ChatParticipants.GetAllAsync();
+            return list.Where(cp => cp.UserId == userId && cp.LeftAt == null)
+                .Select(cp => cp.ChatId).ToList();
         }
 
         public async Task<bool> DeleteChatAsync(int chatId)
@@ -155,14 +183,17 @@ namespace Wanas.Application.Services
 
             _uow.Chats.Remove(chat);
             await _uow.CommitAsync();
-            // Optionally: notify clients chat deleted (you can add another notifier method)
+
+            await _notifier.NotifyChatDeletedAsync(chatId);
             return true;
         }
 
         public async Task<bool> LeaveChatAsync(int chatId, string userId)
         {
-            var participant = (await _uow.ChatParticipants.FindAsync(p => p.ChatId == chatId && p.UserId == userId))
-                                .FirstOrDefault();
+            var participant = (await _uow.ChatParticipants
+                .FindAsync(p => p.ChatId == chatId && p.UserId == userId))
+                .FirstOrDefault();
+
             if (participant == null)
                 return false;
 
@@ -175,7 +206,9 @@ namespace Wanas.Application.Services
 
         public async Task<bool> MarkChatAsReadAsync(int chatId, string userId)
         {
-            var messages = await _uow.Messages.FindAsync(m => m.ChatId == chatId && m.SenderId != userId);
+            var messages = await _uow.Messages
+                .FindAsync(m => m.ChatId == chatId && m.SenderId != userId);
+
             foreach (var msg in messages)
             {
                 if (!msg.ReadReceipts.Any(r => r.UserId == userId))
@@ -188,15 +221,17 @@ namespace Wanas.Application.Services
                     });
                 }
             }
+
             await _uow.CommitAsync();
-            // Optionally notify clients about read receipts
             return true;
         }
 
         public async Task<int> GetUnreadMessagesCountAsync(string userId)
         {
-            var messages = await _uow.Messages.FindAsync(m => m.SenderId != userId &&
+            var messages = await _uow.Messages.FindAsync(
+                m => m.SenderId != userId &&
                 !m.ReadReceipts.Any(r => r.UserId == userId));
+
             return messages.Count();
         }
 
@@ -204,24 +239,26 @@ namespace Wanas.Application.Services
         {
             var chats = await _uow.Chats.GetUserChatsAsync(userId);
 
-            var summaries = chats.Select(c =>
-            {
-                var last = c.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
-                var unread = c.Messages.Count(m => m.SenderId != userId && !m.ReadReceipts.Any(r => r.UserId == userId));
-                return new ChatSummaryDto
+            return chats
+                .Select(c =>
                 {
-                    Id = c.Id,
-                    Name = c.Name,
-                    IsGroup = c.IsGroup,
-                    LastMessageContent = last?.TextContent,
-                    LastMessageTime = last?.SentAt,
-                    UnreadCount = unread
-                };
-            })
-            .OrderByDescending(s => s.LastMessageTime)
-            .ToList();
+                    var last = c.Messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                    var unread = c.Messages.Count(
+                        m => m.SenderId != userId &&
+                        !m.ReadReceipts.Any(r => r.UserId == userId));
 
-            return summaries;
+                    return new ChatSummaryDto
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        IsGroup = c.IsGroup,
+                        LastMessageContent = last?.TextContent,
+                        LastMessageTime = last?.SentAt,
+                        UnreadCount = unread
+                    };
+                })
+                .OrderByDescending(s => s.LastMessageTime)
+                .ToList();
         }
     }
 }

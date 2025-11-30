@@ -6,8 +6,9 @@ namespace Wanas.Application.Interfaces
     {
         Task<IEnumerable<ChatDto>> GetUserChatsAsync(string userId);
         Task<ChatDto> GetOrCreatePrivateChatAsync(string userId, string ownerId);
-        Task<ChatDto?> GetChatDetailsAsync(int chatId);
-        Task<ChatDto> CreateChatAsync(CreateChatRequestDto request);
+        Task<ChatDto?> GetChatDetailsAsync(int chatId, string userId);
+        Task<ChatDto> CreateChatAsync(string creatorId, CreateChatRequestDto request);
+        Task<IList<int>> GetUserChatIdsAsync(string userId);
         Task<bool> AddParticipantAsync(int chatId, string userId);
         Task<bool> RemoveParticipantAsync(int chatId, string userId);
         Task<ChatDto?> UpdateChatAsync(int chatId, UpdateChatRequestDto request);

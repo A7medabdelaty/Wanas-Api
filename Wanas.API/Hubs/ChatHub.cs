@@ -1,6 +1,7 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
+using Wanas.Application.Interfaces;
 
 namespace Wanas.API.Hubs
 {
@@ -9,62 +10,66 @@ namespace Wanas.API.Hubs
     {
         private static string GroupName(int chatId) => $"chat_{chatId}";
 
-        // Called when a user connects to SignalR
+        private readonly IChatService _chatService;
+
+        public ChatHub(IChatService chatService)
+        {
+            _chatService = chatService;
+        }
+
         public override async Task OnConnectedAsync()
         {
-            // Context.UserIdentifier is populated by IUserIdProvider (we register one explicitly).
-            var userId = Context.UserIdentifier ?? Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? Context.ConnectionId;
-            await Clients.Caller.SendAsync("Connected", new { UserId = userId });
+            var userId = Context.UserIdentifier!;
+
+            // Auto-join all chat groups for this user
+            var chatIds = await _chatService.GetUserChatIdsAsync(userId);
+
+            foreach (var chatId in chatIds)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(chatId));
+            }
+
             await base.OnConnectedAsync();
         }
 
-        // Called when a user disconnects
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId = Context.UserIdentifier ?? Context.ConnectionId;
-            // Notify all about disconnect (optional)
-            await Clients.All.SendAsync("UserDisconnected", userId);
             await base.OnDisconnectedAsync(exception);
         }
 
-        // User joins a specific chat group (chat room)
+        // Manually join a chat (optional)
         public async Task JoinChatGroup(int chatId)
         {
-            var group = GroupName(chatId);
-            await Groups.AddToGroupAsync(Context.ConnectionId, group);
-            await Clients.Group(group).SendAsync("UserJoinedChat", new { ChatId = chatId, UserId = Context.UserIdentifier ?? Context.ConnectionId });
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(chatId));
         }
 
-        // User leaves a chat group
+        // Manually leave a chat
         public async Task LeaveChatGroup(int chatId)
         {
-            var group = GroupName(chatId);
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, group);
-            await Clients.Group(group).SendAsync("UserLeftChat", new { ChatId = chatId, UserId = Context.UserIdentifier ?? Context.ConnectionId });
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(chatId));
         }
 
-        // Lightweight broadcast helper for clients that want to send message through hub
-        // Note: prefer using the API to persist messages. If clients call this method,
-        // it only broadcasts the payload to the group — persistence must be handled elsewhere.
+        // Optimistic UI helper - does NOT save to DB
         public async Task SendMessageToGroup(int chatId, string content)
         {
             var payload = new
             {
                 ChatId = chatId,
-                SenderId = Context.UserIdentifier ?? Context.ConnectionId,
+                SenderId = Context.UserIdentifier,
                 Content = content,
                 SentAt = DateTime.UtcNow,
-                IsTransient = true // clients can detect transient messages that may not be persisted
+                IsTransient = true // UI should ignore if API returns real message
             };
 
             await Clients.Group(GroupName(chatId)).SendAsync("ReceiveMessage", payload);
         }
 
-        // Helper for clients to notify message read locally (hub broadcasts); service-side persistence should still be invoked
         public async Task BroadcastMessageRead(int chatId, int messageId)
         {
-            var userId = Context.UserIdentifier ?? Context.ConnectionId;
-            await Clients.Group(GroupName(chatId)).SendAsync("MessageRead", new { ChatId = chatId, MessageId = messageId, UserId = userId });
+            var userId = Context.UserIdentifier!;
+
+            await Clients.Group(GroupName(chatId))
+                .SendAsync("MessageRead", new { ChatId = chatId, MessageId = messageId, UserId = userId });
         }
     }
 }
