@@ -69,42 +69,42 @@ namespace Wanas.Application.Services
                 new() {
                     ListingId = 1,
                     ListingTitle = "Quiet Apartment for Focused Professionals",
+                    ListingDescription = "Perfect for software engineers who need peace and quiet",
                     ListingCity = "Cairo",
-                    OwnerName = "Tech Host",
+                    Price = 3000,
                     Score = 65,
-                    //Description = "Perfect for software engineers who need peace and quiet"
                 },
                 new() {
                     ListingId = 2,
                     ListingTitle = "Social Hub in Downtown Cairo",
+                    ListingDescription = "Vibrant area with nightlife. Great for extroverts",
                     ListingCity = "Cairo",
-                    OwnerName = "Social Host",
+                    Price = 3300,
                     Score = 45,
-                    //Description = "Vibrant area with nightlife. Great for extroverts"
                 },
                 new() {
                     ListingId = 3,
                     ListingTitle = "Peaceful Student Residence",
+                    ListingDescription = "Quiet neighborhood perfect for studying and focus",
                     ListingCity = "Cairo",
-                    OwnerName = "Student Host",
+                    Price = 3600,
                     Score = 70,
-                    //Description = "Quiet neighborhood perfect for studying and focus"
                 },
                 new() {
                     ListingId = 4,
                     ListingTitle = "Tech Enthusiast's Paradise",
+                    ListingDescription = "High-speed internet, quiet environment perfect for programmers",
                     ListingCity = "Cairo",
-                    OwnerName = "Developer Host",
+                    Price = 3900,
                     Score = 60,
-                    //Description = "High-speed internet, quiet environment perfect for programmers"
                 },
                 new() {
                     ListingId = 5,
                     ListingTitle = "Party House in City Center",
+                    ListingDescription = "Always something happening! Great for social people",
                     ListingCity = "Cairo",
-                    OwnerName = "Party Host",
+                    Price = 4200,
                     Score = 30,
-                    //Description = "Always something happening! Great for social people"
                 }
             };
 

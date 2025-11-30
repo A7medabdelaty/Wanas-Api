@@ -197,15 +197,20 @@ namespace Wanas.Application.Services
 
         private MatchingResultDto CreateMatchingResult(Listing listing, int score)
         {
-            var user = listing.User;
+            var firstPhotoUrl = listing.ListingPhotos?
+                .OrderBy(p => p.Id)
+                .FirstOrDefault()?.URL;
 
             return new MatchingResultDto
             {
                 ListingId = listing.Id,
                 ListingTitle = listing.Title,
+                ListingDescription = listing.Description,
                 ListingCity = listing.City,
-                OwnerName = user?.FullName ?? "Unknown",
-                OwnerPhoto = user?.Photo,
+                Price = listing.ApartmentListing?.MonthlyPrice > 0
+                    ? listing.ApartmentListing.MonthlyPrice
+                    : listing.MonthlyPrice,
+                FirstPhotoUrl = firstPhotoUrl,
                 Score = score
             };
         }

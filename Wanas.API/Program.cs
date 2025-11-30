@@ -4,6 +4,7 @@ using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
 using Wanas.Application.Interfaces;
+using Wanas.Infrastructure.Persistence.Seed;
 
 
 // Configure Serilog (basic console + file rolling)
@@ -70,6 +71,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
+
+
+
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
@@ -92,5 +97,5 @@ app.MapHub<ChatHub>("/hubs/chat", options =>
     options.ApplicationMaxBufferSize = 32 * 1024;
     options.TransportMaxBufferSize = 32 * 1024;
 });
-
+//using (var scope = app.Services.CreateScope()) { try { await DataSeeder.SeedAsync(scope.ServiceProvider); } catch (Exception ex) { Console.WriteLine($"Seeding failed: {ex.Message}"); } }
 app.Run();
