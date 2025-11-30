@@ -17,6 +17,18 @@ namespace Wanas.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Chat?> GetPrivateChatBetweenAsync(string userA, string userB)
+        {
+            return await _dbSet
+                .Include(c => c.ChatParticipants)
+                .Where(c => !c.IsGroup)
+                .Where(c =>
+                    c.ChatParticipants.Any(p => p.UserId == userA) &&
+                    c.ChatParticipants.Any(p => p.UserId == userB)
+                )
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<Chat?> GetChatWithMessagesAsync(int chatId)
         {
             return await _context.Chats

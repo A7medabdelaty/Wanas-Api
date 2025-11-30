@@ -24,26 +24,26 @@ namespace Wanas.Application.Services
         {
             var repo = _uow.Listings;
 
-            // Start with query from repository (includes already applied)
+            // Start query (includes images, owner, etc.)
             var query = repo.GetQueryableWithIncludes();
 
-            // Apply keyword search using repository logic
+            // Apply keyword search (repository layer)
             if (!string.IsNullOrWhiteSpace(request.Keyword))
             {
                 query = repo.ApplyKeywordSearch(query, request.Keyword);
             }
 
-            // Apply filters (Application layer)
+            // Apply all filters (price, rooms, beds, area, features, etc.)
             query = ListingSearchQueryBuilder.ApplyFilters(query, request);
 
-            // Apply sorting
+            // Apply sorting (price, newest, area, etc.)
             query = ListingSearchQueryBuilder.ApplySorting(query, request.SortBy);
 
             // Pagination metadata
             var totalCount = await query.CountAsync();
             var totalPages = (int) Math.Ceiling(totalCount / (double) request.PageSize);
 
-            // Fetch page results
+            // Get paged records
             var listings = await query
                 .Skip((request.Page - 1) * request.PageSize)
                 .Take(request.PageSize)
@@ -59,6 +59,7 @@ namespace Wanas.Application.Services
                 Listings = listings
             };
         }
-    
+
+
     }
 }

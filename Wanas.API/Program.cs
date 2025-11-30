@@ -3,8 +3,6 @@ using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
-using Wanas.Application.Interfaces;
-using Wanas.Infrastructure.Persistence.Seed;
 
 
 // Configure Serilog (basic console + file rolling)
@@ -42,12 +40,6 @@ builder.Services.AddApplicationServices(builder.Configuration);
 
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
-
-// Seed test data for matching and RAG
-using (var scope = app.Services.CreateScope())
-{
-    await DataSeeder.SeedAsync(scope.ServiceProvider);
-}
 
 // Configure Swagger (works in all environments)
 if (app.Environment.IsDevelopment())
