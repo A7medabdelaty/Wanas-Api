@@ -170,8 +170,18 @@ namespace Wanas.API.Extentions
             services.AddScoped<MatchingService>();
 
             // matching service
-            services.AddScoped<IMatchingService, StaticTestMatchingService>();
+            // Remove static test matcher base
+            //services.AddScoped<StaticTestMatchingService>(); // traditional base matcher (test)
+            services.AddScoped<MatchingService>(); // real traditional matcher
+            services.AddScoped<IMatchingService>(sp =>
+                new HybridMatchingService(
+                    sp.GetRequiredService<MatchingService>(), // use real matcher
+                    sp.GetRequiredService<IChromaService>(),
+                    sp.GetRequiredService<IUnitOfWork>()));
             services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
+
+
+
             // auth service
             services.AddAuthorization(options =>
             {
