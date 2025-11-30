@@ -32,7 +32,6 @@ namespace Wanas.Application.DTOs.Search
         public bool? HasElevator { get; set; }
         public bool? HasAirConditioner { get; set; }
         public bool? HasFans { get; set; }
-        public bool? HasPrivateBathroom { get; set; }
         public bool? IsPetFriendly { get; set; }
         public bool? IsSmokingAllowed { get; set; }
 

@@ -16,7 +16,7 @@ namespace Wanas.Domain.Entities
         public string? Photo { get; set; }
 
         // System Fields
-        public new string  PhoneNumber { get; set; }
+        public new string PhoneNumber { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Admin Management Properties

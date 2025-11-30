@@ -28,7 +28,7 @@ namespace Wanas.API.Controllers
 
         // get all listings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ListingCardDto>>> GetAll()
         {
             var listings = await _listService.GetAllListingsAsync();
             if (listings == null || !listings.Any())
@@ -130,6 +130,18 @@ namespace Wanas.API.Controllers
                 _logger.LogError(ex, "Error deleting listing {Id}", id);
                 return StatusCode(500, "Internal server error while deleting listing.");
             }
+        }
+
+        // get listings by user
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<ListingCardDto>>> GetListingsByUser(string userId)
+        {
+            var listings = await _listService.GetListingsByUserAsync(userId);
+
+            if (!listings.Any())
+                return NotFound("No listings found for this user.");
+
+            return Ok(listings);
         }
 
         // add photos

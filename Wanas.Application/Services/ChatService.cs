@@ -22,7 +22,49 @@ namespace Wanas.Application.Services
         public async Task<IEnumerable<ChatDto>> GetUserChatsAsync(string userId)
         {
             var chats = await _uow.Chats.GetUserChatsAsync(userId);
-            return _mapper.Map<IEnumerable<ChatDto>>(chats);
+            var dtos = _mapper.Map<IEnumerable<ChatDto>>(chats).ToList();
+
+            foreach (var dto in dtos)
+            {
+                // 1 — Group chat: keep the assigned title
+                if (dto.IsGroup)
+                {
+                    dto.ChatName = dto.Title;
+                    continue;
+                }
+
+                // 2 — One-to-one chat: name = the other participant
+                var other = dto.Participants.FirstOrDefault(p => p.UserId != userId);
+                if (other != null)
+                {
+                    dto.ChatName = other.DisplayName ?? other.UserName ?? "User";
+                }
+            }
+
+            return dtos;
+        }
+
+        public async Task<ChatDto> GetOrCreatePrivateChatAsync(string userId, string ownerId)
+        {
+            // 1) Check if chat exists
+            var existing = await _uow.Chats.GetPrivateChatBetweenAsync(userId, ownerId);
+            if (existing != null)
+                return _mapper.Map<ChatDto>(existing);
+
+            // 2) Create new one
+            var chat = new Chat
+            {
+                IsGroup = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            chat.ChatParticipants.Add(new ChatParticipant { UserId = userId });
+            chat.ChatParticipants.Add(new ChatParticipant { UserId = ownerId });
+
+            await _uow.Chats.AddAsync(chat);
+            await _uow.CommitAsync();
+
+            return _mapper.Map<ChatDto>(chat);
         }
 
         public async Task<ChatDto?> GetChatDetailsAsync(int chatId)
