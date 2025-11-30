@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
@@ -39,18 +39,19 @@ namespace Wanas.Application.Services
             return result;
         }
 
-
         public async Task<ChatDto> GetOrCreatePrivateChatAsync(string userId, string ownerId)
         {
             var existing = await _uow.Chats.GetPrivateChatBetweenAsync(userId, ownerId);
             if (existing != null)
             {
-                var dto = _mapper.Map<ChatDto>(existing);
+                var fullExisting = await _uow.Chats.GetChatWithUsersAsync(existing.Id);
+
+                var dto = _mapper.Map<ChatDto>(fullExisting);
                 ApplyPrivateChatName(dto, userId);
                 return dto;
             }
 
-            // Create private chat
+            // Create chat
             var chat = new Chat
             {
                 IsGroup = false,
@@ -63,7 +64,9 @@ namespace Wanas.Application.Services
             await _uow.Chats.AddAsync(chat);
             await _uow.CommitAsync();
 
-            var createdDto = _mapper.Map<ChatDto>(chat);
+            var fullChat = await _uow.Chats.GetChatWithUsersAsync(chat.Id);
+
+            var createdDto = _mapper.Map<ChatDto>(fullChat);
             ApplyPrivateChatName(createdDto, userId);
             return createdDto;
         }

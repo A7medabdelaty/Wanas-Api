@@ -74,6 +74,8 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
+app.UseMiddleware<SignalRTokenMiddleware>();
+
 app.UseAuthentication();
 app.UseMiddleware<TrafficLoggingMiddleware>();
 // Add User Status Check Middleware (must be after Authentication)
@@ -83,6 +85,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<ChatHub>("/hubs/chat");
+app.MapHub<ChatHub>("/hubs/chat", options =>
+{
+    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets 
+        | Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+    options.ApplicationMaxBufferSize = 32 * 1024;
+    options.TransportMaxBufferSize = 32 * 1024;
+});
 
 app.Run();

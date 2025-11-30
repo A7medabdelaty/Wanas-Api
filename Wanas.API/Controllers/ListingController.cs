@@ -58,7 +58,12 @@ namespace Wanas.API.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
                 return Unauthorized();
+            Console.WriteLine("ROOMS RECEIVED/n/n/n/n/nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/dddddnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+
             dto.Rooms = JsonConvert.DeserializeObject<List<CreateRoomDto>>(rooms);
+            Console.WriteLine("ROOMS RECEIVED/n/n/n/n/n/dddddnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+
+            Console.WriteLine(rooms);
             try
             {
                 var listing = await _listService.CreateListingAsync(dto, userId);

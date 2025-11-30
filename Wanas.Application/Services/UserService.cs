@@ -2,22 +2,22 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Numerics;
 using Wanas.Application.Abstractions;
 using Wanas.Application.DTOs.User;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Errors;
+using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services;
-public class UserService(
-    UserManager<ApplicationUser> userManager,
-    IFileService fileService,
-ILogger<UserService> logger
-) : IUserService
+public class UserService( UserManager<ApplicationUser> userManager, IFileService fileService,ILogger<UserService> logger,IUnitOfWork unitOfWork ) : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ILogger<UserService> _logger = logger;
     private readonly IFileService _fileService = fileService;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+   
 
     //  COMPLETE PROFILE
     public async Task<Result<UserProfileResponse>> CompleteProfileAsync(
@@ -409,5 +409,67 @@ ILogger<UserService> logger
 
         return Result.Success(response);
     }
+
+
+    //Get profile by id 
+    public async Task<Result<UserProfileResponse>> GetUserProfileByIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _unitOfWork.Users.GetUserByIdAsync(userId);
+
+        if (user is null || user.IsDeleted)
+            return Result.Failure<UserProfileResponse>(UserErrors.UserNotFound);
+
+        var response = new UserProfileResponse(
+            user.Id,
+            user.Email!,
+            user.FullName,
+            user.ProfileType,
+            user.Age,
+            user.City,
+            user.PhoneNumber,
+            user.Bio,
+            user.Photo,
+            user.IsFirstLogin,
+            user.IsProfileCompleted,
+            user.IsPreferenceCompleted
+        );
+
+        return Result.Success(response);
+    }
+
+    //Get preferences by id
+    public async Task<Result<UserPreferencesResponse>> GetUserPreferencesByIdAsync(string userId, CancellationToken cancellationToken)
+    {
+        var pref = await _unitOfWork.UserPreferences.GetByUserIdAsync(userId);
+
+        if (pref is null)
+            return Result.Failure<UserPreferencesResponse>(UserErrors.UserNotFound);
+
+        var dto = new UserPreferencesResponse(
+            pref.Id,
+            pref.City,
+            pref.MinimumAge,
+            pref.MaximumAge,
+            pref.Gender,
+            pref.MinimumBudget,
+            pref.MaximumBudget,
+            pref.Children,
+            pref.Visits,
+            pref.OvernightGuests,
+            pref.Smoking,
+            pref.Pets,
+            pref.SleepSchedule,
+            pref.SocialLevel,
+            pref.NoiseToleranceLevel,
+            pref.Job,
+            pref.IsStudent,
+            pref.University,
+            pref.Major
+        );
+
+        return Result<UserPreferencesResponse>.Success(dto);
+    }
+
+
 
 }

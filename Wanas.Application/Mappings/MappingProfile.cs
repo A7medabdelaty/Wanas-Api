@@ -21,10 +21,9 @@ namespace Wanas.Application.Mappings
 
             // ChatParticipant → ChatParticipantDto
             CreateMap<ChatParticipant, ChatParticipantDto>()
-                .ForMember(dest => dest.UserId,
-                    opt => opt.MapFrom(src => src.UserId))
-                .ForMember(dest => dest.UserName,
-                    opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null));
+                .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.User.Photo));
 
             CreateMap<CreateChatRequestDto, Chat>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
@@ -38,10 +37,6 @@ namespace Wanas.Application.Mappings
                     opt => opt.MapFrom(src => src.SentAt));
 
             CreateMap<CreateMessageRequestDto, Message>();
-
-            CreateMap<ChatParticipant, ChatParticipantDto>()
-                .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.User.UserName));
-
         }
     }
 }
