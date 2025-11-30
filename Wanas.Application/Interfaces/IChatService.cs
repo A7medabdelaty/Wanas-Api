@@ -5,6 +5,7 @@ namespace Wanas.Application.Interfaces
     public interface IChatService
     {
         Task<IEnumerable<ChatDto>> GetUserChatsAsync(string userId);
+        Task<ChatDto> GetOrCreatePrivateChatAsync(string userId, string ownerId);
         Task<ChatDto?> GetChatDetailsAsync(int chatId);
         Task<ChatDto> CreateChatAsync(CreateChatRequestDto request);
         Task<bool> AddParticipantAsync(int chatId, string userId);
