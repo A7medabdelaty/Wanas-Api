@@ -11,5 +11,6 @@ public record AuthResponse(
     DateTime RefreshTokenExpiration,
     bool? IsFirstLogin,
     bool IsProfileCompleted,
-    bool IsPreferenceCompleted
+    bool IsPreferenceCompleted,
+    string? Role
 );
