@@ -51,8 +51,24 @@ namespace Wanas.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var requesterId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (requesterId == null)
+                return Unauthorized();
+
+            // Step 1 — Check if chat already exists (only for private chats)
+            var existingChat = await _chatService.GetOrCreatePrivateChatAsync(request.UserId, requesterId);
+            if (existingChat != null)
+            {
+                // Returned DTO includes correct ChatName for this user
+                return Ok(new ApiResponse(existingChat));
+            }
+
+            // Step 2 — Create new chat
             var chat = await _chatService.CreateChatAsync(request);
-            return CreatedAtAction(nameof(GetChatDetails), new { chatId = chat.Id }, new ApiResponse(chat));
+
+            return CreatedAtAction(nameof(GetChatDetails),
+                new { chatId = chat.Id },
+                new ApiResponse(chat));
         }
 
         // Update chat (rename or toggle group)
