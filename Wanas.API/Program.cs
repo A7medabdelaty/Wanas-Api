@@ -3,7 +3,8 @@ using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
 using Wanas.API.Middlewares;
-using Microsoft.Extensions.FileProviders;
+using Wanas.Application.Interfaces;
+using Wanas.Infrastructure.Persistence.Seed;
 
 
 // Configure Serilog (basic console + file rolling)
@@ -42,14 +43,6 @@ builder.Services.AddApplicationServices(builder.Configuration);
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
-    ),
-    RequestPath = "/uploads" // <-- this will make files available at https://localhost:7279/uploads/filename.jpg
-});
-
 // Configure Swagger (works in all environments)
 if (app.Environment.IsDevelopment())
 {
@@ -63,20 +56,24 @@ if (app.Environment.IsDevelopment())
 
 
 //Initialize ChromaDB on startup
-//using (var scope = app.Services.CreateScope())
-//{
-//    var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
-//    try
-//    {
-//        await chromaService.InitializeCollectionAsync();
-//        Console.WriteLine("ChromaDB collection initialized");
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine($"ChromaDB init failed: {ex.Message}");
-//        // Continue - traditional matching will still work
-//    }
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
+    try
+    {
+        await chromaService.InitializeCollectionAsync();
+        Console.WriteLine("ChromaDB collection initialized");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"ChromaDB init failed: {ex.Message}");
+        // Continue - traditional matching will still work
+    }
+}
+
+
+
+
 
 app.UseHttpsRedirection();
 
@@ -100,5 +97,5 @@ app.MapHub<ChatHub>("/hubs/chat", options =>
     options.ApplicationMaxBufferSize = 32 * 1024;
     options.TransportMaxBufferSize = 32 * 1024;
 });
-
+//using (var scope = app.Services.CreateScope()) { try { await DataSeeder.SeedAsync(scope.ServiceProvider); } catch (Exception ex) { Console.WriteLine($"Seeding failed: {ex.Message}"); } }
 app.Run();

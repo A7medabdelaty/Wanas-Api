@@ -187,21 +187,17 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<int>("AreaInSqMeters")
                         .HasColumnType("int");
 
-                    b.Property<int>("AvailableBeds")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AvailableRooms")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Floor")
-                        .IsRequired()
+                    b.Property<int>("Floor")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("int");
 
                     b.Property<bool>("HasAirConditioner")
                         .HasColumnType("bit");
 
                     b.Property<bool>("HasElevator")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasFans")
                         .HasColumnType("bit");
 
                     b.Property<bool>("HasInternet")
@@ -227,12 +223,6 @@ namespace Wanas.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("TotalBathrooms")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalBeds")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalRooms")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -343,7 +333,7 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsFirstLogin")
+                    b.Property<bool?>("IsFirstLogin")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPreferenceCompleted")
@@ -430,7 +420,6 @@ namespace Wanas.Infrastructure.Migrations
                             FullName = "Wanas Admin",
                             IsBanned = false,
                             IsDeleted = false,
-                            IsFirstLogin = true,
                             IsPreferenceCompleted = false,
                             IsProfileCompleted = false,
                             IsSuspended = false,
@@ -488,9 +477,6 @@ namespace Wanas.Infrastructure.Migrations
 
                     b.Property<int?>("ApartmentListingId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
 
                     b.Property<string>("RenterId")
                         .HasColumnType("nvarchar(450)");
@@ -1185,7 +1171,7 @@ namespace Wanas.Infrastructure.Migrations
                     b.Property<bool>("HasAirConditioner")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsAvailable")
+                    b.Property<bool>("HasFan")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("PricePerBed")
