@@ -31,6 +31,7 @@ namespace Wanas.Application.DTOs.Listing
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }
 
+        public HostDetailsDto Host { get; set; }
         public List<ListingPhotoDto> ListingPhotos { get; set; }
         public List<CommentDto> Comments { get; set; }
     }
