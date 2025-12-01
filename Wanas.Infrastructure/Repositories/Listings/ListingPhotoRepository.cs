@@ -18,5 +18,13 @@ namespace Wanas.Infrastructure.Repositories.Listings
                 .Where(x => x.ListingId == listingId)
                 .ToListAsync();
         }
+
+        public async Task<ListingPhoto> GetPhotoWithListingByIdAsync(int photoId)
+        {
+            return await _context.ListingPhotos
+                .Include(p => p.Listing)
+                .FirstOrDefaultAsync(p => p.Id == photoId);
+        }
+
     }
 }
