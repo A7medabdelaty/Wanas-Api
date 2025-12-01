@@ -9,5 +9,6 @@ namespace Wanas.Domain.Repositories
         Task<Chat?> GetChatWithMessagesAsync(int chatId);
         Task<Chat> GetChatWithUsersAsync(int chatId);
         Task<Chat?> GetChatWithParticipantsAsync(int chatId);
+        Task<Chat?> GetPrivateChatForListingAsync(string ownerId, string userId, int listingId);
     }
 }
