@@ -10,9 +10,10 @@ namespace Wanas.Application.DTOs.Matching
     {
         public int ListingId { get; set; }
         public string ListingTitle { get; set; }
+        public string ListingDescription { get; set; }
         public string ListingCity { get; set; }
-        public string OwnerName { get; set; }
-        public string OwnerPhoto { get; set; }
+        public int Price { get; set; }
+        public string FirstPhotoUrl { get; set; }
         public int Score { get; set; }
     }
 }

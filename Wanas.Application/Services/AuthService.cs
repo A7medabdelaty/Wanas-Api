@@ -50,7 +50,7 @@ public class AuthService(
             return Result.Failure<AuthResponse>(result.IsNotAllowed ? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredentials);
 
         var roles = await _userManager.GetRolesAsync(user);
-
+        var role = roles.FirstOrDefault();
         var (token, expiresIn) = _jwtProvider.GenerateToken(user, roles);
 
         var refreshToken = GenerateRefreshToken();
@@ -72,6 +72,7 @@ public class AuthService(
             await _userManager.UpdateAsync(user);
 
         return Result.Success(new AuthResponse(
+
             user.Id,
             user.Email,
             user.FullName,
@@ -82,7 +83,9 @@ public class AuthService(
             refreshExpires,
             user.IsFirstLogin,
             user.IsProfileCompleted,
-            user.IsPreferenceCompleted
+            user.IsPreferenceCompleted,
+            role
+
         ));
     }
 
@@ -106,6 +109,7 @@ public class AuthService(
         savedToken.RevokedOn = DateTime.UtcNow;
 
         var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault();
 
         var (newJwt, expiresIn) = _jwtProvider.GenerateToken(user, roles);
 
@@ -131,7 +135,8 @@ public class AuthService(
             newRefreshExpires,
             user.IsFirstLogin,
             user.IsProfileCompleted,
-            user.IsPreferenceCompleted
+            user.IsPreferenceCompleted,
+            role
         ));
     }
 

@@ -2,8 +2,9 @@ namespace Wanas.Application.DTOs.Chat
 {
     public class ChatParticipantDto
     {
-        public string UserId { get; set; } = string.Empty;
+        public string UserId { get; set; }
         public string? UserName { get; set; }
-        public DateTime JoinedAt { get; set; }
+        public string? DisplayName { get; set; }
+        public string? PhotoUrl { get; set; }
     }
 }

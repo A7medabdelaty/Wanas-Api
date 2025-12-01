@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.DTOs.Message;
 using Wanas.Domain.Entities;
@@ -9,11 +9,21 @@ namespace Wanas.Application.Mappings
     {
         public MappingProfile()
         {
+            // Chat → ChatDto
             CreateMap<Chat, ChatDto>()
-                .ForMember(dest => dest.ParticipantIds,
-                    opt => opt.MapFrom(src => src.ChatParticipants.Select(p => p.UserId)))
-                .ForMember(dest => dest.Messages,
-                    opt => opt.MapFrom(src => src.Messages));
+                .ForMember(dest => dest.ChatName,
+                    opt => opt.MapFrom(src =>
+                        !string.IsNullOrWhiteSpace(src.Name)
+                            ? src.Name
+                            : $"Chat #{src.Id}"))
+                .ForMember(dest => dest.Participants,
+                    opt => opt.MapFrom(src => src.ChatParticipants));
+
+            // ChatParticipant → ChatParticipantDto
+            CreateMap<ChatParticipant, ChatParticipantDto>()
+                .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.User.Photo));
 
             CreateMap<CreateChatRequestDto, Chat>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
@@ -27,10 +37,6 @@ namespace Wanas.Application.Mappings
                     opt => opt.MapFrom(src => src.SentAt));
 
             CreateMap<CreateMessageRequestDto, Message>();
-
-            CreateMap<ChatParticipant, ChatParticipantDto>()
-                .ForMember(d => d.UserName, opt => opt.MapFrom(s => s.User.UserName));
-
         }
     }
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Wanas.Application.DTOs.Message;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -12,12 +13,14 @@ namespace Wanas.Application.Services
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IRealTimeNotifier _notifier;
+        private readonly ILogger<MessageService> _logger;
 
-        public MessageService(IUnitOfWork uow, IMapper mapper, IRealTimeNotifier notifier)
+        public MessageService(IUnitOfWork uow, IMapper mapper, IRealTimeNotifier notifier, ILogger<MessageService> logger)
         {
             _uow = uow;
             _mapper = mapper;
             _notifier = notifier;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<MessageDto>> GetMessagesByChatAsync(int chatId, int limit = 50)
@@ -31,9 +34,17 @@ namespace Wanas.Application.Services
         {
             var chat = await _uow.Chats.GetChatWithParticipantsAsync(request.ChatId);
             if (chat == null)
+            {
+                _logger.LogWarning("Attempted to send message to non-existent chat {ChatId}", request.ChatId);
                 throw new InvalidOperationException("Chat not found.");
+            }
+
             if (!chat.ChatParticipants.Any(p => p.UserId == request.SenderId))
+            {
+                _logger.LogWarning("User {UserId} attempted to send message to chat {ChatId} but is not a participant", 
+                    request.SenderId, request.ChatId);
                 throw new InvalidOperationException("Sender is not a participant.");
+            }
 
             var message = new Message
             {
@@ -48,7 +59,10 @@ namespace Wanas.Application.Services
 
             var dto = _mapper.Map<MessageDto>(message);
 
-            // broadcast to group
+            _logger.LogInformation("Message {MessageId} created in chat {ChatId} by user {UserId}. Notifying {ParticipantCount} participants", 
+                dto.Id, request.ChatId, request.SenderId, chat.ChatParticipants.Count);
+
+            // Broadcast to all connected participants in the group
             await _notifier.NotifyMessageReceivedAsync(dto);
 
             return dto;

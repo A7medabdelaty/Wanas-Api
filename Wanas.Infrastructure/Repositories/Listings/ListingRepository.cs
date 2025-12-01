@@ -16,6 +16,10 @@ namespace Wanas.Infrastructure.Repositories.Listings
         {
             return await _context.Listings
                 .Where(l => l.IsActive)
+                .Include(l => l.User)
+                .ThenInclude(u => u.UserPreference)
+                .Include(l => l.ApartmentListing)
+                .Include(l => l.ListingPhotos)
                 .ToListAsync();
         }
 

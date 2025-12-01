@@ -37,8 +37,9 @@ namespace Wanas.Application.Services
 
             return $@"
                         Write an attractive, warm, and persuasive real-estate listing description.
-                        It must be one flowing paragraph (5–7 sentences).
+                        It must be one flowing paragraph (3-5 sentences).
                         It should highlight comfort, convenience, lifestyle, and location.
+                        it should be in arabic
 
                         Listing Information:
                         - Title: {d.Title}

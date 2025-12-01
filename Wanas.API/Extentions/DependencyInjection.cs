@@ -99,6 +99,22 @@ namespace Wanas.API.Extentions
                     ValidIssuer = jwtSettings?.Issuer,
                     ValidAudience = jwtSettings?.Audience
                 };
+                // Allow SignalR to read token from query string
+                o.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        
+                        // Check for token in query string for both WebSocket upgrade and regular requests
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
+                        
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             services.AddSingleton<IJwtProvider, JwtProvider>();
@@ -125,6 +141,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IPayoutRepository, PayoutRepository>();
             services.AddScoped<IRefundRepository, RefundRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IBookingApprovalRepository, BookingApprovalRepository>();
 
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -151,12 +168,15 @@ namespace Wanas.API.Extentions
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
 
-            services.AddSignalR();
+            services.AddSignalR(options =>
+            {
+                options.MaximumReceiveMessageSize = 32 * 1024; // 32KB
+                options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+            });
+            
             services.AddSingleton<IUserIdProvider, ClaimNameUserIdProvider>();
-
-            // register the real-time notifier (ensure namespace and class exist)
-            services.AddSingleton<Wanas.Application.Interfaces.IRealTimeNotifier, Wanas.API.RealTime.RealTimeNotifier>();
-
 
             // RAG dependencies
             services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
@@ -170,8 +190,18 @@ namespace Wanas.API.Extentions
             services.AddScoped<MatchingService>();
 
             // matching service
-            services.AddScoped<IMatchingService, StaticTestMatchingService>();
+            // Remove static test matcher base
+            //services.AddScoped<StaticTestMatchingService>(); // traditional base matcher (test)
+            services.AddScoped<MatchingService>(); // real traditional matcher
+            services.AddScoped<IMatchingService>(sp =>
+                new HybridMatchingService(
+                    sp.GetRequiredService<MatchingService>(), // use real matcher
+                    sp.GetRequiredService<IChromaService>(),
+                    sp.GetRequiredService<IUnitOfWork>()));
             services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
+
+
+
             // auth service
             services.AddAuthorization(options =>
             {

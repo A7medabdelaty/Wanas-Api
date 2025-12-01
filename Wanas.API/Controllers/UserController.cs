@@ -123,4 +123,28 @@ public class UserController(
 
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
+
+    [HttpGet("profile/{Id}")]
+    public async Task<IActionResult> GetUserProfileById(
+         string Id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _userService.GetUserProfileByIdAsync(Id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+    [HttpGet("preferences/{Id}")]
+    public async Task<IActionResult> GetUserPreferencesById(
+         string Id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _userService.GetUserPreferencesByIdAsync(Id, cancellationToken);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
+
+
+
+
+
+
 }

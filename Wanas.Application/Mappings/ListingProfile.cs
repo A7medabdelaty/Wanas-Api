@@ -24,21 +24,32 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.IsSmokingAllowed, opt => opt.MapFrom(src => src.ApartmentListing.IsSmokingAllowed))
                 .ForMember(dest => dest.Host, opt => opt.MapFrom(src => src.User))
 
-                // Computed fields
-                .ForMember(dest => dest.TotalRooms, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Count))
+            // ---------- COMPUTED FIELDS ----------
+                .ForMember(dest => dest.TotalRooms, opt =>
+                    opt.MapFrom(src => src.ApartmentListing.Rooms.Count))
 
-                .ForMember(dest => dest.AvailableRooms, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Count(r => r.IsAvailable)))
+                .ForMember(dest => dest.AvailableRooms, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Count(r =>
+                            r.Beds.Any(b => b.IsAvailable)
+                        )
+                    )
+                )
 
-                .ForMember(dest => dest.TotalBeds, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Sum(r => r.BedsCount)))
+                .ForMember(dest => dest.TotalBeds, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Sum(r => r.Beds.Count)
+                    )
+                )
 
-                .ForMember(dest => dest.AvailableBeds, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Sum(r => r.AvailableBeds)))
-
+                .ForMember(dest => dest.AvailableBeds, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Sum(r =>
+                            r.Beds.Count(b => b.IsAvailable)
+                        )
+                    )
+                )
                 .ForMember(dest => dest.ListingPhotos, opt => opt.MapFrom(src => src.ListingPhotos))
-                // Comments mapping handled by another profile — kept here for output only
                 .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
 
 
@@ -110,10 +121,28 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City))
                 .ForMember(dest => dest.MonthlyPrice, opt => opt.MapFrom(src => src.ApartmentListing.MonthlyPrice))
-                .ForMember(dest => dest.MainPhotoUrl, opt => opt.MapFrom(src => src.ListingPhotos.FirstOrDefault() != null ? src.ListingPhotos.First().URL : null))
+                .ForMember(dest => dest.MainPhotoUrl, opt =>
+                    opt.MapFrom(src => src.ListingPhotos.FirstOrDefault() != null
+                        ? src.ListingPhotos.First().URL
+                        : null
+                    )
+                )
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
-                .ForMember(dest => dest.AvailableRooms, opt => opt.MapFrom(src => src.ApartmentListing.Rooms.Count(r => r.IsAvailable)))
-                .ForMember(dest => dest.AvailableBeds, opt => opt.MapFrom(src => src.ApartmentListing.Rooms.Sum(r => r.AvailableBeds)))
+
+                .ForMember(dest => dest.AvailableRooms, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Count(r =>
+                            r.Beds.Any(b => b.IsAvailable)
+                        )
+                    )
+                )
+                .ForMember(dest => dest.AvailableBeds, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Sum(r =>
+                            r.Beds.Count(b => b.IsAvailable)
+                        )
+                    )
+                )
                 .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet));
 
 
