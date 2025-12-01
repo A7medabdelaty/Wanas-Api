@@ -16,7 +16,6 @@ namespace Wanas.Domain.Repositories
         IReportRepository Reports { get; }
         ITrafficLogRepository TrafficLogs { get; }
         IDailyMetricsRepository DailyMetrics { get; }
-        // Revenue
         IPaymentRepository Payments { get; }
         ICommissionRepository Commissions { get; }
         IPayoutRepository Payouts { get; }
@@ -26,7 +25,7 @@ namespace Wanas.Domain.Repositories
         IListingRepository Listings { get; }
         IListingPhotoRepository ListingPhotos { get; }
         ICommentRepository Comments { get; }
-
         IRoomRepository Rooms { get; }
+        IBookingApprovalRepository BookingApprovals { get; }
     }
 }

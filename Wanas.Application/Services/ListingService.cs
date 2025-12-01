@@ -93,6 +93,9 @@ namespace Wanas.Application.Services
                 }
             }
 
+            var chat = new Chat { IsGroup = true, Name = listing.Title };
+            listing.GroupChat = chat;
+            listing.GroupChatId = chat.Id;
             // Save everything to the database
             await _uow.Listings.AddAsync(listing);
             await _uow.CommitAsync();

@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using System.Security.Claims;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
-using Wanas.Domain.Entities;
 
 namespace Wanas.API.Controllers
 {

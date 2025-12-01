@@ -17,9 +17,7 @@ namespace Wanas.API.RealTime
             _logger = logger;
         }
 
-        // ----------------------------------------------------
         // CHAT CREATED
-        // ----------------------------------------------------
         public async Task NotifyChatCreatedAsync(ChatDto chat)
         {
             try
@@ -39,9 +37,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // CHAT UPDATED
-        // ----------------------------------------------------
         public async Task NotifyChatUpdatedAsync(ChatDto chat)
         {
             try
@@ -57,9 +53,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // CHAT DELETED
-        // ----------------------------------------------------
         public async Task NotifyChatDeletedAsync(int chatId)
         {
             try
@@ -75,9 +69,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // PARTICIPANT ADDED
-        // ----------------------------------------------------
         public async Task NotifyParticipantAddedAsync(int chatId, string userId)
         {
             try
@@ -94,9 +86,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // PARTICIPANT REMOVED
-        // ----------------------------------------------------
         public async Task NotifyParticipantRemovedAsync(int chatId, string userId)
         {
             try
@@ -113,9 +103,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // MESSAGE RECEIVED - Notifies ALL participants (online & offline)
-        // ----------------------------------------------------
         public async Task NotifyMessageReceivedAsync(MessageDto message)
         {
             try
@@ -134,9 +122,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // MESSAGE DELETED
-        // ----------------------------------------------------
         public async Task NotifyMessageDeletedAsync(int chatId, int messageId)
         {
             try
@@ -153,9 +139,7 @@ namespace Wanas.API.RealTime
             }
         }
 
-        // ----------------------------------------------------
         // MESSAGE READ
-        // ----------------------------------------------------
         public async Task NotifyMessageReadAsync(int chatId, int messageId, string userId)
         {
             try
@@ -171,6 +155,12 @@ namespace Wanas.API.RealTime
                 _logger.LogError(ex, "Error notifying message read for chat {ChatId}, message {MessageId}, user {UserId}", 
                     chatId, messageId, userId);
             }
+        }
+
+        public async Task NotifyPaymentApprovedAsync(int listingId, string userId)
+        {
+            await _hub.Clients.User(userId)
+                .SendAsync("PaymentApproved", new { ListingId = listingId });
         }
     }
 }
