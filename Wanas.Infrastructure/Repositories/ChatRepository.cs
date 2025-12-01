@@ -12,7 +12,7 @@ namespace Wanas.Infrastructure.Repositories
         public async Task<IEnumerable<Chat>> GetUserChatsAsync(string userId)
         {
             return await _context.Chats
-                .Include(c => c.ChatParticipants).ThenInclude(p=>p.User)
+                .Include(c => c.ChatParticipants).ThenInclude(p=>p.User).ThenInclude(m=>m.Messages)
                 .Where(c => c.ChatParticipants.Any(p => p.UserId == userId))
                 .ToListAsync();
         }
