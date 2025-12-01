@@ -1,46 +1,43 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Wanas.API.Responses;
+﻿using Microsoft.AspNetCore.Mvc;
+using Wanas.Application.DTOs.Approval;
 using Wanas.Application.Interfaces;
-
-[Authorize]
-[ApiController]
-[Route("api/listings")]
-public class ApprovalController : ControllerBase
+namespace Wanas.API.Controllers
 {
-    private readonly IBookingApprovalService _approvalService;
-
-    public ApprovalController(IBookingApprovalService approvalService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class BookingApprovalController : ControllerBase
     {
-        _approvalService = approvalService;
-    }
+        private readonly IBookingApprovalService _approvalService;
 
-    [HttpPost("{listingId}/approve-payment/{userId}")]
-    public async Task<IActionResult> ApprovePayment(int listingId, string userId)
-    {
-        var ownerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (ownerId == null)
-            return Unauthorized(ownerId);
+        public BookingApprovalController(IBookingApprovalService approvalService)
+        {
+            _approvalService = approvalService;
+        }
 
-        var ok = await _approvalService.ApprovePaymentAsync(listingId, ownerId, userId);
-        if (!ok)
-            return BadRequest(new ApiError("ApprovalFailed"));
+        [HttpPost("approve-group")]
+        public async Task<IActionResult> ApproveGroup([FromBody] GroupApprovalRequest dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        return Ok(new ApiResponse("Payment approved successfully."));
-    }
+            var ok = await _approvalService.ApproveToGroupAsync(dto.ListingId, dto.OwnerId, dto.UserId);
 
-    [HttpPost("{listingId}/approve-to-group/{userId}")]
-    public async Task<IActionResult> ApproveToGroup(int listingId, string userId)
-    {
-        var ownerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (ownerId == null)
-            return Unauthorized(ownerId);
+            return ok
+                ? Ok(new { Message = "User added to group chat successfully." })
+                : BadRequest(new { Error = "Group approval failed or already approved." });
+        }
 
-        var ok = await _approvalService.ApproveToGroupAsync(listingId, ownerId, userId);
-        if (!ok)
-            return BadRequest(new ApiError("GroupAddFailed"));
+        [HttpPost("approve-payment")]
+        public async Task<IActionResult> ApprovePayment([FromBody] PaymentApprovalRequest dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        return Ok(new ApiResponse("User added to group chat."));
+            var ok = await _approvalService.ApprovePaymentAsync(dto.ListingId, dto.OwnerId, dto.UserId);
+
+            return ok
+                ? Ok(new { Message = "Payment approved successfully." })
+                : BadRequest(new { Error = "Payment approval failed or already approved." });
+        }
     }
 }
