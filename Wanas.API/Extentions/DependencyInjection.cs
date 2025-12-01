@@ -179,27 +179,24 @@ namespace Wanas.API.Extentions
             services.AddSingleton<IUserIdProvider, ClaimNameUserIdProvider>();
 
             // RAG dependencies
-            services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
-            services.AddHttpClient<IChromaService, ChromaService>();
+            // services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
+            // services.AddHttpClient<IChromaService, ChromaService>();
             services.AddHttpClient<IAIProvider, OpenAIProvider>();
             services.AddScoped<IChatbotService, ChatbotService>();
 
             services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
-            services.AddScoped<IEmbeddingService, OpenAIEmbeddingService>();
-            services.AddScoped<IChromaService, ChromaService>();
-            services.AddScoped<MatchingService>();
 
             // matching service
-            // Remove static test matcher base
-            //services.AddScoped<StaticTestMatchingService>(); // traditional base matcher (test)
-            services.AddScoped<MatchingService>(); // real traditional matcher
-            services.AddScoped<IMatchingService>(sp =>
-                new HybridMatchingService(
-                    sp.GetRequiredService<MatchingService>(), // use real matcher
-                    sp.GetRequiredService<IChromaService>(),
-                    sp.GetRequiredService<IUnitOfWork>()));
-            services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
 
+            // services.AddScoped<MatchingService>();
+            // services.AddScoped<IMatchingService>(sp =>
+            //     new HybridMatchingService(
+            //         sp.GetRequiredService<MatchingService>(), // use real matcher
+            //         sp.GetRequiredService<IChromaService>(),
+            //         sp.GetRequiredService<IUnitOfWork>()));
+
+            services.AddScoped<IMatchingService,MatchingService>(); // real traditional matcher
+            services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
 
 
             // auth service
