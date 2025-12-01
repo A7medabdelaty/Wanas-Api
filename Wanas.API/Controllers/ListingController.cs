@@ -25,17 +25,18 @@ namespace Wanas.API.Controllers
             _logger = logger;
         }
 
-        // get all listings
+        // GET ALL
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListingCardDto>>> GetAll()
         {
             var listings = await _listService.GetAllListingsAsync();
-            if (listings == null || !listings.Any())
+            if (!listings.Any())
                 return NotFound("No listings found.");
+
             return Ok(listings);
         }
 
-        // get listing by id
+        // GET BY ID
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ListingDetailsDto>> GetById(int id)
         {
@@ -49,22 +50,25 @@ namespace Wanas.API.Controllers
             return Ok(listing);
         }
 
-        // create listing
+        // CREATE LISTING
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<ListingDetailsDto>> Create([FromForm] CreateListingDto dto, [FromForm] string rooms)
+        public async Task<ActionResult<ListingDetailsDto>> Create(
+            [FromForm] CreateListingDto dto,
+            [FromForm] string rooms)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null)
                 return Unauthorized();
-            Console.WriteLine("ROOMS RECEIVED/n/n/n/n/nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/dddddnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
 
-            dto.Rooms = JsonConvert.DeserializeObject<List<CreateRoomDto>>(rooms);
-            Console.WriteLine("ROOMS RECEIVED/n/n/n/n/n/dddddnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+            if (string.IsNullOrWhiteSpace(rooms))
+                return BadRequest("Rooms JSON is required.");
 
-            Console.WriteLine(rooms);
             try
             {
+                dto.Rooms = JsonConvert.DeserializeObject<List<CreateRoomDto>>(rooms)
+                            ?? new List<CreateRoomDto>();
+
                 var listing = await _listService.CreateListingAsync(dto, userId);
 
                 return CreatedAtAction(nameof(GetById),
@@ -78,19 +82,27 @@ namespace Wanas.API.Controllers
             }
         }
 
-        // update listing
+        // UPDATE LISTING
         [Authorize]
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ListingDetailsDto>> Update(int id, [FromForm] UpdateListingDto dto, [FromForm] string rooms)
+        public async Task<ActionResult<ListingDetailsDto>> Update(
+            int id,
+            [FromForm] UpdateListingDto dto,
+            [FromForm] string rooms)
         {
             if (id <= 0)
                 return BadRequest("Invalid id.");
 
-            dto.Rooms = JsonConvert.DeserializeObject<List<UpdateRoomDto>>(rooms);
+            if (string.IsNullOrWhiteSpace(rooms))
+                return BadRequest("Rooms JSON is required.");
 
             try
             {
+                dto.Rooms = JsonConvert.DeserializeObject<List<UpdateRoomDto>>(rooms)
+                            ?? new List<UpdateRoomDto>();
+
                 var updated = await _listService.UpdateListingAsync(id, dto);
+
                 if (updated == null)
                     return NotFound();
 
@@ -103,7 +115,7 @@ namespace Wanas.API.Controllers
             }
         }
 
-        // delete listing
+        // DELETE LISTING
         [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
@@ -112,7 +124,6 @@ namespace Wanas.API.Controllers
                 return BadRequest("Invalid id.");
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
             _logger.LogInformation("User {User} requested deletion of listing {Id}", userId, id);
 
             try
@@ -131,7 +142,7 @@ namespace Wanas.API.Controllers
             }
         }
 
-        // get listings by user
+        // GET LISTINGS BY USER
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<ListingCardDto>>> GetListingsByUser(string userId)
         {
@@ -143,7 +154,7 @@ namespace Wanas.API.Controllers
             return Ok(listings);
         }
 
-        // add photos
+        // ADD PHOTOS
         [Authorize]
         [HttpPost("{id:int}/photos")]
         public async Task<IActionResult> AddPhotos(int id, [FromForm] List<IFormFile> photos)
@@ -158,7 +169,7 @@ namespace Wanas.API.Controllers
             return NoContent();
         }
 
-        // delete listing photo
+        // DELETE PHOTO
         [Authorize]
         [HttpDelete("{listingId:int}/photos/{photoId:int}")]
         public async Task<IActionResult> DeletePhoto(int listingId, int photoId)
@@ -175,7 +186,7 @@ namespace Wanas.API.Controllers
             return NoContent();
         }
 
-        // get listing comments
+        // COMMENTS
         [HttpGet("{listingId:int}/comments")]
         public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments(int listingId)
         {
@@ -186,13 +197,13 @@ namespace Wanas.API.Controllers
             return Ok(comments);
         }
 
-        // add comment
         [Authorize]
         [HttpPost("{listingId:int}/comments")]
-        public async Task<ActionResult<CommentDto>> CreateComment(int listingId, [FromBody] CreateCommentDto dto)
+        public async Task<ActionResult<CommentDto>> CreateComment(
+            int listingId,
+            [FromBody] CreateCommentDto dto)
         {
             dto.ListingId = listingId;
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var comment = await _commentService.CreateCommentAsync(dto, userId);
@@ -202,10 +213,12 @@ namespace Wanas.API.Controllers
                 comment);
         }
 
-        // update comment
         [Authorize]
         [HttpPut("{listingId:int}/comments/{commentId:int}")]
-        public async Task<ActionResult<CommentDto>> UpdateComment(int listingId, int commentId, [FromBody] UpdateCommentDto dto)
+        public async Task<ActionResult<CommentDto>> UpdateComment(
+            int listingId,
+            int commentId,
+            [FromBody] UpdateCommentDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -217,7 +230,6 @@ namespace Wanas.API.Controllers
             return Ok(updated);
         }
 
-        // get comment
         [HttpGet("{listingId:int}/comments/{commentId:int}")]
         public async Task<ActionResult<CommentDto>> GetComment(int listingId, int commentId)
         {
