@@ -33,6 +33,8 @@ namespace Wanas.Infrastructure.Repositories.Listings
         public async Task<IEnumerable<Listing>> GetListingsByUserAsync(string userId)
         {
             return await _context.Listings
+                .Include(p=>p.ApartmentListing)
+                .Include(c=>c.ListingPhotos)
                 .Where(l => l.UserId == userId)
                 .ToListAsync();
         }
