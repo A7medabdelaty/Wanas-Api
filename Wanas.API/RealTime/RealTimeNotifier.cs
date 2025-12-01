@@ -162,5 +162,11 @@ namespace Wanas.API.RealTime
             await _hub.Clients.User(userId)
                 .SendAsync("PaymentApproved", new { ListingId = listingId });
         }
+        public async Task NotifyGroupApprovedAsync(int chatId, string userId)
+        {
+            await _hub.Clients.Group($"chat_{chatId}")
+                .SendAsync("GroupJoinApproved", new { ChatId = chatId, UserId = userId });
+        }
+
     }
 }

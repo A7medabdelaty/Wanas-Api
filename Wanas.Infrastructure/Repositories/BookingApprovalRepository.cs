@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.Persistence;
 
@@ -14,5 +15,11 @@ namespace Wanas.Infrastructure.Repositories
             return await _context.BookingApprovals
                 .AnyAsync(x => x.ListingId == listingId && x.UserId == userId);
         }
+        public async Task<bool> ExistsAsync(int listingId, string userId, ApprovalType type)
+        {
+            return await _context.BookingApprovals
+                .AnyAsync(b => b.ListingId == listingId && b.UserId == userId && b.Type == type);
+        }
+
     }
 }

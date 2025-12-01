@@ -20,6 +20,11 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                 .HasForeignKey(m => m.ChatId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(c => c.Listing)
+                .WithOne(l => l.GroupChat)
+                .HasForeignKey<Chat>(c => c.ListingId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.Property(c => c.Name)
                 .HasMaxLength(100);
         }

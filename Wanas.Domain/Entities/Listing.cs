@@ -28,6 +28,5 @@ namespace Wanas.Domain.Entities
         public int GroupChatId { get; set; }
         public Chat GroupChat { get; set; }
         public virtual ICollection<BookingApproval> BookingApprovals { get; set; } = new List<BookingApproval>();
-
     }
 }
