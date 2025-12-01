@@ -8,37 +8,47 @@ namespace Wanas.Application.Mappings
     {
         public ListingProfile()
         {
-            //   LISTING → DETAILS DTO
-            CreateMap<Listing, ListingDetailsDto>()
-                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ApartmentListing.Address))
-                .ForMember(dest => dest.MonthlyPrice, opt => opt.MapFrom(src => src.ApartmentListing.MonthlyPrice))
-                .ForMember(dest => dest.HasElevator, opt => opt.MapFrom(src => src.ApartmentListing.HasElevator))
-                .ForMember(dest => dest.Floor, opt => opt.MapFrom(src => src.ApartmentListing.Floor))
-                .ForMember(dest => dest.AreaInSqMeters, opt => opt.MapFrom(src => src.ApartmentListing.AreaInSqMeters))
-                .ForMember(dest => dest.TotalBathrooms, opt => opt.MapFrom(src => src.ApartmentListing.TotalBathrooms))
-                .ForMember(dest => dest.HasKitchen, opt => opt.MapFrom(src => src.ApartmentListing.HasKitchen))
-                .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet))
-                .ForMember(dest => dest.HasAirConditioner, opt => opt.MapFrom(src => src.ApartmentListing.HasAirConditioner))
-                .ForMember(dest => dest.HasFans, opt => opt.MapFrom(src => src.ApartmentListing.HasFans))
-                .ForMember(dest => dest.IsPetFriendly, opt => opt.MapFrom(src => src.ApartmentListing.IsPetFriendly))
-                .ForMember(dest => dest.IsSmokingAllowed, opt => opt.MapFrom(src => src.ApartmentListing.IsSmokingAllowed))
+CreateMap<Listing, ListingDetailsDto>()
+    .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ApartmentListing.Address))
+    .ForMember(dest => dest.MonthlyPrice, opt => opt.MapFrom(src => src.ApartmentListing.MonthlyPrice))
+    .ForMember(dest => dest.HasElevator, opt => opt.MapFrom(src => src.ApartmentListing.HasElevator))
+    .ForMember(dest => dest.Floor, opt => opt.MapFrom(src => src.ApartmentListing.Floor))
+    .ForMember(dest => dest.AreaInSqMeters, opt => opt.MapFrom(src => src.ApartmentListing.AreaInSqMeters))
+    .ForMember(dest => dest.TotalBathrooms, opt => opt.MapFrom(src => src.ApartmentListing.TotalBathrooms))
+    .ForMember(dest => dest.HasKitchen, opt => opt.MapFrom(src => src.ApartmentListing.HasKitchen))
+    .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet))
+    .ForMember(dest => dest.HasAirConditioner, opt => opt.MapFrom(src => src.ApartmentListing.HasAirConditioner))
+    .ForMember(dest => dest.HasFans, opt => opt.MapFrom(src => src.ApartmentListing.HasFans))
+    .ForMember(dest => dest.IsPetFriendly, opt => opt.MapFrom(src => src.ApartmentListing.IsPetFriendly))
+    .ForMember(dest => dest.IsSmokingAllowed, opt => opt.MapFrom(src => src.ApartmentListing.IsSmokingAllowed))
 
-                // Computed fields
-                .ForMember(dest => dest.TotalRooms, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Count))
+    // ---------- COMPUTED FIELDS ----------
+    .ForMember(dest => dest.TotalRooms, opt =>
+        opt.MapFrom(src => src.ApartmentListing.Rooms.Count))
 
-                .ForMember(dest => dest.AvailableRooms, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Count(r => r.IsAvailable)))
+    .ForMember(dest => dest.AvailableRooms, opt =>
+        opt.MapFrom(src =>
+            src.ApartmentListing.Rooms.Count(r =>
+                r.Beds.Any(b => b.IsAvailable)
+            )
+        )
+    )
 
-                .ForMember(dest => dest.TotalBeds, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Sum(r => r.BedsCount)))
+    .ForMember(dest => dest.TotalBeds, opt =>
+        opt.MapFrom(src =>
+            src.ApartmentListing.Rooms.Sum(r => r.Beds.Count)
+        )
+    )
 
-                .ForMember(dest => dest.AvailableBeds, opt => opt.MapFrom(src =>
-                    src.ApartmentListing.Rooms.Sum(r => r.AvailableBeds)))
-
-                .ForMember(dest => dest.ListingPhotos, opt => opt.MapFrom(src => src.ListingPhotos))
-                // Comments mapping handled by another profile — kept here for output only
-                .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
+    .ForMember(dest => dest.AvailableBeds, opt =>
+        opt.MapFrom(src =>
+            src.ApartmentListing.Rooms.Sum(r =>
+                r.Beds.Count(b => b.IsAvailable)
+            )
+        )
+    )
+    .ForMember(dest => dest.ListingPhotos, opt => opt.MapFrom(src => src.ListingPhotos))
+    .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
 
 
             //   LISTING PHOTO → DTO
@@ -109,10 +119,28 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City))
                 .ForMember(dest => dest.MonthlyPrice, opt => opt.MapFrom(src => src.ApartmentListing.MonthlyPrice))
-                .ForMember(dest => dest.MainPhotoUrl, opt => opt.MapFrom(src => src.ListingPhotos.FirstOrDefault() != null ? src.ListingPhotos.First().URL : null))
+                .ForMember(dest => dest.MainPhotoUrl, opt =>
+                    opt.MapFrom(src => src.ListingPhotos.FirstOrDefault() != null
+                        ? src.ListingPhotos.First().URL
+                        : null
+                    )
+                )
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
-                .ForMember(dest => dest.AvailableRooms, opt => opt.MapFrom(src => src.ApartmentListing.Rooms.Count(r => r.IsAvailable)))
-                .ForMember(dest => dest.AvailableBeds, opt => opt.MapFrom(src => src.ApartmentListing.Rooms.Sum(r => r.AvailableBeds)))
+
+                .ForMember(dest => dest.AvailableRooms, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Count(r =>
+                            r.Beds.Any(b => b.IsAvailable)
+                        )
+                    )
+                )
+                .ForMember(dest => dest.AvailableBeds, opt =>
+                    opt.MapFrom(src =>
+                        src.ApartmentListing.Rooms.Sum(r =>
+                            r.Beds.Count(b => b.IsAvailable)
+                        )
+                    )
+                )
                 .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet));
 
 
