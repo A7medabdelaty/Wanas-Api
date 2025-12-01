@@ -13,5 +13,6 @@ namespace Wanas.Application.Interfaces
         Task NotifyMessageReceivedAsync(MessageDto message);
         Task NotifyMessageDeletedAsync(int chatId, int messageId);
         Task NotifyMessageReadAsync(int chatId, int messageId, string userId);
+        Task NotifyPaymentApprovedAsync(int listingId, string userId);
     }
 }

@@ -15,6 +15,7 @@ namespace Wanas.Infrastructure.Persistence.Configurations
             builder.Property(l => l.CreatedAt)
                    .HasDefaultValueSql("GETUTCDATE()");
             builder.Property(l => l.IsActive).HasColumnType("bit");
+
             builder
                 .HasIndex(l => l.City)
                 .HasDatabaseName("IX_Listing_City");

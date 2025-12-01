@@ -25,5 +25,9 @@ namespace Wanas.Domain.Entities
         public string? ModerationNote { get; set; }
         public bool IsFlagged { get; set; } = false;
         public string? FlagReason { get; set; }
+        public int GroupChatId { get; set; }
+        public Chat GroupChat { get; set; }
+        public virtual ICollection<BookingApproval> BookingApprovals { get; set; } = new List<BookingApproval>();
+
     }
 }

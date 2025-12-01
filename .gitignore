@@ -370,3 +370,4 @@ FodyWeavers.xsd
 # Ignore Uploads folder
 Wanas.API.uploads/
 /Wanas.API/uploads
+/Wanas.Infrastructure/Migrations/AppDBContextModelSnapshot.cs
