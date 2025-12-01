@@ -58,9 +58,9 @@ namespace Wanas.API.Controllers
             var creatorId = GetUserId();
 
             // If request.UserId != null → private chat
-            if (!string.IsNullOrWhiteSpace(request.UserId))
+            if (!string.IsNullOrWhiteSpace(request.ParticipantId))
             {
-                var chat = await _chatService.GetOrCreatePrivateChatAsync(creatorId, request.UserId);
+                var chat = await _chatService.GetOrCreatePrivateChatAsync(creatorId, request.ParticipantId);
                 return Ok(new ApiResponse(chat));
             }
 

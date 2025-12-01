@@ -1,4 +1,5 @@
 using dotenv.net;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Wanas.API.Extentions;
 using Wanas.API.Hubs;
