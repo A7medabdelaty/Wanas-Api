@@ -389,40 +389,18 @@ namespace Wanas.Application.Services
 
             return dtoCreated;
         }
-
-        public async Task<ChatDto> GetPrivateChatForListingAsync(string ownerId, string userId, int listingId)
+        public async Task<ChatDto?> GetPrivateChatForListingAsync(string ownerId, string userId, int listingId)
         {
             var existing = await _uow.Chats.GetPrivateChatForListingAsync(ownerId, userId, listingId);
 
-            if (existing != null)
-            {
-                var full = await _uow.Chats.GetChatWithUsersAsync(existing.Id);
-                var dto = _mapper.Map<ChatDto>(full);
-                ApplyPrivateChatName(dto, ownerId);
-                return dto;
-            }
+            if (existing == null)
+                return null;
 
-            var chat = new Chat
-            {
-                IsGroup = false,
-                ListingId = listingId,
-                CreatedAt = DateTime.UtcNow,
-                ChatParticipants = new List<ChatParticipant>
-        {
-            new ChatParticipant { UserId = ownerId },
-            new ChatParticipant { UserId = userId }
-        }
-            };
+            var full = await _uow.Chats.GetChatWithUsersAsync(existing.Id);
 
-            await _uow.Chats.AddAsync(chat);
-            await _uow.CommitAsync();
-
-            var fullChat = await _uow.Chats.GetChatWithUsersAsync(chat.Id);
-
-            var createdDto = _mapper.Map<ChatDto>(fullChat);
-            ApplyPrivateChatName(createdDto, ownerId);
-
-            return createdDto;
+            var dto = _mapper.Map<ChatDto>(full);
+            ApplyPrivateChatName(dto, ownerId);
+            return dto;
         }
 
     }

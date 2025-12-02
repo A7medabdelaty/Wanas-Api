@@ -10,6 +10,7 @@ namespace Wanas.Application.Mappings
         {
             CreateMap<Listing, ListingDetailsDto>()
                 .ForMember(dest=>dest.OwnerId, opt=>opt.MapFrom(src=>src.UserId))
+                .ForMember(dest=>dest.GroupChatId, opt=>opt.MapFrom(src=>src.GroupChatId))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.ApartmentListing.Address))
                 .ForMember(dest => dest.MonthlyPrice, opt => opt.MapFrom(src => src.ApartmentListing.MonthlyPrice))
                 .ForMember(dest => dest.HasElevator, opt => opt.MapFrom(src => src.ApartmentListing.HasElevator))

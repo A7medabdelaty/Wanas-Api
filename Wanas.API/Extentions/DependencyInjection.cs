@@ -160,10 +160,10 @@ namespace Wanas.API.Extentions
             services.AddScoped<IListingService, ListingService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IFileService, FileService>();
-
             services.AddScoped<IListingModerationService, ListingModerationService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IRevenueService, RevenueService>();
+            services.AddScoped<IBookingApprovalService, BookingApprovalService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();

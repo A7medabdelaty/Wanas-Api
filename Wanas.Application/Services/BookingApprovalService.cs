@@ -1,4 +1,5 @@
 ﻿
+using Wanas.Application.DTOs.Approval;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
@@ -38,11 +39,17 @@ namespace Wanas.Application.Services
                     .ExistsAsync(listingId, userId, ApprovalType.Group))
                 return false;
 
+            var groupChat = _chatService.AddParticipantAsync(listing.Id, userId);
+            if (groupChat == null)
+                return false;
+
             // Insert approval
             await _uow.BookingApprovals.AddAsync(new BookingApproval
             {
                 ListingId = listingId,
                 UserId = userId,
+                ChatId = privateChat.Id,
+                OwnerId = ownerId,
                 Type = ApprovalType.Group,
                 ApprovedAt = DateTime.UtcNow
             });
@@ -50,7 +57,7 @@ namespace Wanas.Application.Services
             await _uow.CommitAsync();
 
             // Notify group chat
-            await _notifier.NotifyGroupApprovedAsync(listing.GroupChatId, userId);
+            await _notifier.NotifyGroupApprovedAsync((int)listing.GroupChatId, userId);
 
             return true;
         }
@@ -77,6 +84,8 @@ namespace Wanas.Application.Services
             {
                 ListingId = listingId,
                 UserId = userId,
+                ChatId = privateChat.Id,
+                OwnerId = ownerId,
                 Type = ApprovalType.Payment,
                 ApprovedAt = DateTime.UtcNow
             });
@@ -88,5 +97,34 @@ namespace Wanas.Application.Services
 
             return true;
         }
+        public async Task<ApprovalStatusDto> GetApprovalStatusAsync(int listingId, string userId, string requesterId)
+        {
+            var listing = await _uow.Listings.GetByIdAsync(listingId);
+            if (listing == null)
+                return null;
+
+            var isOwner = listing.UserId == requesterId;
+
+            var groupApproved = await _uow.BookingApprovals
+                .ExistsAsync(listingId, userId, ApprovalType.Group);
+
+            var paymentApproved = await _uow.BookingApprovals
+                .ExistsAsync(listingId, userId, ApprovalType.Payment);
+
+            return new ApprovalStatusDto
+            {
+                ListingId = listingId,
+                UserId = userId,
+
+                IsGroupApproved = groupApproved,
+                IsPaymentApproved = paymentApproved,
+
+                CanChat = true,
+
+                CanJoinGroup = isOwner && !groupApproved,
+                CanPay = isOwner && groupApproved && !paymentApproved
+            };
+        }
+
     }
 }

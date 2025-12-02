@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using System;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -46,15 +47,14 @@ namespace Wanas.Application.Services
             listing.UserId = userId;
             listing.IsActive = true;
 
+            // --- Apartment Listing ---
             listing.ApartmentListing = _mapper.Map<ApartmentListing>(dto);
             listing.ApartmentListing.Listing = listing;
 
             listing.ApartmentListing.Rooms ??= new List<Room>();
-            listing.ApartmentListing.Rooms.Clear();
-
             listing.ListingPhotos ??= new HashSet<ListingPhoto>();
 
-            // Create rooms + beds with availability rules
+            // --- Rooms ---
             if (dto.Rooms != null && dto.Rooms.Any())
             {
                 foreach (var roomDto in dto.Rooms)
@@ -71,7 +71,6 @@ namespace Wanas.Application.Services
                         Beds = new List<Bed>()
                     };
 
-                    // Create beds
                     for (int i = 0; i < roomDto.BedsCount; i++)
                     {
                         room.Beds.Add(new Bed
@@ -81,14 +80,12 @@ namespace Wanas.Application.Services
                         });
                     }
 
-                    // Enforce rules
                     room.RecalculateAvailability();
-
                     listing.ApartmentListing.Rooms.Add(room);
                 }
             }
 
-            // Photos
+            // --- Photos ---
             if (dto.Photos != null)
             {
                 foreach (var file in dto.Photos)
@@ -98,14 +95,28 @@ namespace Wanas.Application.Services
                 }
             }
 
-            // Create group chat
-            var chat = new Chat { IsGroup = true, Name = listing.Title };
-            listing.GroupChat = chat;
-            listing.GroupChatId = chat.Id;
-
+            // --- Save listing first so we have listing.Id ---
             await _uow.Listings.AddAsync(listing);
+            await _uow.CommitAsync(); // listing.Id is now generated
+
+            // --- Create Group Chat (no ListingId) ---
+            var groupChat = new Chat
+            {
+                IsGroup = true,
+                Name = listing.Title,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _uow.Chats.AddAsync(groupChat);
+            await _uow.CommitAsync(); // groupChat.Id generated
+
+            // --- Link Listing to GroupChat ---
+            listing.GroupChatId = groupChat.Id;
+            listing.GroupChat = groupChat;
+
             await _uow.CommitAsync();
 
+            // --- Return full listing ---
             var savedListing = await _uow.Listings.GetListingWithDetailsAsync(listing.Id);
             return _mapper.Map<ListingDetailsDto>(savedListing);
         }
