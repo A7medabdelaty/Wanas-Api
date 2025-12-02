@@ -10,7 +10,8 @@ namespace Wanas.Application.DTOs.Reports
         public string ReorterId { get; set; } 
 
         public ReportTarget TargetType { get; set; }
-        public string TargetId { get; set; }    
+        public string TargetId { get; set; }
+        public ReportCategory Category { get; set; } 
 
         public string Reason { get; set; }
         public DateTime CreatedAt { get; set; } 

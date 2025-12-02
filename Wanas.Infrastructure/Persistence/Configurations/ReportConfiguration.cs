@@ -28,6 +28,9 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                    .HasForeignKey(r => r.ReporterId)
                    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(r => r.Category)
+                   .HasConversion<int>();
+
             builder.HasIndex(r => new { r.TargetType, r.TargetId });
 
             builder.Property(r => r.TargetType).HasConversion<string>();

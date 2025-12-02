@@ -18,7 +18,7 @@ namespace Wanas.API.Controllers
         }
         //[Authorize]
         [HttpPost]
-        public async Task<IActionResult> SubmitReport([FromBody] CreateReportDto dto)
+        public async Task<IActionResult> SubmitReport([FromForm] CreateReportDto dto)
         {
             //Jwt thing
             string? reporterId =User.FindFirstValue(ClaimTypes.NameIdentifier);

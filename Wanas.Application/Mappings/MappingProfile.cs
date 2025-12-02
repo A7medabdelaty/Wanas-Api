@@ -17,7 +17,10 @@ namespace Wanas.Application.Mappings
                             ? src.Name
                             : $"Chat #{src.Id}"))
                 .ForMember(dest => dest.Participants,
-                    opt => opt.MapFrom(src => src.ChatParticipants));
+                    opt => opt.MapFrom(src => src.ChatParticipants))
+                .ForMember(d => d.Participants, opt => opt.MapFrom(s => s.ChatParticipants))
+                .ForMember(d => d.ListingId, opt => opt.MapFrom(s => s.ListingId));
+            ;
 
             // ChatParticipant → ChatParticipantDto
             CreateMap<ChatParticipant, ChatParticipantDto>()
