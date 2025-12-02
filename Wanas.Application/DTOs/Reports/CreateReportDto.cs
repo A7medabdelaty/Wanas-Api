@@ -18,6 +18,6 @@ namespace Wanas.Application.DTOs.Reports
 
         public ReportCategory Category { get; set; }
 
-        public IFormFile[] Photos { get; set; }
+        public IFormFile[]? Photos { get; set; }
     }
 }
