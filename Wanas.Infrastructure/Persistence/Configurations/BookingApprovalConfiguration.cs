@@ -19,6 +19,15 @@ namespace Wanas.Infrastructure.Persistence.Configurations
             builder.Property(x => x.UserId)
                 .IsRequired();
 
+            builder.Property(x => x.OwnerId)
+                .IsRequired();
+
+            builder.Property(x => x.ChatId)
+                .IsRequired();
+
+            builder.Property(x => x.Type)
+                .IsRequired();
+
             builder.Property(x => x.ApprovedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
@@ -28,14 +37,25 @@ namespace Wanas.Infrastructure.Persistence.Configurations
                 .HasForeignKey(x => x.ListingId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // BookingApproval → ApplicationUser
+            // BookingApproval → User (Requester)
             builder.HasOne(x => x.User)
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // A user should not have duplicate approvals for same listing
-            builder.HasIndex(x => new { x.ListingId, x.UserId })
+            // BookingApproval → Owner
+            builder.HasOne(x => x.Owner)
+                .WithMany()
+                .HasForeignKey(x => x.OwnerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // BookingApproval → Chat
+            builder.HasOne(x => x.Chat)
+                .WithMany()
+                .HasForeignKey(x => x.ChatId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasIndex(x => new { x.ListingId, x.UserId, x.Type })
                 .IsUnique();
         }
     }
