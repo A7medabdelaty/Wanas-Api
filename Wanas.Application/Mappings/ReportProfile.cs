@@ -11,10 +11,12 @@ namespace Wanas.Application.Mappings
             // Map DTO to Entity for submission
             CreateMap<CreateReportDto, Report>()
                 .ForMember(dest => dest.Status, opt => opt.Ignore()) // Status is set in the service or by default value (Pending)
-                .ForMember(dest => dest.ReportPhotos,
-                           opt => opt.MapFrom(src =>
-                                (src.PhotoUrls ?? new List<string>())
-                                    .Select(url => new ReportPhoto { URL = url }).ToList()))
+                    .ForMember(dest => dest.ReportPhotos, opt => opt.Ignore())
+                //.ForMember(dest => dest.ReportPhotos,
+                //           opt => opt.MapFrom(src =>
+                //                (src.PhotoUrls ?? new List<string>())
+                //                    .Select(url => new ReportPhoto { URL = url }).ToList()))
+
                 .ForMember(dest => dest.CreatedAt,
                            opt => opt.MapFrom(_ => DateTime.UtcNow))
                 .ForMember(dest => dest.Reporter, opt => opt.Ignore()) // set in service (attach user)

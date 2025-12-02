@@ -148,7 +148,7 @@ namespace Wanas.Application.Services
                 return false;
 
             if (!chat.IsGroup)
-                return false; // avoid breaking private chats
+                return false;
 
             var participant = chat.ChatParticipants.FirstOrDefault(p => p.UserId == userId && p.LeftAt == null);
             if (participant == null)

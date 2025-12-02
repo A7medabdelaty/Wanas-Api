@@ -146,18 +146,6 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet));
 
 
-            // User → Host Details
-            CreateMap<ApplicationUser, HostDetailsDto>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City))
-                .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio));
-
-
-
             // REVERSE MAPS
             CreateMap<ApartmentListing, CreateListingDto>().ReverseMap();
             CreateMap<Room, CreateRoomDto>().ReverseMap();

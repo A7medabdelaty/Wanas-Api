@@ -71,20 +71,20 @@ if (app.Environment.IsDevelopment())
 
 
 //Initialize ChromaDB on startup
-using (var scope = app.Services.CreateScope())
-{
-    var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
-    try
-    {
-        await chromaService.InitializeCollectionAsync();
-        Console.WriteLine("ChromaDB collection initialized");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"ChromaDB init failed: {ex.Message}");
-        // Continue - traditional matching will still work
-    }
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
+//     try
+//     {
+//         await chromaService.InitializeCollectionAsync();
+//         Console.WriteLine("ChromaDB collection initialized");
+//     }
+//     catch (Exception ex)
+//     {
+//         Console.WriteLine($"ChromaDB init failed: {ex.Message}");
+//         // Continue - traditional matching will still work
+//     }
+// }
 
 
 

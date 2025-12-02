@@ -1,9 +1,4 @@
 using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Wanas.Application.DTOs.Reports;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -17,11 +12,13 @@ namespace Wanas.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IAuditLogService _auditLogService;
-        public ReportService(IMapper mapper ,IUnitOfWork unitOfWork, IAuditLogService auditLogService)
+        private readonly IFileService _photoService;
+        public ReportService(IMapper mapper ,IUnitOfWork unitOfWork, IAuditLogService auditLogService , IFileService fileService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _auditLogService = auditLogService;
+            _photoService = fileService;
         }
 
         //public async Task<ReportResponseDto> CreateREportAsync(CreateReportDto dto, string reporterId)
@@ -43,29 +40,27 @@ namespace Wanas.Application.Services
             report.CreatedAt = DateTime.UtcNow;
             await _unitOfWork.Reports.AddAsync(report);
             await _unitOfWork.CommitAsync();
-            if (report.ReportPhotos != null && reportDto.PhotoUrls != null && reportDto.PhotoUrls.Any())
+            if (reportDto.Photos != null)
             {
-                foreach (var url in reportDto.PhotoUrls)
+                foreach (var photo in reportDto.Photos)
                 {
-                    var photo = new ReportPhoto
-                    {
-                        URL = url,
-                        ReportId = report.ReportId //linking photo to report by reporterId
+                    var url = await _photoService.SaveFileAsync(photo);
 
+                    var entity = new ReportPhoto
+                    {
+                        ReportId = report.ReportId,
+                        URL = url
                     };
 
-                    await _unitOfWork.ReportPhotos.AddAsync(photo);
+                    await _unitOfWork.ReportPhotos.AddAsync(entity);
                 }
 
-                await _unitOfWork.CommitAsync();
+                await _auditLogService.LogAsync("ReportSubmitted", reporterId, reporterId, $"ReportId={report.ReportId}; TargetId={report.TargetId}; TargetType={report.TargetType}");
+
             }
-            var finalReport = await _unitOfWork.Reports.GetByIdAsync(report.ReportId);
-            var response = _mapper.Map<ReportResponseDto>(finalReport);
-
-            await _auditLogService.LogAsync("ReportSubmitted", reporterId, reporterId, $"ReportId={report.ReportId}; TargetId={report.TargetId}; TargetType={report.TargetType}");
-            return response;
-
-
+                var finalReport = await _unitOfWork.Reports.GetByIdAsync(report.ReportId);
+                var response = _mapper.Map<ReportResponseDto>(finalReport);
+                return response;
 
         }
 

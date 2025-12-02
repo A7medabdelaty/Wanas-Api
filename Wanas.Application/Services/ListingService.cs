@@ -182,7 +182,7 @@ namespace Wanas.Application.Services
         // REMOVE PHOTO
         public async Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId)
         {
-            var photo = await _uow.ListingPhotos.GetByIdAsync(photoId);
+            var photo = await _uow.ListingPhotos.GetPhotoWithListingByIdAsync(photoId);
             if (photo == null || photo.ListingId != listingId || photo.Listing.UserId != userId)
                 return false;
 
