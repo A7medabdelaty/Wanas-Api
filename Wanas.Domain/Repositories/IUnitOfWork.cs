@@ -1,4 +1,5 @@
-﻿using Wanas.Domain.Repositories.Listings;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using Wanas.Domain.Repositories.Listings;
 
 namespace Wanas.Domain.Repositories
 {
@@ -20,12 +21,14 @@ namespace Wanas.Domain.Repositories
         ICommissionRepository Commissions { get; }
         IPayoutRepository Payouts { get; }
         IRefundRepository Refunds { get; }
-
         IReviewRepository Reviews { get; }
         IListingRepository Listings { get; }
         IListingPhotoRepository ListingPhotos { get; }
         ICommentRepository Comments { get; }
         IRoomRepository Rooms { get; }
+        IBedRepository Beds { get; }
         IBookingApprovalRepository BookingApprovals { get; }
+        IBedReservationRepository BedReservations { get; }
+        Task<IDbContextTransaction> BeginTransactionAsync();
     }
 }

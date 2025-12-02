@@ -141,8 +141,9 @@ namespace Wanas.API.Extentions
             services.AddScoped<IPayoutRepository, PayoutRepository>();
             services.AddScoped<IRefundRepository, RefundRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IBedRepository, BedRepository>();
             services.AddScoped<IBookingApprovalRepository, BookingApprovalRepository>();
-
+            services.AddScoped<IBedReservationRepository, BedReservationRepository>();
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -164,6 +165,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IRevenueService, RevenueService>();
             services.AddScoped<IBookingApprovalService, BookingApprovalService>();
+            services.AddScoped<IBedReservationService, BedReservationService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();

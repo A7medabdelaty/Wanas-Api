@@ -61,8 +61,8 @@ namespace Wanas.Application.Mappings
             //   CREATE LISTING DTO → ENTITY (with nested objects)
             CreateMap<CreateListingDto, Listing>()
                 .ForMember(dest => dest.ApartmentListing, opt => opt.MapFrom(src => src))
-                .ForMember(dest => dest.ListingPhotos, opt => opt.Ignore()) // handled manually
-                .ForMember(dest => dest.Comments, opt => opt.Ignore())     // ignore comments
+                .ForMember(dest => dest.ListingPhotos, opt => opt.Ignore())
+                .ForMember(dest => dest.Comments, opt => opt.Ignore())
                 .ForMember(dest => dest.Payments, opt => opt.Ignore());
 
             CreateMap<CreateListingDto, ApartmentListing>()
@@ -79,7 +79,7 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.IsPetFriendly, opt => opt.MapFrom(src => src.IsPetFriendly))
                 .ForMember(dest => dest.IsSmokingAllowed, opt => opt.MapFrom(src => src.IsSmokingAllowed))
                 .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src => src.Rooms))
-                .ForMember(dest => dest.Beds, opt => opt.Ignore()); // Beds created from Rooms
+                .ForMember(dest => dest.Beds, opt => opt.Ignore());
 
             CreateMap<CreateRoomDto, Room>()
                 .ForMember(dest => dest.Beds, opt => opt.MapFrom(src => src.Beds));
