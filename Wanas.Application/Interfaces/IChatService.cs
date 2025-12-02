@@ -17,7 +17,7 @@ namespace Wanas.Application.Interfaces
         Task<bool> MarkChatAsReadAsync(int chatId, string userId);
         Task<int> GetUnreadMessagesCountAsync(string userId);
         Task<IEnumerable<ChatSummaryDto>> GetRecentChatsAsync(string userId);
+        Task<ChatDto> GetOrCreatePrivateChatByListingAsync(string ownerId, string userId, int listingId);
         Task<ChatDto> GetPrivateChatForListingAsync(string ownerId, string userId, int listingId);
-
     }
 }

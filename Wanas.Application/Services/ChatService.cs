@@ -148,7 +148,7 @@ namespace Wanas.Application.Services
                 return false;
 
             if (!chat.IsGroup)
-                return false; // avoid breaking private chats
+                return false;
 
             var participant = chat.ChatParticipants.FirstOrDefault(p => p.UserId == userId && p.LeftAt == null);
             if (participant == null)
@@ -350,35 +350,80 @@ namespace Wanas.Application.Services
             return dto;
         }
 
-        public async Task<ChatDto> GetPrivateChatForListingAsync(string ownerId, string userId, int listingId)
+        public async Task<ChatDto> GetOrCreatePrivateChatByListingAsync(
+                string ownerId,
+                string userId,
+                int listingId)
         {
-            // Check if a private chat exists between them
-            var existing = await _uow.Chats.GetPrivateChatBetweenAsync(ownerId, userId);
-
+            // 1) Check existing chat linked to listing
+            var existing = await _uow.Chats.GetPrivateChatForListingAsync(ownerId, userId, listingId);
             if (existing != null)
             {
-                var dto = _mapper.Map<ChatDto>(existing);
+                var full = await _uow.Chats.GetChatWithUsersAsync(existing.Id);
+                var dto = _mapper.Map<ChatDto>(full);
                 ApplyPrivateChatName(dto, ownerId);
                 return dto;
             }
 
-            // If not, create one
+            // 2) Create new chat tied to listing
             var chat = new Chat
             {
                 IsGroup = false,
-                CreatedAt = DateTime.UtcNow
+                ListingId = listingId,
+                CreatedAt = DateTime.UtcNow,
+                ChatParticipants = new List<ChatParticipant>
+        {
+            new ChatParticipant { UserId = ownerId },
+            new ChatParticipant { UserId = userId }
+        }
             };
-
-            chat.ChatParticipants.Add(new ChatParticipant { UserId = ownerId });
-            chat.ChatParticipants.Add(new ChatParticipant { UserId = userId });
 
             await _uow.Chats.AddAsync(chat);
             await _uow.CommitAsync();
 
-            var createdDto = _mapper.Map<ChatDto>(chat);
+            var fullChat = await _uow.Chats.GetChatWithUsersAsync(chat.Id);
+            var dtoCreated = _mapper.Map<ChatDto>(fullChat);
+
+            ApplyPrivateChatName(dtoCreated, ownerId);
+            await _notifier.NotifyChatCreatedAsync(dtoCreated);
+
+            return dtoCreated;
+        }
+
+        public async Task<ChatDto> GetPrivateChatForListingAsync(string ownerId, string userId, int listingId)
+        {
+            var existing = await _uow.Chats.GetPrivateChatForListingAsync(ownerId, userId, listingId);
+
+            if (existing != null)
+            {
+                var full = await _uow.Chats.GetChatWithUsersAsync(existing.Id);
+                var dto = _mapper.Map<ChatDto>(full);
+                ApplyPrivateChatName(dto, ownerId);
+                return dto;
+            }
+
+            var chat = new Chat
+            {
+                IsGroup = false,
+                ListingId = listingId,
+                CreatedAt = DateTime.UtcNow,
+                ChatParticipants = new List<ChatParticipant>
+        {
+            new ChatParticipant { UserId = ownerId },
+            new ChatParticipant { UserId = userId }
+        }
+            };
+
+            await _uow.Chats.AddAsync(chat);
+            await _uow.CommitAsync();
+
+            var fullChat = await _uow.Chats.GetChatWithUsersAsync(chat.Id);
+
+            var createdDto = _mapper.Map<ChatDto>(fullChat);
             ApplyPrivateChatName(createdDto, ownerId);
 
             return createdDto;
         }
+
     }
 }

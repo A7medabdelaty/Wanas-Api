@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Wanas.API.Responses;
+using Wanas.Application.DTOs.Approval;
 using Wanas.Application.DTOs.Chat;
 using Wanas.Application.Interfaces;
 
@@ -13,10 +14,12 @@ namespace Wanas.API.Controllers
     public class ChatsController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly IListingService _listingService;
 
-        public ChatsController(IChatService chatService)
+        public ChatsController(IChatService chatService,IListingService listingService)
         {
             _chatService = chatService;
+            _listingService = listingService;
         }
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -171,6 +174,26 @@ namespace Wanas.API.Controllers
 
             var chats = await _chatService.GetRecentChatsAsync(userId);
             return Ok(ApiResponse.Ok(chats));
+        }
+
+        // create/open private chat for listing
+        [HttpPost("private/{listingId:int}/open")]
+        public async Task<IActionResult> OpenPrivateChatForListing(int listingId)
+        {
+            var requesterId = GetUserId(); 
+            if (requesterId == null)
+                return Unauthorized();
+
+            var listing = await _listingService.GetListingByIdAsync(listingId);
+            if(listing == null)
+                return NotFound();
+
+            var ownerId = listing.OwnerId;
+            if (string.IsNullOrWhiteSpace(ownerId))
+                return BadRequest(new ApiError("OwnerIdRequired"));
+
+            var chat = await _chatService.GetOrCreatePrivateChatByListingAsync(ownerId, requesterId, listingId);
+            return Ok(new ApiResponse(chat));
         }
     }
 }

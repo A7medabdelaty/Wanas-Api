@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace Wanas.Application.DTOs.Reports
 
         public string Reason { get; set; } = null!;
 
-        public List<string>? PhotoUrls { get; set; }
+        public ReportCategory Category { get; set; }
+
+        public IFormFile[] Photos { get; set; }
     }
 }
