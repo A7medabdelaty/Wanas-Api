@@ -29,6 +29,13 @@ namespace Wanas.API.Controllers
             //Jwt thing
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            // Check duplicate review (NO EXCEPTION)
+            var hasReviewed = await revServ.HasUserReviewedAsync(userId, dto.TargetId, dto.TargetType);
+            if (hasReviewed)
+                return BadRequest(new { message = "لقد قمت بتقييم هذا العنصر من قبل" });
+
+
+
             if (userId == null) return Unauthorized("User is not Logged in");
 
             var result = await revServ.CreateReviewAsync(dto, userId);
