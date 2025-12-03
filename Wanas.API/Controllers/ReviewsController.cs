@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Wanas.Application.DTOs.Review;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Enums;
@@ -23,8 +24,19 @@ namespace Wanas.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = User.FindFirst("sub")?.Value; // JWT user ID
-            if (userId == null) return Unauthorized();
+            //var userId = User.FindFirst("sub")?.Value; // JWT user ID
+            //if (userId == null) return Unauthorized();
+            //Jwt thing
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Check duplicate review (NO EXCEPTION)
+            var hasReviewed = await revServ.HasUserReviewedAsync(userId, dto.TargetId, dto.TargetType);
+            if (hasReviewed)
+                return BadRequest(new { message = "لقد قمت بتقييم هذا العنصر من قبل" });
+
+
+
+            if (userId == null) return Unauthorized("User is not Logged in");
 
             var result = await revServ.CreateReviewAsync(dto, userId);
             return Ok(result);
