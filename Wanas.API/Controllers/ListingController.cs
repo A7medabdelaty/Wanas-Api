@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Security.Claims;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
+using Wanas.Domain.Enums;
 
 namespace Wanas.API.Controllers
 {
@@ -46,6 +47,12 @@ namespace Wanas.API.Controllers
             var listing = await _listService.GetListingByIdAsync(id);
             if (listing == null)
                 return NotFound();
+            if (listing.ModerationStatus != ListingModerationStatus.Approved)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (listing.OwnerId != userId)
+                    return NotFound();
+            }
 
             return Ok(listing);
         }

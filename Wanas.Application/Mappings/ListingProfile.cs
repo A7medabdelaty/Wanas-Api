@@ -144,7 +144,11 @@ namespace Wanas.Application.Mappings
                     )
                 )
                 .ForMember(dest => dest.HasInternet, opt => opt.MapFrom(src => src.ApartmentListing.HasInternet));
-
+            CreateMap<Listing, ListingModerationDto>()
+                .ForMember(dest => dest.ListingId, opt => opt.MapFrom(src => src.Id));
+            CreateMap<Listing, ListingPendingDto>()
+            .ForMember(dest => dest.OwnerName, opt => opt.MapFrom(src => src.User.FullName ))
+            .ForMember(dest => dest.OwnerEmail, opt => opt.MapFrom(src => src.User.Email));
 
             // REVERSE MAPS
             CreateMap<ApartmentListing, CreateListingDto>().ReverseMap();

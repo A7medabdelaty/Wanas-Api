@@ -1,4 +1,6 @@
 ﻿
+using Wanas.Domain.Enums;
+
 namespace Wanas.Application.DTOs.Listing
 {
     public class ListingDetailsDto
@@ -32,6 +34,9 @@ namespace Wanas.Application.DTOs.Listing
 
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }
+
+        public ListingModerationStatus ModerationStatus { get; set; }
+        public string? ModerationNote { get; set; }
 
         public HostDetailsDto Host { get; set; }
         public List<ListingPhotoDto> ListingPhotos { get; set; }

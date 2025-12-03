@@ -111,10 +111,10 @@ namespace Wanas.Application.Services
         //    return true;
         //}
         #endregion
-        public async Task<IEnumerable<ListingModerationDto>> GetPendingAsync()
+        public async Task<IEnumerable<ListingPendingDto>> GetPendingAsync()
         {
             var pending = await _uow.Listings.FindAsync(l => l.ModerationStatus == ListingModerationStatus.Pending);
-            return pending.Select(l => _mapper.Map<ListingModerationDto>(l));
+            return pending.Select(l => _mapper.Map<ListingPendingDto>(l));
         }
     }
 }

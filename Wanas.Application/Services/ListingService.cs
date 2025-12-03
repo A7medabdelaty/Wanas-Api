@@ -4,6 +4,7 @@ using System;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories.Listings;
 using Wanas.Infrastructure.Persistence;
 
@@ -26,7 +27,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
         public async Task<IEnumerable<Listing>> GetListingsByCityAsync(string city)
         {
             return await _context.Listings
-                .Where(l => l.City.ToLower() == city.ToLower())
+                .Where(l => l.City.ToLower() == city.ToLower() && l.ModerationStatus==ListingModerationStatus.Approved)
                 .ToListAsync();
         }
 
@@ -56,7 +57,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
         public async Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword)
         {
             return await _context.Listings
-                .Where(l => l.Title.ToLower().Contains(keyword.ToLower()))
+                .Where(l => l.Title.ToLower().Contains(keyword.ToLower())&& l.ModerationStatus == ListingModerationStatus.Approved)
                 .ToListAsync();
         }
 
@@ -69,6 +70,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
                    .ThenInclude(al => al.Rooms)
                        .ThenInclude(r => r.Beds)
                 .OrderByDescending(l => l.CreatedAt)
+                .Where(l=>l.ModerationStatus == ListingModerationStatus.Approved)
                 .ToListAsync();
         }
 
