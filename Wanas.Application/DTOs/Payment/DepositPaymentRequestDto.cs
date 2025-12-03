@@ -2,6 +2,8 @@
 {
     public class DepositPaymentRequestDto
     {
-        public int ReservationId { get; set; }
+        public string PaymentToken { get; set; }
+        public string PaymentMethod { get; set; }
+        public decimal AmountPaid { get; set; }
     }
 }

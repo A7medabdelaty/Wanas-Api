@@ -53,5 +53,12 @@ namespace Wanas.Infrastructure.Repositories
                 .Where(x => x.Room.ApartmentListing.ListingId == listingId && x.RenterId == null)
                 .ToListAsync();
         }
+        public async Task<List<Bed>> GetByReservationIdAsync(int reservationId)
+        {
+            return await _context.Beds
+                .Include(b => b.Room)
+                .Where(b => b.BedReservations.Any(br => br.ReservationId == reservationId))
+                .ToListAsync();
+        }
     }
 }
