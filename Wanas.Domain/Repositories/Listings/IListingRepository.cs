@@ -11,6 +11,9 @@ namespace Wanas.Domain.Repositories.Listings
         Task<IEnumerable<Listing>> GetActiveListingsAsync();
         Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword);
         IQueryable<Listing> GetQueryableWithIncludes();
+
+            Task<IEnumerable<Listing>> GetPendingWithOwnerAsync();
+        
         IQueryable<Listing> ApplyKeywordSearch(IQueryable<Listing> query, string keyword);
     }
 }
