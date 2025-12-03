@@ -9,7 +9,7 @@ namespace Wanas.Infrastructure.Persistence.Configurations
         public void Configure(EntityTypeBuilder<Listing> builder)
         {
             builder.HasKey(l => l.Id);
-            builder.Property(l => l.Title).HasMaxLength(50);
+            builder.Property(l => l.Title).HasMaxLength(150);
             builder.Property(l => l.Description).HasMaxLength(2000);
             builder.Property(l => l.City).HasMaxLength(50);
             builder.Property(l => l.CreatedAt)
