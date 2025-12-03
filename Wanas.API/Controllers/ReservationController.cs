@@ -45,6 +45,15 @@ namespace Wanas.API.Controllers
             return Ok(result);
         }
 
+
+        [HttpPost("{id:int}/confirm-deposit")]
+        public async Task<IActionResult> ConfirmDeposit(int id)
+        {
+            var userId = GetUserId();
+            var result = await _reservationService.ConfirmDepositAsync(id, userId);
+            return Ok(result);
+        }
+
         [HttpGet("owner")]
         public async Task<IActionResult> GetOwnerReservations()
         {
