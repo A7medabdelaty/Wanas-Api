@@ -180,6 +180,8 @@ namespace Wanas.Application.Services
             return _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
         }
 
+        
+
         // REMOVE PHOTO
         public async Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId)
         {

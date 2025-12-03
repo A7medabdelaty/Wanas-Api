@@ -47,6 +47,7 @@ namespace Wanas.Application.Services
             var listings = await query
                 .Skip((request.Page - 1) * request.PageSize)
                 .Take(request.PageSize)
+                .Where(l=>l.ModerationStatus==Domain.Enums.ListingModerationStatus.Approved)
                 .ProjectTo<ListingCardDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 

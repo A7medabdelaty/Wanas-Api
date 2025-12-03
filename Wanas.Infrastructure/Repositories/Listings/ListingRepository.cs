@@ -96,5 +96,13 @@ namespace Wanas.Infrastructure.Repositories.Listings
                 x.City.ToLower().Contains(keyword)
             );
         }
+
+        public async Task<IEnumerable<Listing>> GetPendingWithOwnerAsync()
+        {
+            return await _context.Listings
+            .Include(l => l.User)  
+            .Where(l => l.ModerationStatus == ListingModerationStatus.Pending)
+            .ToListAsync();
+        }
     }
 }

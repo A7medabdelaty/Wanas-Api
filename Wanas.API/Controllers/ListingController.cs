@@ -50,7 +50,8 @@ namespace Wanas.API.Controllers
             if (listing.ModerationStatus != ListingModerationStatus.Approved)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (listing.OwnerId != userId)
+                var isAdmin = User.IsInRole("Admin");
+                if (listing.OwnerId != userId&& !isAdmin)
                     return NotFound();
             }
 
