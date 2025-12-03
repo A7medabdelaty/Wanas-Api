@@ -19,7 +19,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
                 .ToListAsync();
         }
 
-        public async Task<Room> GetRoomWithBedsAsync(int roomId)
+        public async Task<Room?> GetRoomWithBedsAsync(int roomId)
         {
             return await _context.Rooms
                 .Include(r => r.Beds)

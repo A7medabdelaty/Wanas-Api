@@ -45,6 +45,7 @@ namespace Wanas.Application.Services
 
             // Get paged records
             var listings = await query
+                .AsSplitQuery()
                 .Skip((request.Page - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ProjectTo<ListingCardDto>(_mapper.ConfigurationProvider)

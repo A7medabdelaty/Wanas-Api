@@ -37,5 +37,6 @@ namespace Wanas.Infrastructure.Persistence
         public DbSet<Payout> Payouts { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<BookingApproval> BookingApprovals { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
     }
 }

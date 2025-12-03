@@ -1,85 +1,70 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Wanas.Application.DTOs.Booking;
-using Wanas.Application.Interfaces;
 using Wanas.API.Responses;
+using Wanas.Application.DTOs.Booking;
+using Wanas.Application.DTOs.Payment;
+using Wanas.Application.Interfaces;
 
-namespace Wanas.API.Controllers
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class BookingsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class BookingsController : ControllerBase
+    private readonly IBedReservationService _reservationService;
+
+    public BookingsController(IBedReservationService reservationService)
     {
-        private readonly IBedReservationService _reservationService;
-        public BookingsController(IBedReservationService reservationService)
-        {
-            _reservationService = reservationService;
-        }
+        _reservationService = reservationService;
+    }
 
-        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+    private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // POST: /api/bookings/reserve
-        [HttpPost("reserve")]
-        public async Task<IActionResult> ReserveBeds([FromBody] ReserveBedsRequestDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+    // Reserve Beds
+    [HttpPost("reserve")]
+    public async Task<IActionResult> ReserveBeds([FromBody] ReserveBedsRequestDto dto)
+    {
+        var userId = GetUserId();
+        var res = await _reservationService.ReserveBedsAsync(userId, dto);
+        return Ok(new ApiResponse(res));
+    }
 
-            var userId = GetUserId();
-            if (userId == null)
-                return Unauthorized();
+    // Owner approves payment
+    [HttpPost("{reservationId}/approve-payment")]
+    public async Task<IActionResult> ApprovePayment(int reservationId)
+    {
+        var ownerId = GetUserId();
+        var ok = await _reservationService.ApprovePaymentAsync(reservationId, ownerId);
+        return ok ? Ok(ApiResponse.Ok(null, "Payment approved"))
+                  : BadRequest(new ApiError("ApprovalFailed"));
+    }
 
-            try
-            {
-                var res = await _reservationService.ReserveBedsAsync(userId, dto);
-                return Ok(new ApiResponse(res));
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new ApiError("ReservationFailed", ex.Message));
-            }
-        }
+    // User pays deposit
+    [HttpPost("pay-deposit")]
+    public async Task<IActionResult> PayDeposit([FromBody] DepositPaymentRequestDto dto)
+    {
+        var userId = GetUserId();
+        var result = await _reservationService.PayDepositAsync(dto.ReservationId, userId);
+        return Ok(new ApiResponse(result));
+    }
 
-        // POST: /api/bookings/confirm
-        [HttpPost("confirm")]
-        public async Task<IActionResult> ConfirmReservation([FromBody] ConfirmReservationRequestDto dto)
-        {
-            var ownerId = GetUserId();
-            if (ownerId == null)
-                return Unauthorized();
+    // Owner final confirmation
+    [HttpPost("confirm")]
+    public async Task<IActionResult> Confirm([FromBody] ConfirmReservationRequestDto dto)
+    {
+        var ownerId = GetUserId();
+        var ok = await _reservationService.ConfirmReservationAsync(ownerId, dto);
+        return ok ? Ok(ApiResponse.Ok(null, "Reservation confirmed"))
+                  : BadRequest(new ApiError("ConfirmFailed"));
+    }
 
-            var ok = await _reservationService.ConfirmReservationAsync(ownerId, dto);
-            if (!ok)
-                return BadRequest(new ApiError("ConfirmFailed"));
-
-            return Ok(ApiResponse.Ok(null, "Reservation confirmed."));
-        }
-
-        // POST: /api/bookings/cancel/{reservationId}
-        [HttpPost("cancel/{reservationId:int}")]
-        public async Task<IActionResult> CancelReservation(int reservationId)
-        {
-            var userId = GetUserId();
-            if (userId == null)
-                return Unauthorized();
-
-            var ok = await _reservationService.CancelReservationAsync(userId, reservationId);
-            if (!ok)
-                return BadRequest(new ApiError("CancelFailed"));
-
-            return Ok(ApiResponse.Ok(null, "Reservation cancelled."));
-        }
-
-        // GET: /api/bookings/{reservationId}
-        [HttpGet("{reservationId:int}")]
-        public async Task<IActionResult> GetReservation(int reservationId)
-        {
-            var res = await _reservationService.GetReservationAsync(reservationId);
-            if (res == null)
-                return NotFound(new ApiError("ReservationNotFound"));
-            return Ok(new ApiResponse(res));
-        }
+    // Cancel
+    [HttpPost("cancel/{reservationId}")]
+    public async Task<IActionResult> Cancel(int reservationId)
+    {
+        var userId = GetUserId();
+        var ok = await _reservationService.CancelReservationAsync(userId, reservationId);
+        return ok ? Ok(ApiResponse.Ok(null, "Reservation cancelled"))
+                  : BadRequest(new ApiError("CancelFailed"));
     }
 }

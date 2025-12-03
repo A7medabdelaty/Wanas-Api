@@ -5,7 +5,7 @@ namespace Wanas.Domain.Repositories.Listings
     public interface IListingRepository : IGenericRepository<Listing>
     {
         Task<IEnumerable<Listing>> GetAllListingsAsync();
-        Task<Listing> GetListingWithDetailsAsync(int id);
+        Task<Listing?> GetListingWithDetailsAsync(int id);
         Task<IEnumerable<Listing>> GetListingsByUserAsync(string userId);
         Task<IEnumerable<Listing>> GetListingsByCityAsync(string city);
         Task<IEnumerable<Listing>> GetActiveListingsAsync();

@@ -36,6 +36,7 @@ namespace Wanas.Application.DTOs.Listing
         public HostDetailsDto Host { get; set; }
         public List<ListingPhotoDto> ListingPhotos { get; set; }
         public List<CommentDto> Comments { get; set; }
+        public List<ListingRoomDto> Rooms { get; set; }
     }
 
 }
