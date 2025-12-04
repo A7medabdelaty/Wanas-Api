@@ -38,6 +38,13 @@ namespace Wanas.Application.Mappings
 
                 // Beds
                 .ForMember(dest => dest.Beds, opt => opt.MapFrom(src => src.Beds));
+
+            CreateMap<Reservation, ReservationListItemDto>()
+                .ForMember(dest => dest.ListingTitle, opt => opt.MapFrom(src => src.Listing.Title))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Listing.City))
+                .ForMember(dest => dest.CoverPhotoUrl,
+                           opt => opt.MapFrom(src => src.Listing.ListingPhotos))
+                .ForMember(dest => dest.Beds, opt => opt.MapFrom(src => src.Beds));
         }
     }
 }

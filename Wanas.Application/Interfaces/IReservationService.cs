@@ -9,5 +9,6 @@ namespace Wanas.Application.Interfaces
         Task<List<ReservationDto>> GetOwnerReservationsAsync(string ownerId);
         Task<ReservationDto> GetReservationAsync(int id);
         Task<ReservationDto> PayDepositAsync(int reservationId, DepositPaymentRequestDto payment, string userId);
+        Task<List<ReservationListItemDto>> GetRenterReservationsAsync(string userId);
     }
 }
