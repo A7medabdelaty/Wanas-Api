@@ -5,6 +5,7 @@ using Wanas.Application.DTOs.Listing;
 using Wanas.Application.DTOs.Search;
 using Wanas.Application.Interfaces;
 using Wanas.Application.QueryBuilders;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
@@ -38,6 +39,8 @@ namespace Wanas.Application.Services
 
             // Apply sorting (price, newest, area, etc.)
             query = ListingSearchQueryBuilder.ApplySorting(query, request.SortBy);
+
+            query = query.Where(l => l.ModerationStatus == ListingModerationStatus.Approved);
 
             // Pagination metadata
             var totalCount = await query.CountAsync();

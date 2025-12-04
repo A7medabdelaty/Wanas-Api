@@ -39,6 +39,7 @@ namespace Wanas.Infrastructure.Repositories
         {
             var reviews = await _context.Reviews
                 .Where(r => r.TargetId == listingId)
+                .Include(r=>r.Reviewer)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 

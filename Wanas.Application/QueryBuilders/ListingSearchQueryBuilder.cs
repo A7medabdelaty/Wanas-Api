@@ -28,11 +28,19 @@ namespace Wanas.Application.QueryBuilders
                 query = query.Where(x => x.ApartmentListing.Rooms.Count <= request.MaxRooms);
 
             // Beds (use EF.Count)
+            //if (request.MinBeds.HasValue)
+            //    query = query.Where(x => x.ApartmentListing.Beds.Count >= request.MinBeds);
+
+            //if (request.MaxBeds.HasValue)
+            //    query = query.Where(x => x.ApartmentListing.Beds.Count <= request.MaxBeds);
+            // ...
+            // Beds (Fix: Count beds inside rooms)
             if (request.MinBeds.HasValue)
-                query = query.Where(x => x.ApartmentListing.Beds.Count >= request.MinBeds);
+                query = query.Where(x => x.ApartmentListing.Rooms.SelectMany(r => r.Beds).Count() >= request.MinBeds);
 
             if (request.MaxBeds.HasValue)
-                query = query.Where(x => x.ApartmentListing.Beds.Count <= request.MaxBeds);
+                query = query.Where(x => x.ApartmentListing.Rooms.SelectMany(r => r.Beds).Count() <= request.MaxBeds);
+            // ...
 
             // Area
             if (request.MinArea.HasValue)

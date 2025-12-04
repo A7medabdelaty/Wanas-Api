@@ -1,3 +1,5 @@
+using Wanas.Domain.Enums;
+
 namespace Wanas.Application.DTOs.Listing
 {
     public class ListingCardDto
@@ -13,6 +15,8 @@ namespace Wanas.Application.DTOs.Listing
         public int? AvailableRooms { get; set; }
         public int? AvailableBeds { get; set; }
         public bool HasInternet { get; set; }
+        public ListingModerationStatus ModerationStatus { get; set; }
+        public string? ModerationNote { get; set; } = string.Empty;
     }
 
 }
