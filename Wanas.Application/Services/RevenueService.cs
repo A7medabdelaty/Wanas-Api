@@ -14,7 +14,7 @@ namespace Wanas.Application.Services
             var payments = await _uow.Payments.FindAsync(p => p.PaymentDate >= from && p.PaymentDate <= to);
             var commissions = await _uow.Commissions.GetAllAsync();
             var relevantCommissions = commissions.Where(c => payments.Any(p => p.PaymentId == c.PaymentId));
-            var gross = payments.Where(p => p.Status == PaymentStatus.Completed).Sum(p => p.Amount);
+            var gross = payments.Where(p => p.Status == PaymentStatus.Sucess).Sum(p => p.Amount);
             var commissionAmt = relevantCommissions.Sum(c => c.PlatformAmount);
             var net = gross - commissionAmt;
             return new RevenueSummaryDto

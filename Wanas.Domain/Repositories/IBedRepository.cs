@@ -7,8 +7,9 @@ namespace Wanas.Domain.Repositories
         Task<List<Bed>> GetByIdsAsync(IEnumerable<int> ids);
         Task<List<Bed>> GetBedsByRoomIdAsync(int roomId);
         Task<List<Bed>> GetBedsByListingIdAsync(int listingId);
-
+        Task<List<Bed>> GetByReservationIdAsync(int reservationId);
         Task<List<Bed>> GetAvailableBedsByRoomAsync(int roomId);
         Task<List<Bed>> GetAvailableBedsByListingAsync(int listingId);
+        Task<List<Bed>> GetTemporarilyAvailableBedsAsync(int listingId, IEnumerable<int> bedIds);
     }
 }

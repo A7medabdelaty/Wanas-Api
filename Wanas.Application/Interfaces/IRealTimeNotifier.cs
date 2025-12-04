@@ -15,5 +15,7 @@ namespace Wanas.Application.Interfaces
         Task NotifyMessageReadAsync(int chatId, int messageId, string userId);
         Task NotifyPaymentApprovedAsync(int listingId, string userId);
         Task NotifyGroupApprovedAsync(int chatId, string userId);
+        Task NotifyOwnerAsync(string ownerId, string message);
+        Task NotifyUserAsync(string userId, string message);
     }
 }

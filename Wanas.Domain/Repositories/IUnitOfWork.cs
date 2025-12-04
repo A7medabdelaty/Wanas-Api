@@ -28,7 +28,7 @@ namespace Wanas.Domain.Repositories
         IRoomRepository Rooms { get; }
         IBedRepository Beds { get; }
         IBookingApprovalRepository BookingApprovals { get; }
-        IBedReservationRepository BedReservations { get; }
+        IReservationRepository Reservations { get; }
         Task<IDbContextTransaction> BeginTransactionAsync();
     }
 }

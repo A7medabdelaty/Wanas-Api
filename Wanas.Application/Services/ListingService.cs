@@ -4,6 +4,7 @@ using System;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
@@ -178,6 +179,8 @@ namespace Wanas.Application.Services
             var listings = await _uow.Listings.GetListingsByUserAsync(userId);
             return _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
         }
+
+        
 
         // REMOVE PHOTO
         public async Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId)

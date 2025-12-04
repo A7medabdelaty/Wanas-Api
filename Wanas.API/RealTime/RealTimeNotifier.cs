@@ -168,5 +168,23 @@ namespace Wanas.API.RealTime
                 .SendAsync("GroupJoinApproved", new { ChatId = chatId, UserId = userId });
         }
 
+        public async Task NotifyOwnerAsync(string ownerId, string message)
+        {
+            await _hub.Clients.User(ownerId).SendAsync("OwnerNotification", new
+            {
+                Message = message,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        public async Task NotifyUserAsync(string userId, string message)
+        {
+            await _hub.Clients.User(userId).SendAsync("UserNotification", new
+            {
+                Message = message,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
     }
 }
