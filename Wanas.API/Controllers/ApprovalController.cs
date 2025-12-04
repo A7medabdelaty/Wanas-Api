@@ -85,5 +85,21 @@ namespace Wanas.API.Controllers
 
             return Ok(ApiResponse.Ok(null, "Payment approved successfully."));
         }
+
+        [HttpGet("status/{listingId:int}/{userId}")]
+        public async Task<IActionResult> GetStatus(int listingId, string userId)
+        {
+            var requesterId = GetUserId();
+            if (requesterId == null)
+                return Unauthorized();
+
+            var status = await _approvalService.GetApprovalStatusAsync(listingId, userId, requesterId);
+
+            if (status == null)
+                return NotFound(new ApiError("ListingNotFound"));
+
+            return Ok(new ApiResponse(status));
+        }
+
     }
 }

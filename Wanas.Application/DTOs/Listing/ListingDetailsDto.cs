@@ -1,10 +1,13 @@
 ﻿
+using Wanas.Domain.Enums;
+
 namespace Wanas.Application.DTOs.Listing
 {
     public class ListingDetailsDto
     {
         public int Id { get; set; }
         public string OwnerId { get; set; }
+        public string GroupChatId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -32,9 +35,13 @@ namespace Wanas.Application.DTOs.Listing
         public bool IsPetFriendly { get; set; }
         public bool IsSmokingAllowed { get; set; }
 
+        public ListingModerationStatus ModerationStatus { get; set; }
+        public string? ModerationNote { get; set; }
+
         public HostDetailsDto Host { get; set; }
         public List<ListingPhotoDto> ListingPhotos { get; set; }
         public List<CommentDto> Comments { get; set; }
+        public List<ListingRoomDto> Rooms { get; set; }
     }
 
 }

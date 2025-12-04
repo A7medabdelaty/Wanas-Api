@@ -18,7 +18,7 @@ namespace Wanas.Application.DTOs.Reports
 
 
         public ReportStatus Status { get; set; }
-        public List<string> PhotoUrls { get; set; } = new List<string>();
+        public List<string>? PhotoUrls { get; set; } = new List<string>();
 
         // New fields for admin visibility
         public bool IsEscalated { get; set; }
