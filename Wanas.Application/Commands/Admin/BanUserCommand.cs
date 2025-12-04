@@ -6,5 +6,5 @@ namespace Wanas.Application.Commands.Admin
        string TargetUserId,
        string AdminId, 
       string? Reason
-      ) : IRequest<bool>;
+      ) : IRequest<BanResult>;
 }

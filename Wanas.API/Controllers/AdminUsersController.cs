@@ -24,36 +24,62 @@ namespace Wanas.API.Controllers
         [HttpPost("{id}/suspend")]
         public async Task<IActionResult> SuspendUser(string id, [FromBody] SuspendUserRequest request)
         {
+            if (request == null)
+                return BadRequest(new { message = "Invalid request body." });
+
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? User.FindFirstValue("sub")
                 ?? string.Empty;
 
             var command = new SuspendUserCommand(
-                    TargetUserId: id,
-                    AdminId: adminId,
-                    DurationDays: request.DurationDays,
-                    Reason: request.Reason
+                TargetUserId: id,
+                AdminId: adminId,
+                DurationDays: request.DurationDays,
+                Reason: request.Reason
             );
 
-            var result = await _mediator.Send(command);
+            SuspendResult result = await _mediator.Send(command);
 
-            if (!result)
-                return NotFound(new { message = "User not found or operation failed." });
+            // User is already suspended
+            if (result.AlreadySuspended)
+            {
+                return Conflict(new
+                {
+                    message = result.SuspendedUntil.HasValue
+                        ? $"User is already suspended until {result.SuspendedUntil:yyyy-MM-dd HH:mm:ss}."
+                        : "User is already suspended indefinitely.",
+                    userId = id,
+                    suspendedUntil = result.SuspendedUntil
+                });
+            }
 
+            // Suspension failed for some other reason
+            if (!result.Success)
+            {
+                return NotFound(new
+                {
+                    message = "User not found or operation failed.",
+                    userId = id
+                });
+            }
+
+            // Suspension succeeded
             return Ok(new
             {
                 message = "User suspended successfully.",
                 userId = id,
-                suspendedUntil = request.DurationDays.HasValue
-                ? DateTime.UtcNow.AddDays(request.DurationDays.Value)
-                : (DateTime?)null
+                suspendedUntil = result.SuspendedUntil
             });
         }
+
 
         // POST api/admin/users/{id}/ban
         [HttpPost("{id}/ban")]
         public async Task<IActionResult> BanUser(string id, [FromBody] BanUserRequest request)
         {
+            if (request == null)
+                return BadRequest(new { message = "Invalid request body." });
+
             var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? User.FindFirstValue("sub")
                 ?? string.Empty;
@@ -64,18 +90,37 @@ namespace Wanas.API.Controllers
                 Reason: request.Reason
             );
 
-            var result = await _mediator.Send(command);
+            BanResult result = await _mediator.Send(command);
 
-            if (!result)
-                return NotFound(new { message = "User not found or operation failed." });
+            // User is already banned
+            if (result.AlreadyBanned)
+            {
+                return Conflict(new
+                {
+                    message = result.Message ?? "User is already banned",
+                    userId = id
+                });
+            }
 
+            // Ban failed for some other reason
+            if (!result.Success)
+            {
+                return NotFound(new
+                {
+                    message = result.Message ?? "User not found or operation failed",
+                    userId = id
+                });
+            }
+
+            // Ban succeeded
             return Ok(new
             {
-                message = "User banned permanently.",
+                message = result.Message ?? "User banned permanently",
                 userId = id,
                 bannedAt = DateTime.UtcNow
             });
         }
+
 
         // POST api/admin/users/{id}/unsuspend
         [HttpPost("{id}/unsuspend")]

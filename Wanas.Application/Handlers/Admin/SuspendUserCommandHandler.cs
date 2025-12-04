@@ -6,7 +6,8 @@ using Wanas.Application.Commands.Admin;
 
 namespace Wanas.Application.Handlers.Admin
 {
-    public class SuspendUserCommandHandler : IRequestHandler<SuspendUserCommand, bool>
+    public class SuspendUserCommandHandler
+    : IRequestHandler<SuspendUserCommand, SuspendResult>
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuditLogService _audit;
@@ -19,36 +20,44 @@ namespace Wanas.Application.Handlers.Admin
             _audit = audit;
         }
 
-        public async Task<bool> Handle(SuspendUserCommand request, CancellationToken cancellationToken)
+        public async Task<SuspendResult> Handle(SuspendUserCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(request.TargetUserId);
-            if (user == null) return false;
+            if (user == null)
+                return new SuspendResult(false, false, null);
 
             // Prevent suspending admins
             var isTargetAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            // Do not suspend other admins
-            if (isTargetAdmin) return false;
+            if (isTargetAdmin)
+                return new SuspendResult(false, false, null);
 
+            // --- Prevent duplicate suspension ---
+            if (user.IsSuspended)
+            {
+                if (user.SuspendedUntil.HasValue && user.SuspendedUntil > DateTime.UtcNow)
+                    return new SuspendResult(false, true, user.SuspendedUntil);
+
+                return new SuspendResult(false, true, null);
+            }
+
+            // Apply suspension
             user.IsSuspended = true;
             if (request.DurationDays.HasValue)
-            {
                 user.SuspendedUntil = DateTime.UtcNow.AddDays(request.DurationDays.Value);
-            }
             else
-            {
-                user.SuspendedUntil = null; // null => indefinite
-            }
+                user.SuspendedUntil = null;
 
-            // Update security stamp to force token invalidation
             await _userManager.UpdateSecurityStampAsync(user);
 
             var updateResult = await _userManager.UpdateAsync(user);
-            if (!updateResult.Succeeded) return false;
+            if (!updateResult.Succeeded)
+                return new SuspendResult(false, false, null);
 
-            var details = $"DurationDays={request.DurationDays}; Reason={request.Reason}";
-            await _audit.LogAsync("SuspendUser", request.AdminId, request.TargetUserId, details);
+            await _audit.LogAsync("SuspendUser", request.AdminId, request.TargetUserId,
+                $"DurationDays={request.DurationDays}; Reason={request.Reason}");
 
-            return true;
+            return new SuspendResult(true, false, user.SuspendedUntil);
         }
     }
+
 }
