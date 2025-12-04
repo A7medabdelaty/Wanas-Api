@@ -37,6 +37,7 @@ namespace Wanas.Domain.Entities
         public ICollection<Chat> Chats { get; set; } = new List<Chat>();
 
         public ICollection<BookingApproval> BookingApprovals { get; set; } = new List<BookingApproval>();
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
 
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
@@ -32,7 +33,8 @@ namespace Wanas.Infrastructure.Repositories
         public ICommentRepository Comments { get; }
         public IRoomRepository Rooms { get; }
         public IBookingApprovalRepository BookingApprovals { get; }
-
+        public IBedRepository Beds { get; }
+        public IReservationRepository Reservations { get; } 
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -55,7 +57,9 @@ namespace Wanas.Infrastructure.Repositories
                           IPayoutRepository payouts,
                           IRefundRepository refunds,
                           IRoomRepository rooms,
-                          IBookingApprovalRepository bookingApprovals)
+                          IBookingApprovalRepository bookingApprovals,
+                          IReservationRepository bedReservations,
+                          IBedRepository beds)
         {
             _context = context;
             Chats = chats;
@@ -82,10 +86,15 @@ namespace Wanas.Infrastructure.Repositories
             ListingPhotos = listingPhotos;
             Rooms = rooms;
             BookingApprovals = bookingApprovals;
+            Reservations = bedReservations;
+            Beds = beds;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
-
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
+        }
         public void Dispose() => _context.Dispose();
     }
 }

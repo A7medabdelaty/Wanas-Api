@@ -40,18 +40,20 @@ namespace Wanas.Infrastructure.Repositories.Listings
                 .ToListAsync();
         }
 
-        public async Task<Listing> GetListingWithDetailsAsync(int id)
+        public async Task<Listing?> GetListingWithDetailsAsync(int id)
         {
             return await _context.Listings
-                .Include(l => l.User)
-            .Include(l => l.ListingPhotos)
-            .Include(l => l.ApartmentListing)
-                .ThenInclude(a => a.Rooms)
-                    .ThenInclude(r => r.Beds)
-            .Include(l => l.Comments)
-            .Include(l => l.Matches)
-            .Include(l => l.Payments)
-            .FirstOrDefaultAsync(l => l.Id == id);
+                    .AsNoTracking()
+                    .AsSplitQuery()
+                    .Include(l => l.User)
+                    .Include(l => l.ListingPhotos)
+                    .Include(l => l.ApartmentListing)
+                        .ThenInclude(a => a.Rooms)
+                            .ThenInclude(r => r.Beds)
+                    .Include(l => l.Comments)
+                    .Include(l => l.Matches)
+                    .Include(l => l.Payments)
+                    .FirstOrDefaultAsync(l => l.Id == id);
         }
 
         public async Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword)
@@ -78,7 +80,10 @@ namespace Wanas.Infrastructure.Repositories.Listings
         {
             return _context.Listings
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(x => x.ApartmentListing)
+                    .ThenInclude(a => a.Rooms)
+                        .ThenInclude(r => r.Beds)
                 .Include(x => x.ListingPhotos)
                 .Include(x => x.User)
                 .Include(x => x.Comments);

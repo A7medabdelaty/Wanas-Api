@@ -8,6 +8,7 @@
         public string? RenterId { get; set; }
         public Room Room { get; set; }
         public ApplicationUser? Renter { get; set; }
+        public ICollection<BedReservation> BedReservations { get; set; } = new List<BedReservation>();
         public void SetRenter(string? renterId)
         {
             RenterId = renterId;

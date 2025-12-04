@@ -19,10 +19,10 @@ namespace Wanas.Application.Services
         }
         public async Task<ReviewDto> CreateReviewAsync(CreateReviewDto dto, string reviewerId)
         {
-            // Prevent duplicate reviews
-            var hasReviewed = await unit.Reviews.HasUserReviewedAsync(reviewerId, dto.TargetId, dto.TargetType);
-            if (hasReviewed)
-                throw new InvalidOperationException("You have already reviewed this target.");
+            //// Prevent duplicate reviews
+            //var hasReviewed = await unit.Reviews.HasUserReviewedAsync(reviewerId, dto.TargetId, dto.TargetType);
+            //if (hasReviewed)
+            //    throw new InvalidOperationException("You have already reviewed this target.");
 
             var review = mapper.Map<Review>(dto);
             review.ReviewerId = reviewerId;

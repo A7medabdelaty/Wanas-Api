@@ -23,7 +23,7 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.HasFans, opt => opt.MapFrom(src => src.ApartmentListing.HasFans))
                 .ForMember(dest => dest.IsPetFriendly, opt => opt.MapFrom(src => src.ApartmentListing.IsPetFriendly))
                 .ForMember(dest => dest.IsSmokingAllowed, opt => opt.MapFrom(src => src.ApartmentListing.IsSmokingAllowed))
-
+                .ForMember(dest => dest.Rooms,opt => opt.MapFrom(src => src.ApartmentListing.Rooms))
     // ---------- COMPUTED FIELDS ----------
         .ForMember(dest => dest.TotalRooms, opt =>
             opt.MapFrom(src => src.ApartmentListing.Rooms.Count))
@@ -52,7 +52,8 @@ namespace Wanas.Application.Mappings
         .ForMember(dest => dest.ListingPhotos, opt => opt.MapFrom(src => src.ListingPhotos))
         .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Comments));
 
-
+            CreateMap<Room, ListingRoomDto>()
+                .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.Id));
             //   LISTING PHOTO → DTO
             CreateMap<ListingPhoto, ListingPhotoDto>()
                 .ForMember(dest => dest.Url, opt => opt.MapFrom(src => src.URL));
@@ -61,8 +62,8 @@ namespace Wanas.Application.Mappings
             //   CREATE LISTING DTO → ENTITY (with nested objects)
             CreateMap<CreateListingDto, Listing>()
                 .ForMember(dest => dest.ApartmentListing, opt => opt.MapFrom(src => src))
-                .ForMember(dest => dest.ListingPhotos, opt => opt.Ignore()) // handled manually
-                .ForMember(dest => dest.Comments, opt => opt.Ignore())     // ignore comments
+                .ForMember(dest => dest.ListingPhotos, opt => opt.Ignore())
+                .ForMember(dest => dest.Comments, opt => opt.Ignore())
                 .ForMember(dest => dest.Payments, opt => opt.Ignore());
 
             CreateMap<CreateListingDto, ApartmentListing>()
@@ -79,7 +80,7 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.IsPetFriendly, opt => opt.MapFrom(src => src.IsPetFriendly))
                 .ForMember(dest => dest.IsSmokingAllowed, opt => opt.MapFrom(src => src.IsSmokingAllowed))
                 .ForMember(dest => dest.Rooms, opt => opt.MapFrom(src => src.Rooms))
-                .ForMember(dest => dest.Beds, opt => opt.Ignore()); // Beds created from Rooms
+                .ForMember(dest => dest.Beds, opt => opt.Ignore());
 
             CreateMap<CreateRoomDto, Room>()
                 .ForMember(dest => dest.Beds, opt => opt.MapFrom(src => src.Beds));
@@ -153,7 +154,8 @@ namespace Wanas.Application.Mappings
             // REVERSE MAPS
             CreateMap<ApartmentListing, CreateListingDto>().ReverseMap();
             CreateMap<Room, CreateRoomDto>().ReverseMap();
-            CreateMap<Bed, BedDto>().ReverseMap();
+            CreateMap<Bed, BedDto>()
+            .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.RenterId == null));
 
             CreateMap<ApartmentListing, UpdateListingDto>().ReverseMap();
             CreateMap<Room, UpdateRoomDto>().ReverseMap();
