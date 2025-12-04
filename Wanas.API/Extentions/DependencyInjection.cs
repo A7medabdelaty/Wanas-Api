@@ -166,6 +166,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IRevenueService, RevenueService>();
             services.AddScoped<IBookingApprovalService, BookingApprovalService>();
             services.AddScoped<IReservationService, ReservationService>();
+            services.AddHostedService<ReservationExpirationService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();

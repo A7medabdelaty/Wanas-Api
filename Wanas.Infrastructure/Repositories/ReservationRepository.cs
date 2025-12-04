@@ -28,8 +28,11 @@ namespace Wanas.Infrastructure.Repositories
         {
             return await _context.Reservations
                 .Include(r => r.Beds)
+                .ThenInclude(br => br.Bed)
                 .Include(r => r.Listing)
+                    .ThenInclude(l => l.User)
                 .Where(r => r.Listing.UserId == ownerId)
+                .Where(r => r.Beds.All(br => br.Bed.RenterId == null))
                 .ToListAsync();
         }
 

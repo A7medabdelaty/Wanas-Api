@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.Persistence;
 
@@ -60,5 +61,22 @@ namespace Wanas.Infrastructure.Repositories
                 .Where(b => b.BedReservations.Any(br => br.ReservationId == reservationId))
                 .ToListAsync();
         }
+        public async Task<List<Bed>> GetTemporarilyAvailableBedsAsync(int listingId, IEnumerable<int> bedIds)
+        {
+            var cutoff = DateTime.UtcNow.AddMinutes(-30);
+
+            return await _context.Beds
+                .Where(b =>
+                    bedIds.Contains(b.Id) &&
+                    b.Room.ApartmentListing.ListingId == listingId &&
+                    b.RenterId == null &&
+
+                    !b.BedReservations.Any(br =>
+                        br.Reservation.PaymentStatus == PaymentStatus.Pending &&
+                        br.Reservation.CreatedAt > cutoff))
+                .Include(b => b.Room)
+                .ToListAsync();
+        }
+
     }
 }
