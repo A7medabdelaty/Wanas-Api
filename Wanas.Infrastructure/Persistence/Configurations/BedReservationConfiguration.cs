@@ -10,32 +10,18 @@ namespace Wanas.Infrastructure.Persistence.Configurations
         {
             builder.ToTable("BedReservations");
 
-            builder.HasKey(x => x.Id);
-            builder.Property(x => x.UserId).IsRequired();
-            builder.Property(x => x.ListingId).IsRequired();
-            builder.Property(x => x.ReservedAt).HasDefaultValueSql("GETUTCDATE()");
+            // Composite Key
+            builder.HasKey(br => new { br.BedId, br.ReservationId });
 
-            builder.HasMany(x => x.Items)
-                .WithOne(i => i.BedReservation)
-                .HasForeignKey(i => i.BedReservationId)
+            builder.HasOne(br => br.Bed)
+                .WithMany(b => b.BedReservations)
+                .HasForeignKey(br => br.BedId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(br => br.Reservation)
+                .WithMany(r => r.Beds)
+                .HasForeignKey(br => br.ReservationId)
                 .OnDelete(DeleteBehavior.Cascade);
-        }
-    }
-
-    public class BedReservationItemConfiguration : IEntityTypeConfiguration<BedReservationItem>
-    {
-        public void Configure(EntityTypeBuilder<BedReservationItem> builder)
-        {
-            builder.ToTable("BedReservationItems");
-
-            builder.HasKey(x => x.Id);
-
-            builder.HasIndex(x => new { x.BedId, x.BedReservationId });
-
-            builder.HasOne(x => x.Bed)
-                .WithMany()
-                .HasForeignKey(x => x.BedId)
-                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

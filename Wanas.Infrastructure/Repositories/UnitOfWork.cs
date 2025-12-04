@@ -34,7 +34,7 @@ namespace Wanas.Infrastructure.Repositories
         public IRoomRepository Rooms { get; }
         public IBookingApprovalRepository BookingApprovals { get; }
         public IBedRepository Beds { get; }
-        public IBedReservationRepository BedReservations { get; } 
+        public IReservationRepository Reservations { get; } 
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -58,7 +58,7 @@ namespace Wanas.Infrastructure.Repositories
                           IRefundRepository refunds,
                           IRoomRepository rooms,
                           IBookingApprovalRepository bookingApprovals,
-                          IBedReservationRepository bedReservations,
+                          IReservationRepository bedReservations,
                           IBedRepository beds)
         {
             _context = context;
@@ -86,7 +86,7 @@ namespace Wanas.Infrastructure.Repositories
             ListingPhotos = listingPhotos;
             Rooms = rooms;
             BookingApprovals = bookingApprovals;
-            BedReservations = bedReservations;
+            Reservations = bedReservations;
             Beds = beds;
         }
 

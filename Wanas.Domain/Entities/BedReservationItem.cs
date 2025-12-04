@@ -6,7 +6,7 @@
         public int BedReservationId { get; set; }
         public int BedId { get; set; }
 
-        public virtual BedReservation BedReservation { get; set; } = null!;
+        public virtual Reservation BedReservation { get; set; } = null!;
         public virtual Bed Bed { get; set; } = null!;
     }
 }

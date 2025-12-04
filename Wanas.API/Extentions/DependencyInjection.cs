@@ -136,14 +136,14 @@ namespace Wanas.API.Extentions
             services.AddScoped<IAppealRepository, AppealRepository>();
             services.AddScoped<ITrafficLogRepository, TrafficLogRepository>();
             services.AddScoped<IDailyMetricsRepository, DailyMetricsRepository>();
-            services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ICommissionRepository, CommissionRepository>();
             services.AddScoped<IPayoutRepository, PayoutRepository>();
             services.AddScoped<IRefundRepository, RefundRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBedRepository, BedRepository>();
             services.AddScoped<IBookingApprovalRepository, BookingApprovalRepository>();
-            services.AddScoped<IBedReservationRepository, BedReservationRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -165,7 +165,8 @@ namespace Wanas.API.Extentions
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IRevenueService, RevenueService>();
             services.AddScoped<IBookingApprovalService, BookingApprovalService>();
-            services.AddScoped<IBedReservationService, BedReservationService>();
+            services.AddScoped<IReservationService, ReservationService>();
+            services.AddHostedService<ReservationExpirationService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
