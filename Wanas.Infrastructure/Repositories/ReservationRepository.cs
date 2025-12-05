@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 using Wanas.Infrastructure.Persistence;
 
@@ -26,10 +27,20 @@ namespace Wanas.Infrastructure.Repositories
 
         public async Task<List<Reservation>> GetReservationsByOwnerAsync(string ownerId)
         {
+            var expiryLimit = DateTime.UtcNow.AddMinutes(-30);
+
             return await _context.Reservations
                 .Include(r => r.Beds)
+                    .ThenInclude(br => br.Bed)
+                        .ThenInclude(b => b.Room)
                 .Include(r => r.Listing)
-                .Where(r => r.Listing.UserId == ownerId)
+                .Where(r =>
+                    r.Listing.UserId == ownerId && (
+                        r.PaymentStatus == PaymentStatus.Sucess ||
+                        (r.PaymentStatus == PaymentStatus.Pending && r.CreatedAt >= expiryLimit)
+                    )
+                )
+                .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }
 
@@ -49,7 +60,16 @@ namespace Wanas.Infrastructure.Repositories
                 .Where(r => r.Listing.UserId == ownerId)
                 .ToListAsync();
         }
-
+        public async Task<List<Reservation>> GetByRenterAsync(string renterId)
+        {
+            return await _context.Reservations
+                .Include(r => r.Beds)
+                .Include(r => r.Listing)
+                    .ThenInclude(l => l.ApartmentListing)
+                .Where(r => r.UserId == renterId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
     }
 
 }

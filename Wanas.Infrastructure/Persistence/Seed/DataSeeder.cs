@@ -59,6 +59,69 @@ namespace Wanas.Infrastructure.Persistence.Seed
                 }
 
                 await context.SaveChangesAsync(ct);
+
+                // Ensure some basic reports exist even when listings already existed
+                if (!await context.Reports.AnyAsync(ct))
+                {
+                    var users = await context.Users.OrderBy(u => u.CreatedAt).Take(6).ToListAsync(ct);
+                    var anyListing = listings.FirstOrDefault();
+                    if (users.Count >0)
+                    {
+                        var seededReports = new List<Report>();
+                        var categories = new[] { ReportCategory.Harassment, ReportCategory.Spam, ReportCategory.SensitiveContent, ReportCategory.Other };
+                        var severities = new[] { ReportSeverity.Low, ReportSeverity.Medium, ReportSeverity.High };
+
+                        // Create10 reports alternating target types
+                        for (int i =0; i <10; i++)
+                        {
+                            var reporter = users[i % users.Count];
+                            var isUserTarget = i %2 ==0;
+                            var category = categories[i % categories.Length];
+                            var severity = severities[i % severities.Length];
+
+                            var report = new Report
+                            {
+                                TargetType = isUserTarget ? ReportTarget.User : ReportTarget.Listing,
+                                TargetId = isUserTarget
+                                ? users[(i +1) % users.Count].Id // pick a different user as target
+                                : (anyListing != null ? anyListing.Id.ToString() : users[(i +1) % users.Count].Id),
+                                Category = category,
+                                Reason = isUserTarget ? "Reported user behavior." : "Reported listing content.",
+                                Status = ReportStatus.Pending,
+                                CreatedAt = DateTime.UtcNow.AddMinutes(-60 + i *3),
+                                ReporterId = reporter.Id,
+                                IsEscalated = false,
+                                Severity = severity
+                            };
+                            seededReports.Add(report);
+                        }
+
+                        await context.Reports.AddRangeAsync(seededReports, ct);
+                        await context.SaveChangesAsync(ct);
+
+                        // Optionally add photos to first few reports
+                        var createdReports = await context.Reports
+                            .OrderBy(r => r.ReportId)
+                            .Take(3)
+                            .ToListAsync(ct);
+
+                        var photoSeed = new List<ReportPhoto>();
+                        for (int i =0; i < createdReports.Count; i++)
+                        {
+                            photoSeed.Add(new ReportPhoto
+                            {
+                                ReportId = createdReports[i].ReportId,
+                                URL = $"images/reports/evidence{i +1}.jpg"
+                            });
+                        }
+                        if (photoSeed.Count >0)
+                        {
+                            await context.ReportPhotos.AddRangeAsync(photoSeed, ct);
+                            await context.SaveChangesAsync(ct);
+                        }
+                    }
+                }
+
                 return; // Skip full seed to avoid duplicating users/listings
             }
 
@@ -205,6 +268,61 @@ namespace Wanas.Infrastructure.Persistence.Seed
             }
 
             await context.SaveChangesAsync(ct);
+
+            // Seed initial reports linked to renters/owners
+            if (!await context.Reports.AnyAsync(ct))
+            {
+                var users = renters.Concat(owners).ToList();
+                var firstListing = await context.Listings.OrderBy(l => l.Id).FirstOrDefaultAsync(ct);
+
+                var reports = new List<Report>();
+                var categories = new[] { ReportCategory.Harassment, ReportCategory.Spam, ReportCategory.SensitiveContent, ReportCategory.Other };
+                var severities = new[] { ReportSeverity.Low, ReportSeverity.Medium, ReportSeverity.High };
+
+                for (int i =0; i <10; i++)
+                {
+                    var reporter = users[i % users.Count];
+                    var isUserTarget = i %2 ==0;
+                    var category = categories[i % categories.Length];
+                    var severity = severities[i % severities.Length];
+
+                    var targetId = isUserTarget
+                    ? users[(i +1) % users.Count].Id
+                    : (firstListing != null ? firstListing.Id.ToString() : users[(i +1) % users.Count].Id);
+
+                    reports.Add(new Report
+                    {
+                        TargetType = isUserTarget ? ReportTarget.User : ReportTarget.Listing,
+                        TargetId = targetId,
+                        Category = category,
+                        Reason = isUserTarget ? "Owner/Renter behavior reported." : "Listing content reported.",
+                        Status = ReportStatus.Pending,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-120 + i *5),
+                        ReporterId = reporter.Id,
+                        IsEscalated = false,
+                        Severity = severity
+                    });
+                }
+
+                await context.Reports.AddRangeAsync(reports, ct);
+                await context.SaveChangesAsync(ct);
+
+                // Add photos to first few reports (optional)
+                var photoEntries = new List<ReportPhoto>();
+                for (int i =0; i < Math.Min(4, reports.Count); i++)
+                {
+                    photoEntries.Add(new ReportPhoto
+                    {
+                        ReportId = reports[i].ReportId,
+                        URL = $"images/reports/sample-evidence-{i +1}.jpg"
+                    });
+                }
+                if (photoEntries.Count >0)
+                {
+                    await context.ReportPhotos.AddRangeAsync(photoEntries, ct);
+                    await context.SaveChangesAsync(ct);
+                }
+            }
         }
     }
 }

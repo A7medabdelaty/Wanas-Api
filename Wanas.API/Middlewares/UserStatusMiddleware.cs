@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Wanas.Domain.Entities;
+using Wanas.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Wanas.Domain.Enums;
 
 namespace Wanas.API.Middlewares
 {
@@ -18,7 +21,7 @@ namespace Wanas.API.Middlewares
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager)
+        public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager, AppDBContext db)
         {
             // Skip check for anonymous requests or public endpoints
             if (!context.User.Identity?.IsAuthenticated ?? true)
@@ -48,6 +51,9 @@ namespace Wanas.API.Middlewares
             // Check if user is banned
             if (user.IsBanned)
             {
+                // Deactivate listings for banned users
+                await DeactivateUserListingsAsync(db, userId);
+
                 _logger.LogWarning("Banned user {UserId} attempted to access {Path}", userId, context.Request.Path);
 
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -73,11 +79,16 @@ namespace Wanas.API.Middlewares
                     user.SuspendedUntil = null;
                     await userManager.UpdateAsync(user);
 
+                    // Reactivate only approved, non-flagged listings
+                    await ReactivateEligibleListingsAsync(db, userId);
+
                     _logger.LogInformation("Auto-lifted expired suspension for user {UserId}", userId);
                 }
                 else
                 {
-                    // Suspension still active
+                    // Suspension still active -> ensure listings are deactivated
+                    await DeactivateUserListingsAsync(db, userId);
+
                     _logger.LogWarning("Suspended user {UserId} attempted to access {Path}", userId, context.Request.Path);
 
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -100,6 +111,25 @@ namespace Wanas.API.Middlewares
 
             // User is not banned or suspended, continue processing
             await _next(context);
+        }
+
+        private static async Task DeactivateUserListingsAsync(AppDBContext db, string userId)
+        {
+            // Only deactivate those currently active
+            await db.Listings
+                .Where(l => l.UserId == userId && l.IsActive)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(l => l.IsActive, false));
+        }
+
+        private static async Task ReactivateEligibleListingsAsync(AppDBContext db, string userId)
+        {
+            // Reactivate only approved, non-flagged listings
+            await db.Listings
+                .Where(l => l.UserId == userId
+                    && !l.IsActive
+                    && !l.IsFlagged
+                    && l.ModerationStatus == ListingModerationStatus.Approved)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(l => l.IsActive, true));
         }
     }
 }

@@ -85,10 +85,6 @@ namespace Wanas.Application.Mappings
             CreateMap<CreateRoomDto, Room>()
                 .ForMember(dest => dest.Beds, opt => opt.MapFrom(src => src.Beds));
 
-            CreateMap<BedDto, Bed>();
-
-
-
             //   UPDATE LISTING DTO → ENTITY
             CreateMap<UpdateListingDto, Listing>()
                 .ForMember(dest => dest.ApartmentListing, opt => opt.MapFrom(src => src))
@@ -155,7 +151,13 @@ namespace Wanas.Application.Mappings
             CreateMap<ApartmentListing, CreateListingDto>().ReverseMap();
             CreateMap<Room, CreateRoomDto>().ReverseMap();
             CreateMap<Bed, BedDto>()
-            .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.RenterId == null));
+            .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.RenterId == null))
+            .ForMember(dest=>dest.Id, opt => opt.MapFrom(src => src.Id));
+
+            CreateMap<BedReservation, BedDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.BedId))
+            .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.Bed.RoomId))
+            .ForMember(dest => dest.PricePerBed, opt => opt.MapFrom(src => src.Bed.Room.PricePerBed));
 
             CreateMap<ApartmentListing, UpdateListingDto>().ReverseMap();
             CreateMap<Room, UpdateRoomDto>().ReverseMap();

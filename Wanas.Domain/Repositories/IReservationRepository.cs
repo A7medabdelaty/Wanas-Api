@@ -8,5 +8,6 @@ namespace Wanas.Domain.Repositories
         Task<Reservation?> GetReservationWithBedsAsync(int id);
         Task<List<Reservation>> GetReservationsByOwnerAsync(string ownerId);
         Task<List<Reservation>> GetByOwnerAsync(string ownerId);
+        Task<List<Reservation>> GetByRenterAsync(string renterId);
     }
 }

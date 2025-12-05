@@ -7,5 +7,5 @@ namespace Wanas.Application.Commands.Admin
         string AdminId,
         int? DurationDays,
         string? Reason
-        ) : IRequest<bool>;
+        ) : IRequest<SuspendResult>;
 }

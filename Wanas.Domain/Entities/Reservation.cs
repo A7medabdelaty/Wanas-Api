@@ -17,11 +17,13 @@ namespace Wanas.Domain.Entities
 
         public decimal TotalPrice { get; set; }
         public decimal DepositAmount { get; set; }
+        public decimal RemainingAmount { get; set; }
 
         public PaymentStatus PaymentStatus { get; set; }
         public string? PaymentMethod { get; set; }
         public string? TransactionId { get; set; }
         public DateTime? PaidAt { get; set; }
+        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<BedReservation> Beds { get; set; } = new List<BedReservation>();
     }

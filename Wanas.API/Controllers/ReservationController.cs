@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Wanas.API.Responses;
 using Wanas.Application.DTOs.Payment;
 using Wanas.Application.DTOs.Reservation;
 using Wanas.Application.Interfaces;
@@ -20,36 +21,90 @@ namespace Wanas.API.Controllers
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateReservationRequestDto request)
+        public async Task<IActionResult> CreateReservation(
+            [FromBody] CreateReservationRequestDto request)
         {
             var userId = GetUserId();
-            var result = await _reservationService.CreateReservationAsync(request, userId);
-            return Ok(result);
+
+            if (request == null)
+                return BadRequest(new ApiError("InvalidRequest"));
+
+            if (request.StartDate == default)
+                return BadRequest(new ApiError("InvalidStartDate"));
+
+            if (request.DurationInDays != 15 && request.DurationInDays != 30)
+                return BadRequest(new ApiError("InvalidDuration", "Duration must be 15 or 30 days"));
+
+            try
+            {
+                var reservation = await _reservationService
+                    .CreateReservationAsync(request, userId);
+
+                return Created(
+                    $"/api/reservations/{reservation.Id}",
+                    reservation
+                );
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiError(ex.Message));
+            }
         }
 
         [HttpPost("{reservationId:int}/deposit")]
         public async Task<IActionResult> PayDeposit(
-        int reservationId,
-        [FromBody] DepositPaymentRequestDto payment,
-        CancellationToken cancellationToken)
+            int reservationId,
+            [FromBody] DepositPaymentRequestDto payment)
         {
             if (payment == null)
-                return BadRequest("InvalidPaymentData");
+                return BadRequest(new ApiError("InvalidPaymentData"));
 
             var userId = GetUserId();
-            var result = await _reservationService.PayDepositAsync(reservationId, payment, userId);
 
-            if (result.PaymentStatus != PaymentStatus.Sucess)
-                return BadRequest();
+            try
+            {
+                var result = await _reservationService
+                    .PayDepositAsync(reservationId, payment, userId);
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "Forbidden")
+                    return Forbid();
+
+                if (ex.Message == "ReservationNotFound")
+                    return NotFound(new ApiError("ReservationNotFound"));
+
+                if (ex.Message == "AlreadyPaidOrInvalidState")
+                    return BadRequest(new ApiError("ReservationAlreadyPaid"));
+
+                if (ex.Message == "ReservationExpired")
+                    return BadRequest(new ApiError("ReservationExpired"));
+
+                return BadRequest(new ApiError(ex.Message));
+            }
         }
 
         [HttpGet("owner")]
         public async Task<IActionResult> GetOwnerReservations()
         {
             var ownerId = GetUserId();
+            if (ownerId == null)
+                return Unauthorized();
             var result = await _reservationService.GetOwnerReservationsAsync(ownerId);
+            if(result == null)
+                return NotFound();
+            return Ok(result);
+        }
+
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyReservations()
+        {
+            var userId = GetUserId();
+
+            var result = await _reservationService.GetRenterReservationsAsync(userId);
+
             return Ok(result);
         }
 

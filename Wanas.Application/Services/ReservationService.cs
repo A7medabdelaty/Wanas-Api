@@ -27,35 +27,51 @@ namespace Wanas.Application.Services
             if (listing == null)
                 throw new Exception("ListingNotFound");
 
-            var beds = await _uow.Beds.GetByIdsAsync(request.BedIds);
+            DateTime from = request.StartDate.Date;
+            DateTime to = from.AddDays(request.DurationInDays);
 
-            beds = beds.Where(b =>
-                b.Room.ApartmentListing.ListingId == request.ListingId &&
-                b.RenterId == null
-            ).ToList();
+            // 1. Get beds that are truly available (not rented AND not held by pending reservations)
+            var beds = await _uow.Beds.GetTemporarilyAvailableBedsAsync(
+                    request.ListingId,
+                    request.BedIds
+                );
 
-            if (beds.Count != request.BedIds.Count)
+            if (beds.Count != request.BedIds.Count())
                 throw new Exception("SomeBedsUnavailable");
 
-            // Price per room
-            decimal total = beds.Count * beds.First().Room.PricePerBed;
+            // 2. Compute price
+            decimal totalPrice = beds
+            .Sum(b => (b.Room.PricePerBed / 30m))
+            * request.DurationInDays;
 
+            // 3. Create reservation (pending)
             var reservation = new Reservation
             {
                 ListingId = request.ListingId,
                 UserId = userId,
-                FromDate = request.FromDate,
-                ToDate = request.ToDate,
-                TotalPrice = total,
-                DepositAmount = total * 0.20m,
+                FromDate = from,
+                ToDate = to,
+                TotalPrice = totalPrice,
                 PaymentStatus = PaymentStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
                 Beds = beds.Select(b => new BedReservation { BedId = b.Id }).ToList()
             };
 
             await _uow.Reservations.AddAsync(reservation);
+
+            foreach (var bed in beds)
+                bed.IsAvailable = false;
+
             await _uow.CommitAsync();
 
             return _mapper.Map<ReservationDto>(reservation);
+        }
+
+        public async Task<List<ReservationListItemDto>> GetRenterReservationsAsync(string userId)
+        {
+            var reservations = await _uow.Reservations.GetByRenterAsync(userId);
+
+            return _mapper.Map<List<ReservationListItemDto>>(reservations);
         }
 
         public async Task<List<ReservationDto>> GetOwnerReservationsAsync(string ownerId)
@@ -70,9 +86,9 @@ namespace Wanas.Application.Services
             return _mapper.Map<ReservationDto>(reservation);
         }
         public async Task<ReservationDto> PayDepositAsync(
-            int reservationId,
-            DepositPaymentRequestDto payment,
-            string userId)
+                int reservationId,
+                DepositPaymentRequestDto payment,
+                string userId)
         {
             var reservation = await _uow.Reservations.GetReservationWithBedsAsync(reservationId);
 
@@ -85,39 +101,55 @@ namespace Wanas.Application.Services
             if (reservation.PaymentStatus != PaymentStatus.Pending)
                 throw new Exception("AlreadyPaidOrInvalidState");
 
-            // Load listing owner
+            if (reservation.CreatedAt < DateTime.UtcNow.AddMinutes(-30))
+                throw new Exception("ReservationExpired");
+
+            // ---------- CHECK IF BEDS ARE STILL AVAILABLE ----------
+            var beds = await _uow.Beds.GetByReservationIdAsync(reservationId);
+
+            foreach (var b in beds)
+            {
+                // If another user took the bed OR there is a conflicting pending reservation
+                bool unavailable =
+                    b.RenterId != null ||
+                    b.BedReservations.Any(br =>
+                        br.ReservationId != reservationId &&
+                        br.Reservation.PaymentStatus == PaymentStatus.Pending &&
+                        br.Reservation.CreatedAt > DateTime.UtcNow.AddMinutes(-30));
+
+                if (unavailable)
+                    throw new Exception("SomeBedsAreNoLongerAvailable");
+            }
+
             var listing = await _uow.Listings.GetByIdAsync(reservation.ListingId);
             if (listing == null)
                 throw new Exception("ListingNotFound");
 
-            decimal depositAmount = reservation.TotalPrice * 0.20m;
+            decimal depositAmount = Math.Round(reservation.TotalPrice * 0.20m, 2);
+            decimal remainingAmount = reservation.TotalPrice - depositAmount;
 
-            // ------- MOCK PAYMENT -------
-            bool paymentSuccess = true; // For now always success
+            bool paymentSuccess = true;
             if (!paymentSuccess)
                 throw new Exception("PaymentFailed");
 
-            // Assign beds to user
-            var beds = await _uow.Beds.GetByReservationIdAsync(reservationId);
             foreach (var b in beds)
                 b.RenterId = userId;
 
             reservation.PaymentStatus = PaymentStatus.Sucess;
             reservation.DepositAmount = depositAmount;
+            reservation.RemainingAmount = remainingAmount;
             reservation.PaymentMethod = payment.PaymentMethod;
             reservation.PaidAt = DateTime.UtcNow;
 
             await _uow.CommitAsync();
 
-            // Notify owner
             await _notifier.NotifyOwnerAsync(
                 listing.UserId,
-                $"New reservation deposit paid for listing {reservation.ListingId}"
+                $"Deposit paid for reservation #{reservation.Id} in listing {reservation.ListingId}"
             );
 
             return _mapper.Map<ReservationDto>(reservation);
         }
-
     }
 
 }

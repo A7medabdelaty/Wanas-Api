@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Wanas.Domain.Enums;
+﻿using Wanas.Domain.Enums;
 
 namespace Wanas.Domain.Entities
 {

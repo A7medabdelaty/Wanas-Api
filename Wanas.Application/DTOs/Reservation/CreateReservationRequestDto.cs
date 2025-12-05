@@ -6,7 +6,8 @@ namespace Wanas.Application.DTOs.Reservation
         public int ListingId { get; set; }
         public List<int> BedIds { get; set; }
 
-        public DateTime FromDate { get; set; }
-        public DateTime ToDate { get; set; }
+        public DateTime StartDate { get; set; }
+
+        public int DurationInDays { get; set; }
     }
 }
