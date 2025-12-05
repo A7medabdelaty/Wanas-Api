@@ -23,6 +23,34 @@ namespace Wanas.API.Controllers
             var reports = await _reportService.GetReportsAsync(status, escalated, severity);
             return Ok(new { totalCount = reports.Count(), reports });
         }
+
+        // Dashboard counts endpoint
+        [HttpGet("counts")]
+        public async Task<IActionResult> GetCounts()
+        {
+            var all = await _reportService.GetReportsAsync();
+            var total = all.Count();
+            var pending = all.Count(r => r.Status == ReportStatus.Pending);
+            var reviewed = all.Count(r => r.Status == ReportStatus.Reviewed);
+            var resolved = all.Count(r => r.Status == ReportStatus.Resolved);
+            var rejected = all.Count(r => r.Status == ReportStatus.Rejected);
+            var escalated = all.Count(r => r.IsEscalated);
+
+            // Percent of reviewing: reviewed / total (avoid division by zero)
+            var reviewingPercent = total ==0 ?0 : Math.Round((double)reviewed / total *100,2);
+
+            return Ok(new
+            {
+                total,
+                pendingCount = pending,
+                reviewedCount = reviewed,
+                resolvedCount = resolved,
+                rejectedCount = rejected,
+                escalatedCount = escalated,
+                reviewingPercent
+            });
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReport(int id)
         {
