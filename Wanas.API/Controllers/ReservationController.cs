@@ -98,6 +98,16 @@ namespace Wanas.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyReservations()
+        {
+            var userId = GetUserId();
+
+            var result = await _reservationService.GetRenterReservationsAsync(userId);
+
+            return Ok(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {

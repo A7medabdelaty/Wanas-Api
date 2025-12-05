@@ -67,7 +67,12 @@ namespace Wanas.Application.Services
             return _mapper.Map<ReservationDto>(reservation);
         }
 
+        public async Task<List<ReservationListItemDto>> GetRenterReservationsAsync(string userId)
+        {
+            var reservations = await _uow.Reservations.GetByRenterAsync(userId);
 
+            return _mapper.Map<List<ReservationListItemDto>>(reservations);
+        }
 
         public async Task<List<ReservationDto>> GetOwnerReservationsAsync(string ownerId)
         {
