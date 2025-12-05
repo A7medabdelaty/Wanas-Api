@@ -37,6 +37,25 @@ namespace Wanas.API.Controllers
             return Ok(listings);
         }
 
+        // GET TOP6 ACTIVE APPROVED LISTINGS
+        [HttpGet("top")]
+        public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetTop()
+        {
+            //var active = await _listService.GetActiveListingsAsync();
+            //var top = active
+            //    .Where(l => l.ModerationStatus == ListingModerationStatus.Approved)
+            //    .OrderByDescending(l => l.CreatedAt)
+            //    .Take(6)
+            //    .ToList();
+
+            var top = (await _listService.GetActiveListingsAsync()).OrderByDescending(l => l.CreatedAt).Take(6).ToList();
+
+            if (!top.Any())
+                return NotFound("No listings found.");
+
+            return Ok(top);
+        }
+
         // GET BY ID
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ListingDetailsDto>> GetById(int id)
