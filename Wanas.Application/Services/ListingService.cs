@@ -44,19 +44,37 @@ namespace Wanas.Application.Services
         // CREATE LISTING
         public async Task<ListingDetailsDto> CreateListingAsync(CreateListingDto dto, string userId)
         {
-            var listing = _mapper.Map<Listing>(dto);
-            listing.UserId = userId;
-            listing.IsActive = true;
+            // ---------- Create Main Listing ----------
+            var listing = new Listing
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                City = dto.City,
+                MonthlyPrice = dto.MonthlyPrice,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                UserId = userId,
+                ApartmentListing = new ApartmentListing
+                {
+                    Address = dto.Address,
+                    MonthlyPrice = dto.MonthlyPrice,
+                    HasElevator = dto.HasElevator,
+                    Floor = dto.Floor,
+                    AreaInSqMeters = dto.AreaInSqMeters,
+                    TotalBathrooms = dto.TotalBathrooms,
+                    HasKitchen = dto.HasKitchen,
+                    HasInternet = dto.HasInternet,
+                    HasAirConditioner = dto.HasAirConditioner,
+                    HasFans = dto.HasFans,
+                    IsPetFriendly = dto.IsPetFriendly,
+                    IsSmokingAllowed = dto.IsSmokingAllowed,
+                    Rooms = new List<Room>()
+                },
+                ListingPhotos = new HashSet<ListingPhoto>()
+            };
 
-            // --- Apartment Listing ---
-            listing.ApartmentListing = _mapper.Map<ApartmentListing>(dto);
-            listing.ApartmentListing.Listing = listing;
-
-            listing.ApartmentListing.Rooms ??= new List<Room>();
-            listing.ListingPhotos ??= new HashSet<ListingPhoto>();
-
-            // --- Rooms ---
-            if (dto.Rooms != null && dto.Rooms.Any())
+            // ---------- Rooms & Beds ----------
+            if (dto.Rooms != null)
             {
                 foreach (var roomDto in dto.Rooms)
                 {
@@ -64,20 +82,18 @@ namespace Wanas.Application.Services
                     {
                         RoomNumber = roomDto.RoomNumber,
                         BedsCount = roomDto.BedsCount,
-                        AvailableBeds = roomDto.AvailableBeds,
                         PricePerBed = roomDto.PricePerBed,
                         HasAirConditioner = roomDto.HasAirConditioner,
                         HasFan = roomDto.HasFan,
-                        ApartmentListing = listing.ApartmentListing,
                         Beds = new List<Bed>()
                     };
 
+                    // Auto-generate Beds
                     for (int i = 0; i < roomDto.BedsCount; i++)
                     {
                         room.Beds.Add(new Bed
                         {
-                            Room = room,
-                            IsAvailable = i < roomDto.AvailableBeds
+                            IsAvailable = true
                         });
                     }
 
@@ -86,7 +102,7 @@ namespace Wanas.Application.Services
                 }
             }
 
-            // --- Photos ---
+            // ---------- Save Photos ----------
             if (dto.Photos != null)
             {
                 foreach (var file in dto.Photos)
@@ -96,11 +112,11 @@ namespace Wanas.Application.Services
                 }
             }
 
-            // --- Save listing first so we have listing.Id ---
+            // ---------- Save Listing (generate Listing.Id) ----------
             await _uow.Listings.AddAsync(listing);
-            await _uow.CommitAsync(); // listing.Id is now generated
+            await _uow.CommitAsync();
 
-            // --- Create Group Chat (no ListingId) ---
+            // ---------- Create Group Chat ----------
             var groupChat = new Chat
             {
                 IsGroup = true,
@@ -109,15 +125,12 @@ namespace Wanas.Application.Services
             };
 
             await _uow.Chats.AddAsync(groupChat);
-            await _uow.CommitAsync(); // groupChat.Id generated
-
-            // --- Link Listing to GroupChat ---
-            listing.GroupChatId = groupChat.Id;
-            listing.GroupChat = groupChat;
-
             await _uow.CommitAsync();
 
-            // --- Return full listing ---
+            listing.GroupChatId = groupChat.Id;
+            await _uow.CommitAsync();
+
+            // ---------- Load full listing ----------
             var savedListing = await _uow.Listings.GetListingWithDetailsAsync(listing.Id);
             return _mapper.Map<ListingDetailsDto>(savedListing);
         }

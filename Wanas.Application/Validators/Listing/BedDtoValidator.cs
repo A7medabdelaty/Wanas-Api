@@ -3,7 +3,7 @@ using Wanas.Application.DTOs.Listing;
 
 namespace Wanas.Application.Validators.Listing
 {
-    public class BedDtoValidator : AbstractValidator<BedDto>
+    public class BedDtoValidator : AbstractValidator<CreateBedDto>
     {
         public BedDtoValidator()
         {
