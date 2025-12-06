@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Wanas.Application.Commands.Admin;
 using Wanas.Application.Queries.Admin;
+using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
 
 namespace Wanas.API.Controllers
@@ -14,10 +16,24 @@ namespace Wanas.API.Controllers
     public class AdminUsersController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AdminUsersController(IMediator mediator)
+        public AdminUsersController(IMediator mediator, UserManager<ApplicationUser> userManager)
         {
             _mediator = mediator;
+            _userManager = userManager;
+        }
+
+        // GET api/admin/users/counts
+        [HttpGet("counts")]
+        public async Task<IActionResult> GetUserCounts()
+        {
+            var users = _userManager.Users; // IQueryable<ApplicationUser>
+            var total = await Task.FromResult(users.Count());
+            var owners = await Task.FromResult(users.Count(u => u.ProfileType == ProfileType.Owner));
+            var renters = await Task.FromResult(users.Count(u => u.ProfileType == ProfileType.Renter));
+
+            return Ok(new { total, owners, renters });
         }
 
         // POST api/admin/users/{id}/suspend
