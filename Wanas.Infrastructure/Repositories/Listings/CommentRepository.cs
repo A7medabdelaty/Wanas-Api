@@ -16,6 +16,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
         {
             return await _context.Comments
                 .Where(c => c.ListingId == listingId)
+                .Include(c=>c.Author)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
         }

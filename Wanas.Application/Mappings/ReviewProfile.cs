@@ -16,7 +16,7 @@ namespace Wanas.Application.Mappings
 
             CreateMap<Review, ReviewDto>()
                 .ForMember(dest => dest.ReviewerName,
-                    opt => opt.MapFrom(src => src.Reviewer.UserName))
+                    opt => opt.MapFrom(src => src.Reviewer.FullName))
                 .ForMember(dest => dest.ReviewerProfilePhotoUrl,
                     opt => opt.MapFrom(src => src.Reviewer.Photo));
         }
