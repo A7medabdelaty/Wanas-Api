@@ -39,8 +39,8 @@ namespace Wanas.Application.Services
                     .ExistsAsync(listingId, userId, ApprovalType.Group))
                 return false;
 
-            var groupChat = _chatService.AddParticipantAsync(listing.Id, userId);
-            if (groupChat == null)
+            var groupChat = await _chatService.AddParticipantAsync(listing.Id, userId);
+            if (!groupChat)
                 return false;
 
             // Insert approval

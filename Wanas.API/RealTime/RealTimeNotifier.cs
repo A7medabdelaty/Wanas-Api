@@ -186,5 +186,119 @@ namespace Wanas.API.RealTime
             });
         }
 
+        // USER TYPING
+        public async Task NotifyUserTypingAsync(int chatId, string userId, string userName)
+        {
+            try
+            {
+                await _hub.Clients.Group($"chat_{chatId}")
+                    .SendAsync("UserTyping", new { ChatId = chatId, UserId = userId, UserName = userName });
+
+                _logger.LogDebug("User typing notification sent to group chat_{ChatId} for user {UserId}", chatId, userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying user typing for chat {ChatId}, user {UserId}", chatId, userId);
+            }
+        }
+        // USER STOPPED TYPING
+        public async Task NotifyUserStoppedTypingAsync(int chatId, string userId)
+        {
+            try
+            {
+                await _hub.Clients.Group($"chat_{chatId}")
+                    .SendAsync("UserStoppedTyping", new { ChatId = chatId, UserId = userId });
+
+                _logger.LogDebug("User stopped typing notification sent to group chat_{ChatId} for user {UserId}", chatId, userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying user stopped typing for chat {ChatId}, user {UserId}", chatId, userId);
+            }
+        }
+
+        // USER STATUS CHANGED (Online/Offline)
+        public async Task NotifyUserStatusChangedAsync(string userId, bool isOnline)
+        {
+            try
+            {
+                await _hub.Clients.All
+                    .SendAsync("UserStatusChanged", new { UserId = userId, IsOnline = isOnline, Timestamp = DateTime.UtcNow });
+
+                _logger.LogInformation("User status changed notification sent for user {UserId}: {Status}", userId, isOnline ? "Online" : "Offline");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying user status changed for user {UserId}", userId);
+            }
+        }
+
+        // LISTING UPDATED
+        public async Task NotifyListingUpdatedAsync(int listingId, string ownerId)
+        {
+            try
+            {
+                await _hub.Clients.User(ownerId)
+                    .SendAsync("ListingUpdated", new { ListingId = listingId, Timestamp = DateTime.UtcNow });
+
+                _logger.LogInformation("Listing updated notification sent to owner {OwnerId} for listing {ListingId}", ownerId, listingId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying listing updated for listing {ListingId}, owner {OwnerId}", listingId, ownerId);
+            }
+        }
+        // RESERVATION CREATED
+        public async Task NotifyReservationCreatedAsync(int reservationId, string renterId, string ownerId)
+        {
+            try
+            {
+                var notificationData = new { ReservationId = reservationId, Timestamp = DateTime.UtcNow };
+                // Notify the renter
+                await _hub.Clients.User(renterId)
+                    .SendAsync("ReservationCreated", notificationData);
+                // Notify the owner
+                await _hub.Clients.User(ownerId)
+                    .SendAsync("ReservationCreated", notificationData);
+
+                _logger.LogInformation("Reservation created notification sent for reservation {ReservationId} to renter {RenterId} and owner {OwnerId}",
+                    reservationId, renterId, ownerId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying reservation created for reservation {ReservationId}", reservationId);
+            }
+        }
+        // RESERVATION UPDATED
+        public async Task NotifyReservationUpdatedAsync(int reservationId, string userId)
+        {
+            try
+            {
+                await _hub.Clients.User(userId)
+                    .SendAsync("ReservationUpdated", new { ReservationId = reservationId, Timestamp = DateTime.UtcNow });
+
+                _logger.LogInformation("Reservation updated notification sent to user {UserId} for reservation {ReservationId}", userId, reservationId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying reservation updated for reservation {ReservationId}, user {UserId}", reservationId, userId);
+            }
+        }
+        // RESERVATION CANCELLED
+        public async Task NotifyReservationCancelledAsync(int reservationId, string userId)
+        {
+            try
+            {
+                await _hub.Clients.User(userId)
+                    .SendAsync("ReservationCancelled", new { ReservationId = reservationId, Timestamp = DateTime.UtcNow });
+
+                _logger.LogInformation("Reservation cancelled notification sent to user {UserId} for reservation {ReservationId}", userId, reservationId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying reservation cancelled for reservation {ReservationId}, user {UserId}", reservationId, userId);
+            }
+        }
+
     }
 }

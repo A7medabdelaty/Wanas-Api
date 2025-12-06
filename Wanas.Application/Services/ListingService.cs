@@ -44,19 +44,37 @@ namespace Wanas.Application.Services
         // CREATE LISTING
         public async Task<ListingDetailsDto> CreateListingAsync(CreateListingDto dto, string userId)
         {
-            var listing = _mapper.Map<Listing>(dto);
-            listing.UserId = userId;
-            listing.IsActive = true;
+            // ---------- Create Main Listing ----------
+            var listing = new Listing
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                City = dto.City,
+                MonthlyPrice = dto.MonthlyPrice,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                UserId = userId,
+                ApartmentListing = new ApartmentListing
+                {
+                    Address = dto.Address,
+                    MonthlyPrice = dto.MonthlyPrice,
+                    HasElevator = dto.HasElevator,
+                    Floor = dto.Floor,
+                    AreaInSqMeters = dto.AreaInSqMeters,
+                    TotalBathrooms = dto.TotalBathrooms,
+                    HasKitchen = dto.HasKitchen,
+                    HasInternet = dto.HasInternet,
+                    HasAirConditioner = dto.HasAirConditioner,
+                    HasFans = dto.HasFans,
+                    IsPetFriendly = dto.IsPetFriendly,
+                    IsSmokingAllowed = dto.IsSmokingAllowed,
+                    Rooms = new List<Room>()
+                },
+                ListingPhotos = new HashSet<ListingPhoto>()
+            };
 
-            // --- Apartment Listing ---
-            listing.ApartmentListing = _mapper.Map<ApartmentListing>(dto);
-            listing.ApartmentListing.Listing = listing;
-
-            listing.ApartmentListing.Rooms ??= new List<Room>();
-            listing.ListingPhotos ??= new HashSet<ListingPhoto>();
-
-            // --- Rooms ---
-            if (dto.Rooms != null && dto.Rooms.Any())
+            // ---------- Rooms & Beds ----------
+            if (dto.Rooms != null)
             {
                 foreach (var roomDto in dto.Rooms)
                 {
@@ -64,20 +82,18 @@ namespace Wanas.Application.Services
                     {
                         RoomNumber = roomDto.RoomNumber,
                         BedsCount = roomDto.BedsCount,
-                        AvailableBeds = roomDto.AvailableBeds,
                         PricePerBed = roomDto.PricePerBed,
                         HasAirConditioner = roomDto.HasAirConditioner,
                         HasFan = roomDto.HasFan,
-                        ApartmentListing = listing.ApartmentListing,
                         Beds = new List<Bed>()
                     };
 
+                    // Auto-generate Beds
                     for (int i = 0; i < roomDto.BedsCount; i++)
                     {
                         room.Beds.Add(new Bed
                         {
-                            Room = room,
-                            IsAvailable = i < roomDto.AvailableBeds
+                            IsAvailable = true
                         });
                     }
 
@@ -86,7 +102,7 @@ namespace Wanas.Application.Services
                 }
             }
 
-            // --- Photos ---
+            // ---------- Save Photos ----------
             if (dto.Photos != null)
             {
                 foreach (var file in dto.Photos)
@@ -96,11 +112,11 @@ namespace Wanas.Application.Services
                 }
             }
 
-            // --- Save listing first so we have listing.Id ---
+            // ---------- Save Listing (generate Listing.Id) ----------
             await _uow.Listings.AddAsync(listing);
-            await _uow.CommitAsync(); // listing.Id is now generated
+            await _uow.CommitAsync();
 
-            // --- Create Group Chat (no ListingId) ---
+            // ---------- Create Group Chat ----------
             var groupChat = new Chat
             {
                 IsGroup = true,
@@ -109,15 +125,12 @@ namespace Wanas.Application.Services
             };
 
             await _uow.Chats.AddAsync(groupChat);
-            await _uow.CommitAsync(); // groupChat.Id generated
-
-            // --- Link Listing to GroupChat ---
-            listing.GroupChatId = groupChat.Id;
-            listing.GroupChat = groupChat;
-
             await _uow.CommitAsync();
 
-            // --- Return full listing ---
+            listing.GroupChatId = groupChat.Id;
+            await _uow.CommitAsync();
+
+            // ---------- Load full listing ----------
             var savedListing = await _uow.Listings.GetListingWithDetailsAsync(listing.Id);
             return _mapper.Map<ListingDetailsDto>(savedListing);
         }
@@ -137,7 +150,6 @@ namespace Wanas.Application.Services
                 }
             }
 
-            _uow.Listings.Remove(listing);
             await _uow.CommitAsync();
             return true;
         }
@@ -209,117 +221,89 @@ namespace Wanas.Application.Services
             if (listing == null)
                 return null;
 
-            // Update main listing fields
-            if (dto.Title != null)
-                listing.Title = dto.Title;
-            if (dto.Description != null)
-                listing.Description = dto.Description;
-            if (dto.City != null)
-                listing.City = dto.City;
-            if (dto.MonthlyPrice.HasValue)
-                listing.MonthlyPrice = dto.MonthlyPrice.Value;
+            // Update Listing (simple patch)
+            listing.Title = dto.Title ?? listing.Title;
+            listing.Description = dto.Description ?? listing.Description;
+            listing.City = dto.City ?? listing.City;
+            listing.MonthlyPrice = dto.MonthlyPrice ?? listing.MonthlyPrice;
 
             var apartment = listing.ApartmentListing;
 
-            if (dto.Address != null)
-                apartment.Address = dto.Address;
-            if (dto.Floor != null)
-                apartment.Floor = (int) dto.Floor;
-            if (dto.AreaInSqMeters.HasValue)
-                apartment.AreaInSqMeters = dto.AreaInSqMeters.Value;
-            if (dto.TotalBathrooms.HasValue)
-                apartment.TotalBathrooms = dto.TotalBathrooms.Value;
+            apartment.Address = dto.Address ?? apartment.Address;
+            apartment.Floor = dto.Floor ?? apartment.Floor;
+            apartment.AreaInSqMeters = dto.AreaInSqMeters ?? apartment.AreaInSqMeters;
+            apartment.TotalBathrooms = dto.TotalBathrooms ?? apartment.TotalBathrooms;
 
-            if (dto.HasElevator.HasValue)
-                apartment.HasElevator = dto.HasElevator.Value;
-            if (dto.HasKitchen.HasValue)
-                apartment.HasKitchen = dto.HasKitchen.Value;
-            if (dto.HasInternet.HasValue)
-                apartment.HasInternet = dto.HasInternet.Value;
-            if (dto.HasAirConditioner.HasValue)
-                apartment.HasAirConditioner = dto.HasAirConditioner.Value;
-            if (dto.HasFans.HasValue)
-                apartment.HasFans = dto.HasFans.Value;
-            if (dto.IsPetFriendly.HasValue)
-                apartment.IsPetFriendly = dto.IsPetFriendly.Value;
-            if (dto.IsSmokingAllowed.HasValue)
-                apartment.IsSmokingAllowed = dto.IsSmokingAllowed.Value;
+            apartment.HasElevator = dto.HasElevator ?? apartment.HasElevator;
+            apartment.HasKitchen = dto.HasKitchen ?? apartment.HasKitchen;
+            apartment.HasInternet = dto.HasInternet ?? apartment.HasInternet;
+            apartment.HasAirConditioner = dto.HasAirConditioner ?? apartment.HasAirConditioner;
+            apartment.HasFans = dto.HasFans ?? apartment.HasFans;
+            apartment.IsPetFriendly = dto.IsPetFriendly ?? apartment.IsPetFriendly;
+            apartment.IsSmokingAllowed = dto.IsSmokingAllowed ?? apartment.IsSmokingAllowed;
 
-            // Rooms update
+
+            // ---------- ROOMS UPDATE (Simplified) ----------
             if (dto.Rooms != null)
             {
                 var existingRooms = apartment.Rooms.ToList();
 
-                // Update existing rooms
-                foreach (var roomDto in dto.Rooms.Where(r => r.Id != 0))
+                // Update existing
+                foreach (var rDto in dto.Rooms.Where(r => r.Id != 0))
                 {
-                    var room = existingRooms.FirstOrDefault(r => r.Id == roomDto.Id);
-                    if (room != null)
-                    {
-                        if (roomDto.RoomNumber != null)
-                            room.RoomNumber = roomDto.RoomNumber;
-                        if (roomDto.BedsCount.HasValue)
-                            room.BedsCount = roomDto.BedsCount.Value;
-                        if (roomDto.AvailableBeds.HasValue)
-                            room.AvailableBeds = roomDto.AvailableBeds.Value;
-                        if (roomDto.PricePerBed.HasValue)
-                            room.PricePerBed = roomDto.PricePerBed.Value;
+                    var room = existingRooms.FirstOrDefault(x => x.Id == rDto.Id);
+                    if (room == null)
+                        continue;
 
-                        room.Beds.Clear();
-                        for (int i = 0; i < room.BedsCount; i++)
+                    room.RoomNumber = rDto.RoomNumber;
+                    room.BedsCount = rDto.BedsCount ?? room.BedsCount;
+                    room.AvailableBeds = rDto.AvailableBeds ?? room.AvailableBeds;
+                    room.PricePerBed = rDto.PricePerBed ?? room.PricePerBed;
+
+                    // Regenerate beds
+                    room.Beds.Clear();
+                    for (int i = 0; i < room.BedsCount; i++)
+                    {
+                        room.Beds.Add(new Bed
                         {
-                            room.Beds.Add(new Bed
-                            {
-                                IsAvailable = i < room.AvailableBeds
-                            });
-                        }
-
-                        room.RecalculateAvailability();
-                    }
-                }
-
-                // Add new rooms
-                foreach (var roomDto in dto.Rooms.Where(r => r.Id == 0))
-                {
-                    var newRoom = new Room
-                    {
-                        RoomNumber = roomDto.RoomNumber,
-                        BedsCount = roomDto.BedsCount ?? 0,
-                        AvailableBeds = roomDto.AvailableBeds ?? 0,
-                        PricePerBed = roomDto.PricePerBed ?? 0,
-                        Beds = new List<Bed>()
-                    };
-
-                    for (int i = 0; i < newRoom.BedsCount; i++)
-                    {
-                        newRoom.Beds.Add(new Bed
-                        {
-                            IsAvailable = i < newRoom.AvailableBeds
+                            IsAvailable = i < room.AvailableBeds
                         });
                     }
 
-                    newRoom.RecalculateAvailability();
-                    apartment.Rooms.Add(newRoom);
+                    room.RecalculateAvailability();
                 }
 
-                // Remove deleted rooms
-                var roomIdsInDto = dto.Rooms
-                    .Where(r => r.Id != 0)
-                    .Select(r => r.Id)
-                    .ToHashSet();
-
-                var roomsToRemove = existingRooms
-                    .Where(r => !roomIdsInDto.Contains(r.Id))
-                    .ToList();
-
-                foreach (var room in roomsToRemove)
+                // Add new rooms
+                foreach (var rDto in dto.Rooms.Where(r => r.Id == 0))
                 {
-                    apartment.Rooms.Remove(room);
+                    var room = new Room
+                    {
+                        RoomNumber = rDto.RoomNumber,
+                        BedsCount = rDto.BedsCount ?? 0,
+                        AvailableBeds = rDto.AvailableBeds ?? 0,
+                        PricePerBed = rDto.PricePerBed ?? 0,
+                        Beds = new List<Bed>()
+                    };
+
+                    for (int i = 0; i < room.BedsCount; i++)
+                    {
+                        room.Beds.Add(new Bed
+                        {
+                            IsAvailable = i < room.AvailableBeds
+                        });
+                    }
+
+                    room.RecalculateAvailability();
+                    apartment.Rooms.Add(room);
                 }
+
+                // Delete rooms
+                var incomingIds = dto.Rooms.Where(r => r.Id != 0).Select(r => r.Id).ToHashSet();
+                foreach (var room in existingRooms.Where(r => !incomingIds.Contains(r.Id)))
+                    apartment.Rooms.Remove(room);
             }
 
-            // Add new photos
-            if (dto.NewPhotos != null && dto.NewPhotos.Any())
+            if (dto.NewPhotos != null)
             {
                 listing.ListingPhotos ??= new HashSet<ListingPhoto>();
                 foreach (var file in dto.NewPhotos)
@@ -329,10 +313,10 @@ namespace Wanas.Application.Services
                 }
             }
 
-            _uow.Listings.Update(listing);
             await _uow.CommitAsync();
 
             return _mapper.Map<ListingDetailsDto>(listing);
         }
+
     }
 }

@@ -112,5 +112,5 @@ app.MapHub<ChatHub>("/hubs/chat", options =>
     options.ApplicationMaxBufferSize = 32 * 1024;
     options.TransportMaxBufferSize = 32 * 1024;
 });
-using (var scope = app.Services.CreateScope()) { try { await DataSeeder.SeedAsync(scope.ServiceProvider); } catch (Exception ex) { Console.WriteLine($"Seeding failed: {ex.Message}"); } }
+//using (var scope = app.Services.CreateScope()) { try { await DataSeeder.SeedAsync(scope.ServiceProvider); } catch (Exception ex) { Console.WriteLine($"Seeding failed: {ex.Message}"); } }
 app.Run();

@@ -154,6 +154,10 @@ namespace Wanas.Application.Mappings
             .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.RenterId == null))
             .ForMember(dest=>dest.Id, opt => opt.MapFrom(src => src.Id));
 
+            CreateMap<CreateBedDto, Bed>()
+            .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.RoomId))
+            .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.IsAvailable));
+
             CreateMap<BedReservation, BedDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.BedId))
             .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.Bed.RoomId))
