@@ -121,7 +121,16 @@ namespace Wanas.Application.Services
             {
                 IsGroup = true,
                 Name = listing.Title,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                ChatParticipants = new List<ChatParticipant>
+                {
+                    new ChatParticipant
+                    {
+                        UserId = userId,
+                        IsAdmin = true,
+                        JoinedAt = DateTime.UtcNow
+                    }
+                }
             };
 
             await _uow.Chats.AddAsync(groupChat);
