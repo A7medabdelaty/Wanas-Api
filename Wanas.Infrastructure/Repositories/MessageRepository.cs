@@ -18,5 +18,12 @@ namespace Wanas.Infrastructure.Repositories
                 .Include(m => m.Sender)
                 .ToListAsync();
         }
+        public async Task<List<Message>> GetMessagesWithReadReceiptsAsync(int chatId, string userId)
+        {
+            return await _context.Messages
+                .Where(m => m.ChatId == chatId && m.SenderId != userId)
+                .Include(m => m.ReadReceipts)
+                .ToListAsync();
+        }
     }
 }

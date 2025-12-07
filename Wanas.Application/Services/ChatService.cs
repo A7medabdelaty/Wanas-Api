@@ -27,11 +27,21 @@ namespace Wanas.Application.Services
 
             var dtos = _mapper.Map<IEnumerable<ChatDto>>(chats).ToList();
 
-            // Personalize 1-to-1 chat names
+            // Personalize 1-to-1 chat names and calculate unread count
             foreach (var dto in dtos)
             {
                 if (!dto.IsGroup && dto.Participants?.Count() == 2)
                     ApplyPrivateChatName(dto, userId);
+
+                // Find original chat entity to access messages
+                var chat = chats.FirstOrDefault(c => c.Id == dto.Id);
+                if (chat != null && chat.Messages != null)
+                {
+                    dto.UnreadCount = chat.Messages.Count(m =>
+                        m.SenderId != userId &&
+                        (m.ReadReceipts == null || !m.ReadReceipts.Any(r => r.UserId == userId))
+                    );
+                }
             }
 
             return dtos;
@@ -85,6 +95,15 @@ namespace Wanas.Application.Services
 
             if (!dto.IsGroup)
                 ApplyPrivateChatName(dto, userId);
+
+            // Calculate unread count
+            if (chat.Messages != null)
+            {
+                dto.UnreadCount = chat.Messages.Count(m =>
+                    m.SenderId != userId &&
+                    (m.ReadReceipts == null || !m.ReadReceipts.Any(r => r.UserId == userId))
+                );
+            }
 
             return dto;
         }
@@ -230,8 +249,7 @@ namespace Wanas.Application.Services
         // Mark all unseen messages in a chat as read for the current user
         public async Task<bool> MarkChatAsReadAsync(int chatId, string userId)
         {
-            var messages = await _uow.Messages.FindAsync(m => m.ChatId == chatId && m.SenderId != userId);
-
+            var messages = await _uow.Messages.GetMessagesWithReadReceiptsAsync(chatId,userId);
             var changed = false;
             foreach (var msg in messages)
             {
