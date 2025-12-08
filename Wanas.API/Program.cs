@@ -12,29 +12,34 @@ using Wanas.Infrastructure.Persistence.Seed;
 Log.Logger = new LoggerConfiguration()
  .Enrich.FromLogContext()
  .WriteTo.Console()
- .WriteTo.File("Logs/requests-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit:7)
+ .WriteTo.File("Logs/requests-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
  .CreateLogger();
 
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
-
 builder.Host.UseSerilog();
+
+// Load .env file only in Development
+if (builder.Environment.IsDevelopment())
+{
+    DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+    Log.Information("Loaded .env file for Development environment");
+}
 
 builder.Services.AddControllers();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-{
-    policy
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-      .AllowCredentials()
-       .SetIsOriginAllowed(_ => true);
-});
+   {
+       policy
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .SetIsOriginAllowed(_ => true);
+   });
 });
 
 
@@ -48,11 +53,10 @@ var app = builder.Build();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
-    ),
+ Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
+ ),
     RequestPath = "/uploads" // <-- this will make files available at https://localhost:7279/uploads/filename.jpg
 });
-
 
 
 
@@ -71,20 +75,41 @@ if (app.Environment.IsDevelopment())
 
 
 //Initialize ChromaDB on startup
-// using (var scope = app.Services.CreateScope())
-// {
-//     var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
-//     try
-//     {
-//         await chromaService.InitializeCollectionAsync();
-//         Console.WriteLine("ChromaDB collection initialized");
-//     }
-//     catch (Exception ex)
-//     {
-//         Console.WriteLine($"ChromaDB init failed: {ex.Message}");
-//         // Continue - traditional matching will still work
-//     }
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var chromaService = scope.ServiceProvider.GetRequiredService<IChromaService>();
+    var indexingService = scope.ServiceProvider.GetRequiredService<IChromaIndexingService>();
+
+    try
+    {
+        await chromaService.InitializeCollectionAsync();
+        Console.WriteLine("ChromaDB collection initialized successfully");
+
+        // Check if we need to do initial indexing
+        var hasDocuments = await indexingService.HasAnyDocumentsAsync();
+
+        if (!hasDocuments && app.Environment.IsDevelopment())
+        {
+            Console.WriteLine("No documents found in ChromaDB. Starting initial bulk indexing...");
+            var result = await indexingService.IndexAllListingsAsync();
+            Console.WriteLine($"Initial indexing complete. Success: {result.SuccessCount}, Failed: {result.FailedCount}");
+
+            if (result.FailedCount > 0)
+            {
+                Console.WriteLine($"Indexing errors: {string.Join("; ", result.Errors.Take(5))}");
+            }
+        }
+        else if (hasDocuments)
+        {
+            Console.WriteLine("ChromaDB already has indexed listings");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"ChromaDB init/indexing failed: {ex.Message}");
+        Console.WriteLine("Application will continue with traditional matching only");
+    }
+}
 
 
 
@@ -107,8 +132,8 @@ app.MapControllers();
 
 app.MapHub<ChatHub>("/hubs/chat", options =>
 {
-    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets 
-        | Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
+    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets
+    | Microsoft.AspNetCore.Http.Connections.HttpTransportType.LongPolling;
     options.ApplicationMaxBufferSize = 32 * 1024;
     options.TransportMaxBufferSize = 32 * 1024;
 });

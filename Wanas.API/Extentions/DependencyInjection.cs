@@ -182,25 +182,30 @@ namespace Wanas.API.Extentions
             
             services.AddSingleton<IUserIdProvider, ClaimNameUserIdProvider>();
 
+
+            services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
+            //services.AddScoped<IMatchingService,MatchingService>(); // real traditional matcher
+            
             // RAG dependencies
-            // services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>();
-            // services.AddHttpClient<IChromaService, ChromaService>();
             services.AddHttpClient<IAIProvider, OpenAIProvider>();
             services.AddScoped<IChatbotService, ChatbotService>();
-
             services.Configure<OpenAIConfig>(configuration.GetSection("OpenAI"));
 
-            // matching service
+            // matching service - Using Google Gemini for embeddings
+            services.AddHttpClient<IEmbeddingService, GeminiEmbeddingService>();
+            services.AddHttpClient<IChromaService, ChromaService>();
+            services.AddScoped<IChromaIndexingService, ChromaIndexingService>();
+            services.AddScoped<MatchingService>();
+            services.AddScoped<IMatchingService>(sp =>
+                new HybridMatchingService(
+                    sp.GetRequiredService<MatchingService>(),
+                    sp.GetRequiredService<IChromaService>(),
+                    sp.GetRequiredService<IUnitOfWork>(),
+                    sp.GetRequiredService<ILogger<HybridMatchingService>>()));
 
-            // services.AddScoped<MatchingService>();
-            // services.AddScoped<IMatchingService>(sp =>
-            //     new HybridMatchingService(
-            //         sp.GetRequiredService<MatchingService>(), // use real matcher
-            //         sp.GetRequiredService<IChromaService>(),
-            //         sp.GetRequiredService<IUnitOfWork>()));
 
-            services.AddScoped<IMatchingService,MatchingService>(); // real traditional matcher
-            services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
+            // Background service for ChromaDB indexing
+            services.AddHostedService<ChromaIndexingBackgroundService>();
 
 
             // auth service
@@ -261,8 +266,8 @@ namespace Wanas.API.Extentions
             services.AddMapsterConfig();
             services.AddFluentValidationConfig();
 
-            // .env configurations
-            DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
+            // .env configurations (Development only - loaded in Program.cs)
+            // DotEnv.Load is now called conditionally in Program.cs based on environment
 
             // Cloudinary Init
             services.AddSingleton(sp =>
