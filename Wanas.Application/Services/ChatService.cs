@@ -34,6 +34,26 @@ namespace Wanas.Application.Services
                     ApplyPrivateChatName(dto, userId);
             }
 
+            // Efficiently fetch unread counts for all chats
+            var chatIds = dtos.Select(d => d.Id).ToList();
+            var unreadCounts = await _uow.Messages.GetUnreadMessageCountsAsync(userId, chatIds);
+
+            // Assign counts and sort
+            foreach (var dto in dtos)
+            {
+                if (unreadCounts.TryGetValue(dto.Id, out var count))
+                {
+                    dto.UnreadCount = count;
+                }
+                else
+                {
+                    dto.UnreadCount = 0;
+                }
+            }
+
+            // Sort by LastMessage.SentAt descending
+            dtos = dtos.OrderByDescending(d => d.LastMessage?.SentAt ?? d.CreatedAt).ToList();
+
             return dtos;
         }
 
@@ -85,6 +105,15 @@ namespace Wanas.Application.Services
 
             if (!dto.IsGroup)
                 ApplyPrivateChatName(dto, userId);
+
+            // Calculate unread count
+            if (chat.Messages != null)
+            {
+                dto.UnreadCount = chat.Messages.Count(m =>
+                    m.SenderId != userId &&
+                    (m.ReadReceipts == null || !m.ReadReceipts.Any(r => r.UserId == userId))
+                );
+            }
 
             return dto;
         }
@@ -141,14 +170,22 @@ namespace Wanas.Application.Services
         }
 
         // Remove participant: only allowed for group chats
-        public async Task<bool> RemoveParticipantAsync(int chatId, string userId)
+        public async Task<bool> RemoveParticipantAsync(int chatId, string userId, string requesterId)
         {
+            // prevent removing self (should use LeaveChat)
+            if (userId == requesterId) return false;
+
             var chat = await _uow.Chats.GetChatWithParticipantsAsync(chatId);
             if (chat == null)
                 return false;
 
             if (!chat.IsGroup)
                 return false;
+
+            // Check if requester is admin
+            var requesterPart = chat.ChatParticipants.FirstOrDefault(p => p.UserId == requesterId && p.LeftAt == null);
+            if (requesterPart == null || !requesterPart.IsAdmin)
+                return false; // Unauthorized
 
             var participant = chat.ChatParticipants.FirstOrDefault(p => p.UserId == userId && p.LeftAt == null);
             if (participant == null)
@@ -230,8 +267,7 @@ namespace Wanas.Application.Services
         // Mark all unseen messages in a chat as read for the current user
         public async Task<bool> MarkChatAsReadAsync(int chatId, string userId)
         {
-            var messages = await _uow.Messages.FindAsync(m => m.ChatId == chatId && m.SenderId != userId);
-
+            var messages = await _uow.Messages.GetMessagesWithReadReceiptsAsync(chatId,userId);
             var changed = false;
             foreach (var msg in messages)
             {

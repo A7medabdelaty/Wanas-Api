@@ -34,12 +34,25 @@ namespace Wanas.Application.Services
             if (privateChat == null)
                 return false;
 
-            // GROUP approval already exists?
-            if (await _uow.BookingApprovals
-                    .ExistsAsync(listingId, userId, ApprovalType.Group))
-                return false;
+            // Ensure Group Chat exists (Lazy Creation for legacy listings)
+            if (listing.GroupChatId == null)
+            {
+                var chatName = listing.Title;
+                if (string.IsNullOrWhiteSpace(chatName)) chatName = "Listing Group";
 
-            var groupChat = await _chatService.AddParticipantAsync(listing.Id, userId);
+                var newGroup = await _chatService.CreateChatAsync(ownerId, new Wanas.Application.DTOs.Chat.CreateChatRequestDto 
+                { 
+                    ChatName = chatName, 
+                    IsGroup = true,
+                    ParticipantId = null // Explicitly ensuring group creation
+                });
+
+                listing.GroupChatId = newGroup.Id;
+                _uow.Listings.Update(listing);
+                await _uow.CommitAsync();
+            }
+
+            var groupChat = await _chatService.AddParticipantAsync(listing.GroupChatId.Value, userId);
             if (!groupChat)
                 return false;
 
@@ -57,7 +70,7 @@ namespace Wanas.Application.Services
             await _uow.CommitAsync();
 
             // Notify group chat
-            await _notifier.NotifyGroupApprovedAsync((int)listing.GroupChatId, userId);
+            await _notifier.NotifyGroupApprovedAsync(listing.GroupChatId.Value, userId);
 
             return true;
         }

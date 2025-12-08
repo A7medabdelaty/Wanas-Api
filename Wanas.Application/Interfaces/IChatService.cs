@@ -10,7 +10,7 @@ namespace Wanas.Application.Interfaces
         Task<ChatDto> CreateChatAsync(string creatorId, CreateChatRequestDto request);
         Task<IList<int>> GetUserChatIdsAsync(string userId);
         Task<bool> AddParticipantAsync(int chatId, string userId);
-        Task<bool> RemoveParticipantAsync(int chatId, string userId);
+        Task<bool> RemoveParticipantAsync(int chatId, string userId, string requesterId);
         Task<ChatDto?> UpdateChatAsync(int chatId, UpdateChatRequestDto request);
         Task<bool> DeleteChatAsync(int chatId);
         Task<bool> LeaveChatAsync(int chatId, string userId);

@@ -144,6 +144,7 @@ namespace Wanas.API.Extentions
             services.AddScoped<IBookingApprovalRepository, BookingApprovalRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
