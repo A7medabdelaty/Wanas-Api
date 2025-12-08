@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
@@ -14,12 +15,21 @@ namespace Wanas.Application.Services
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IFileService _fileService;
+        private readonly IChromaIndexingService _chromaIndexingService;
+        private readonly ILogger<ListingService> _logger;
 
-        public ListingService(IUnitOfWork unit, IMapper mapper, IFileService fileServ)
+        public ListingService(
+            IUnitOfWork unit,
+            IMapper mapper,
+            IFileService fileServ,
+            IChromaIndexingService chromaIndexingService,
+            ILogger<ListingService> logger)
         {
             this._uow = unit;
             this._mapper = mapper;
             this._fileService = fileServ;
+            this._chromaIndexingService = chromaIndexingService;
+            this._logger = logger;
         }
 
         // Add photos to a listing
@@ -39,6 +49,19 @@ namespace Wanas.Application.Services
 
             _uow.Listings.Update(listing);
             await _uow.CommitAsync();
+
+            // Reindex after photos added
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _chromaIndexingService.IndexListingAsync(listingId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to reindex listing {ListingId} after adding photos", listingId);
+                }
+            });
         }
 
         // CREATE LISTING
@@ -129,6 +152,21 @@ namespace Wanas.Application.Services
 
             listing.GroupChatId = groupChat.Id;
             await _uow.CommitAsync();
+
+            // ---------- Index to ChromaDB in background ----------
+            var listingId = listing.Id;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    _logger.LogInformation("Background indexing listing {ListingId} to ChromaDB", listingId);
+                    await _chromaIndexingService.IndexListingAsync(listingId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to index listing {ListingId} to ChromaDB", listingId);
+                }
+            });
 
             // ---------- Load full listing ----------
             var savedListing = await _uow.Listings.GetListingWithDetailsAsync(listing.Id);

@@ -41,15 +41,13 @@ namespace Wanas.API.Controllers
         [HttpGet("top")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetTop(int size = 6)
-        [Authorize (Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetTop(int size = 6)
         {
             var active = await _listService.GetActiveListingsAsync();
             var top = active
-               .Where(l => l.ModerationStatus == ListingModerationStatus.Approved)
-               .OrderByDescending(l => l.CreatedAt)
-               .Take(size)
-               .ToList();
+                .Where(l => l.ModerationStatus == ListingModerationStatus.Approved)
+                .OrderByDescending(l => l.CreatedAt)
+                .Take(size)
+                .ToList();
 
             if (!top.Any())
                 return NotFound("No listings found.");
