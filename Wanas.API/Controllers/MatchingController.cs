@@ -6,7 +6,7 @@ namespace Wanas.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Policy = "VerifiedUser")]
+    [Authorize]
     public class MatchingController : ControllerBase
     {
         private readonly IMatchingService _matchingService;

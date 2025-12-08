@@ -1,3 +1,5 @@
+using Wanas.Application.DTOs.Message;
+
 namespace Wanas.Application.DTOs.Chat
 {
     public class ChatDto
@@ -7,5 +9,8 @@ namespace Wanas.Application.DTOs.Chat
         public string ChatName { get; set; }
         public int? ListingId { get; set; }
         public ICollection<ChatParticipantDto> Participants { get; set; }
+        public int UnreadCount { get; set; }
+        public MessageDto LastMessage { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

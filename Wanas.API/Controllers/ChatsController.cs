@@ -120,7 +120,8 @@ namespace Wanas.API.Controllers
         [HttpDelete("{chatId:int}/participants/{userId}")]
         public async Task<IActionResult> RemoveParticipant(int chatId, string userId)
         {
-            var result = await _chatService.RemoveParticipantAsync(chatId, userId);
+            var requesterId = GetUserId();
+            var result = await _chatService.RemoveParticipantAsync(chatId, userId, requesterId);
 
             if (!result)
                 return NotFound(new ApiError("ParticipantNotFound"));

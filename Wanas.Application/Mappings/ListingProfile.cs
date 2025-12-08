@@ -151,7 +151,7 @@ namespace Wanas.Application.Mappings
             CreateMap<ApartmentListing, CreateListingDto>().ReverseMap();
             CreateMap<Room, CreateRoomDto>().ReverseMap();
             CreateMap<Bed, BedDto>()
-            .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.RenterId == null))
+            .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.IsAvailable))
             .ForMember(dest=>dest.Id, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<CreateBedDto, Bed>()

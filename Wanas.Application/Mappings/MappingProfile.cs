@@ -19,14 +19,17 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.Participants,
                     opt => opt.MapFrom(src => src.ChatParticipants))
                 .ForMember(d => d.Participants, opt => opt.MapFrom(s => s.ChatParticipants))
-                .ForMember(d => d.ListingId, opt => opt.MapFrom(s => s.ListingId));
+                .ForMember(d => d.ListingId, opt => opt.MapFrom(s => s.ListingId))
+                .ForMember(d => d.CreatedAt, opt => opt.MapFrom(s => s.CreatedAt))
+                .ForMember(d => d.LastMessage, opt => opt.MapFrom(s => s.Messages.FirstOrDefault()));
             ;
 
             // ChatParticipant → ChatParticipantDto
             CreateMap<ChatParticipant, ChatParticipantDto>()
                 .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.User.FullName))
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
-                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.User.Photo));
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.User.Photo))
+                .ForMember(dest => dest.IsAdmin, opt => opt.MapFrom(src => src.IsAdmin));
 
             CreateMap<CreateChatRequestDto, Chat>()
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
