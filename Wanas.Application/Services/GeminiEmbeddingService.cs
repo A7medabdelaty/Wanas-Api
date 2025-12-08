@@ -40,10 +40,10 @@ namespace Wanas.Application.Services
                     model = Model,
                     content = new
                     {
-                        parts = new[]
-         {
-        new { text = text }
-   }
+                        parts = new[] 
+                        {
+                            new { text = text }
+                        }
                     }
                 };
 
@@ -55,11 +55,11 @@ namespace Wanas.Application.Services
                 using var document = JsonDocument.Parse(content);
 
                 var embeddingArray = document.RootElement
-          .GetProperty("embedding")
-              .GetProperty("values")
-         .EnumerateArray()
-        .Select(x => (float)x.GetDouble())
-  .ToArray();
+                    .GetProperty("embedding")
+                    .GetProperty("values")
+                    .EnumerateArray()
+                    .Select(x => (float)x.GetDouble())
+                    .ToArray();
 
                 _logger.LogInformation("Successfully generated {Count} dimensional embedding", embeddingArray.Length);
                 return embeddingArray;
