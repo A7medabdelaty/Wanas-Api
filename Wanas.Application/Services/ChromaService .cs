@@ -23,13 +23,25 @@ namespace Wanas.Application.Services
             _httpClient = httpClient;
             _embeddingService = embeddingService;
             _logger = logger;
-            
+
             // Try environment variable first (from .env in dev), then appsettings.json, then fallback
-          _baseUrl = Environment.GetEnvironmentVariable("ChromaDB__BaseUrl")
+            _baseUrl = Environment.GetEnvironmentVariable("ChromaDB__BaseUrl")
                 ?? configuration.GetValue<string>("ChromaDB:BaseUrl")
                 ?? "http://localhost:8000/api/v1";
-            
-            _logger.LogInformation("ChromaDB initialized with base URL: {BaseUrl}", _baseUrl);
+
+            // Add authentication token if provided
+            var chromaToken = Environment.GetEnvironmentVariable("ChromaDB__Token")
+                ?? configuration.GetValue<string>("ChromaDB:Token");
+
+            if (!string.IsNullOrEmpty(chromaToken))
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {chromaToken}");
+                _logger.LogInformation("ChromaDB initialized with base URL: {BaseUrl} (authenticated)", _baseUrl);
+            }
+            else
+            {
+                _logger.LogWarning("ChromaDB initialized with base URL: {BaseUrl} (NO AUTHENTICATION - not secure for production!)", _baseUrl);
+            }
         }
 
         private async Task EnsureInitializedAsync()
@@ -83,7 +95,9 @@ namespace Wanas.Application.Services
                     name = "listings",
                     metadata = new Dictionary<string, object>
                     {
-                        ["hnsw:space"] = "cosine"
+                        ["hnsw:space"] = "cosine",
+                        ["embedding"] = "gemini",  // Add this
+                        ["dimensions"] = 768       // Add this
                     }
                 };
 
