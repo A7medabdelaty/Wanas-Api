@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
@@ -11,16 +12,24 @@ namespace Wanas.Application.Services
         private readonly HttpClient _httpClient;
         private readonly IEmbeddingService _embeddingService;
         private readonly ILogger<ChromaService> _logger;
-        private readonly string _baseUrl = "http://localhost:8000/api/v1";
+        private readonly string _baseUrl;
         private string _collectionId;
         private bool _isInitialized = false;
         private readonly SemaphoreSlim _initLock = new SemaphoreSlim(1, 1);
 
-        public ChromaService(HttpClient httpClient, IEmbeddingService embeddingService, ILogger<ChromaService> logger)
+        public ChromaService(HttpClient httpClient, IEmbeddingService embeddingService, ILogger<ChromaService> logger,
+            IConfiguration configuration)
         {
             _httpClient = httpClient;
             _embeddingService = embeddingService;
             _logger = logger;
+            
+            // Try environment variable first (from .env in dev), then appsettings.json, then fallback
+          _baseUrl = Environment.GetEnvironmentVariable("ChromaDB__BaseUrl")
+                ?? configuration.GetValue<string>("ChromaDB:BaseUrl")
+                ?? "http://localhost:8000/api/v1";
+            
+            _logger.LogInformation("ChromaDB initialized with base URL: {BaseUrl}", _baseUrl);
         }
 
         private async Task EnsureInitializedAsync()

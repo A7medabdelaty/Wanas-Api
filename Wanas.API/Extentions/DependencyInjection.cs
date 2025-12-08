@@ -184,7 +184,7 @@ namespace Wanas.API.Extentions
 
             services.AddScoped<IRoommateMatchingService, RoommateMatchingService>();
             //services.AddScoped<IMatchingService,MatchingService>(); // real traditional matcher
-
+            
             // RAG dependencies
             services.AddHttpClient<IAIProvider, OpenAIProvider>();
             services.AddScoped<IChatbotService, ChatbotService>();
