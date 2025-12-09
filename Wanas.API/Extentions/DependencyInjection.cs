@@ -20,6 +20,7 @@ using Wanas.Application.Interfaces.AI;
 using Wanas.Application.Interfaces.Authentication;
 using Wanas.Application.Mappings;
 using Wanas.Application.Services;
+using Wanas.Application.Settings;
 using Wanas.Application.Validators;
 using Wanas.Application.Validators.Authentication;
 using Wanas.Application.Validators.Listing;
@@ -260,6 +261,7 @@ namespace Wanas.API.Extentions
             services.AddAutoMapper(cfg => { cfg.AddProfile<AIListingMappingProfile>(); }, typeof(AIListingMappingProfile).Assembly);
 
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+            services.Configure<AppSettings>(configuration.GetSection(nameof(AppSettings)));
             services.AddProblemDetails();
             services.AddHttpContextAccessor();
 
