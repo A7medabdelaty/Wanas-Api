@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,6 +12,7 @@ using Wanas.Application.DTOs.Authentication;
 using Wanas.Application.Helpers;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Interfaces.Authentication;
+using Wanas.Application.Settings;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
 using Wanas.Domain.Errors;
@@ -19,11 +21,12 @@ namespace Wanas.Application.Services;
 
 public class AuthService(
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
+  SignInManager<ApplicationUser> signInManager,
     IJwtProvider jwtProvider,
-    ILogger<AuthService> logger,
+ ILogger<AuthService> logger,
     IEmailService emailSender,
-    IHttpContextAccessor httpContextAccessor
+    IHttpContextAccessor httpContextAccessor,
+    IOptions<AppSettings> appSettings
 ) : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
@@ -32,6 +35,7 @@ public class AuthService(
     private readonly ILogger<AuthService> _logger = logger;
     private readonly IEmailService _emailSender = emailSender;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly AppSettings _appSettings = appSettings.Value;
 
     private readonly int _refreshTokenExpiryDays = 14;
 
@@ -61,7 +65,7 @@ public class AuthService(
             Token = refreshToken,
             ExpiresOn = refreshExpires
         });
-        if(user.IsFirstLogin is null)
+        if (user.IsFirstLogin is null)
         {
             user.IsFirstLogin = true;
         }
@@ -69,7 +73,7 @@ public class AuthService(
         {
             user.IsFirstLogin = false;
         }
-            await _userManager.UpdateAsync(user);
+        await _userManager.UpdateAsync(user);
 
         return Result.Success(new AuthResponse(
 
@@ -182,7 +186,7 @@ public class AuthService(
         user.NormalizedUserName = userName.ToUpper();
         user.Email = request.Email;
         user.NormalizedEmail = request.Email.ToUpper();
-        
+
 
         var result = await _userManager.CreateAsync(user, request.Password);
 
@@ -319,37 +323,49 @@ public class AuthService(
     // -----------------------------------------
     private async Task SendConfirmationEmail(ApplicationUser user, string code)
     {
-        var originHeader = _httpContextAccessor.HttpContext?.Request.Headers["Origin"];
-        var origin = originHeader.HasValue && !StringValues.IsNullOrEmpty(originHeader.Value) ? originHeader.ToString() : null;
+        // Use configured BaseUrl, fallback to Origin header, then localhost
+        var baseUrl = !string.IsNullOrEmpty(_appSettings.BaseUrl)
+          ? _appSettings.BaseUrl
+               : GetOriginFromRequest() ?? "https://localhost:7279";
 
         var body = EmailBodyBuilder.GenerateEmailBody(
-            "EmailConfirmation",
-            new()
-            {
-                { "{{name}}", user.FullName },
-                { "{{action_url}}", $"{origin}/auth/emailConfirmation?userId={user.Id}&code={code}" }
-            });
+          "EmailConfirmation",
+         new()
+         {
+             { "{{name}}", user.FullName },
+             { "{{action_url}}", $"{baseUrl}/auth/emailConfirmation?userId={user.Id}&code={code}" }
+         });
 
         await _emailSender.SendEmailAsync(user.Email!, "Email Confirmation", body);
     }
 
     private async Task SendResetPasswordEmail(ApplicationUser user, string code)
     {
-        var originHeader = _httpContextAccessor.HttpContext?.Request.Headers["Origin"];
-        var origin = originHeader.HasValue && !StringValues.IsNullOrEmpty(originHeader.Value) ? originHeader.ToString() : null;
+        // Use configured BaseUrl, fallback to Origin header, then localhost
+        var baseUrl = !string.IsNullOrEmpty(_appSettings.BaseUrl)
+          ? _appSettings.BaseUrl
+             : GetOriginFromRequest() ?? "https://localhost:7279";
 
         var body = EmailBodyBuilder.GenerateEmailBody(
             "ForgetPassword",
             new()
             {
                 { "{{name}}", user.FullName },
-                { "{{action_url}}", $"{origin}/auth/forgetPassword?email={user.Email}&code={code}" }
+                { "{{action_url}}", $"{baseUrl}/auth/forgetPassword?email={user.Email}&code={code}" }
             });
 
         await _emailSender.SendEmailAsync(user.Email!, "Reset Password", body);
     }
 
-    
+    private string? GetOriginFromRequest()
+    {
+        var originHeader = _httpContextAccessor.HttpContext?.Request.Headers["Origin"];
+        return originHeader.HasValue && !StringValues.IsNullOrEmpty(originHeader.Value)
+            ? originHeader.ToString()
+            : null;
+    }
+
+
     private static string GenerateRefreshToken() =>
-        Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+  Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 }
