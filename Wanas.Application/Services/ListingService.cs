@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
+using Wanas.Application.Responses;
 using Wanas.Domain.Entities;
-using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
@@ -214,6 +213,14 @@ namespace Wanas.Application.Services
         {
             var listings = await _uow.Listings.GetAllListingsAsync();
             return _mapper.Map<IEnumerable<ListingCardDto>>(listings);
+        }
+
+        // PAGED LISTINGS
+        public async Task<ApiPagedResponse<ListingCardDto>> GetPagedListingsAsync(int pageNumber, int pageSize)
+        {
+            var (items, totalCount) = await _uow.Listings.GetPagedListingsAsync(pageNumber, pageSize);
+            var mapped = _mapper.Map<IEnumerable<ListingCardDto>>(items);
+            return new ApiPagedResponse<ListingCardDto>(mapped, totalCount, pageNumber, pageSize);
         }
 
         // GET BY ID

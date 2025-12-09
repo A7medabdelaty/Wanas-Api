@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Wanas.Application.DTOs.Listing;
+using Wanas.Application.Responses;
 using Wanas.Domain.Entities;
 
 namespace Wanas.Application.Interfaces
@@ -7,6 +8,7 @@ namespace Wanas.Application.Interfaces
     public interface IListingService
     {
         Task<IEnumerable<ListingCardDto>> GetAllListingsAsync();
+        Task<ApiPagedResponse<ListingCardDto>> GetPagedListingsAsync(int pageNumber, int pageSize);
         Task<ListingDetailsDto> GetListingByIdAsync(int id);
         Task<IEnumerable<ListingDetailsDto>> GetListingsByUserAsync(string userId);
         Task<IEnumerable<ListingDetailsDto>> GetListingsByCityAsync(string city);

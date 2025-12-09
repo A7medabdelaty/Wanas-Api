@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Enums;
+using Wanas.Application.Responses;
 
 namespace Wanas.API.Controllers
 {
@@ -26,15 +27,12 @@ namespace Wanas.API.Controllers
             _logger = logger;
         }
 
-        // GET ALL
+        // GET ALL (PAGED)
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ListingCardDto>>> GetAll()
+        public async Task<ActionResult<ApiPagedResponse<ListingCardDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            var listings = await _listService.GetAllListingsAsync();
-            if (!listings.Any())
-                return NotFound("No listings found.");
-
-            return Ok(listings);
+            var result = await _listService.GetPagedListingsAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET TOP6 ACTIVE APPROVED LISTINGS
