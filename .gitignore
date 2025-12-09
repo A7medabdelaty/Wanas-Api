@@ -365,10 +365,8 @@ Wanas.Infrastructure/Migrations/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Wanas.API/appsettings.json
 
 # Ignore Uploads folder
 Wanas.API.uploads/
 /Wanas.API/uploads
 /Wanas.Infrastructure/Migrations/AppDBContextModelSnapshot.cs
-/Wanas.API/appsettings.json
