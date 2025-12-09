@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Wanas.Application.Abstractions;
 using Wanas.Application.DTOs.Authentication;
 using Wanas.Application.Helpers;
@@ -172,6 +173,8 @@ public class AuthService(
     // -----------------------------------------
     public async Task<Result> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
+        if (!IsValidBusinessEmail(request.Email))
+            return Result.Failure(UserErrors.InvalidEmailFormat);
 
         if (request.ProfileType == ProfileType.Admin)
             return Result.Failure(UserErrors.InvalidProfileType);
@@ -368,4 +371,22 @@ public class AuthService(
 
     private static string GenerateRefreshToken() =>
   Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+    private static bool IsValidBusinessEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+       
+        string pattern = @"^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+        if (!Regex.IsMatch(email, pattern))
+            return false;
+
+        
+        if (email.Contains("+"))
+            return false;
+
+        return true;
+    }
+
 }

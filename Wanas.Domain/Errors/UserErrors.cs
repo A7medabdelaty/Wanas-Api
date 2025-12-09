@@ -32,6 +32,9 @@ public static class UserErrors
         new("User.InvalidProfileType", "Cannot register as Admin. Only Owner or Renter allowed.", StatusCodes.Status400BadRequest);
 
 
+    public static readonly Error InvalidEmailFormat =
+    new("User.InvalidEmailFormat", "The provided email is not valid. Please enter a correct email address without '+' symbols.", StatusCodes.Status400BadRequest);
 
-       
+
+
 }
