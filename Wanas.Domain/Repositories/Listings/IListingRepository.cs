@@ -6,6 +6,7 @@ namespace Wanas.Domain.Repositories.Listings
     {
         Task<IEnumerable<Listing>> GetAllListingsAsync();
         Task<Listing?> GetListingWithDetailsAsync(int id);
+        Task<Listing?> GetListingWithDetailsTrackedAsync(int id);
         Task<IEnumerable<Listing>> GetListingsByUserAsync(string userId);
         Task<IEnumerable<Listing>> GetListingsByCityAsync(string city);
         Task<IEnumerable<Listing>> GetActiveListingsAsync();
