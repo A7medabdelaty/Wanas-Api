@@ -185,7 +185,7 @@ namespace Wanas.Application.Services
         // DELETE LISTING
         public async Task<bool> DeleteListingAsync(int id)
         {
-            var listing = await _uow.Listings.GetListingWithDetailsAsync(id);
+            var listing = await _uow.Listings.GetListingWithDetailsTrackedAsync(id);
             if (listing == null)
                 return false;
 
@@ -197,6 +197,7 @@ namespace Wanas.Application.Services
                 }
             }
 
+            _uow.Listings.Remove(listing);
             await _uow.CommitAsync();
             return true;
         }
@@ -264,7 +265,7 @@ namespace Wanas.Application.Services
         // UPDATE LISTING
         public async Task<ListingDetailsDto> UpdateListingAsync(int id, UpdateListingDto dto)
         {
-            var listing = await _uow.Listings.GetListingWithDetailsAsync(id);
+            var listing = await _uow.Listings.GetListingWithDetailsTrackedAsync(id);
             if (listing == null)
                 return null;
 
