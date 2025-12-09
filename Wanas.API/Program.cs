@@ -9,11 +9,19 @@ using Wanas.Infrastructure.Persistence.Seed;
 
 
 // Configure Serilog (basic console + file rolling)
+var logsPath = Path.Combine(AppContext.BaseDirectory, "Logs");
+Directory.CreateDirectory(logsPath);
+
+
 Log.Logger = new LoggerConfiguration()
  .Enrich.FromLogContext()
  .WriteTo.Console()
- .WriteTo.File("Logs/requests-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
- .CreateLogger();
+.WriteTo.File(
+    Path.Combine(AppContext.BaseDirectory, "Logs", "requests-.log"),
+    rollingInterval: RollingInterval.Day,
+    shared: true
+)
+.CreateLogger();
 
 
 
@@ -46,16 +54,23 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddApplicationServices(builder.Configuration);
 
+
+Log.Information("ContentRootPath: {Path}", builder.Environment.ContentRootPath);
+Log.Information("WebRootPath: {Path}", builder.Environment.WebRootPath);
+
+
+
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
 
 
+var uploadsPath = Path.Combine(builder.Environment.WebRootPath!, "uploads");
+Directory.CreateDirectory(uploadsPath);
+
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
- Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
- ),
-    RequestPath = "/uploads" // <-- this will make files available at https://localhost:7279/uploads/filename.jpg
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
 });
 
 
