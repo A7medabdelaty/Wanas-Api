@@ -29,12 +29,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 
-// Load .env file only in Development
-if (builder.Environment.IsDevelopment())
-{
-    DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
-    Log.Information("Loaded .env file for Development environment");
-}
+// Load .env file (safe for all environments)
+DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, ignoreExceptions: true));
+
+// Add environment variables to configuration
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers();
 
@@ -53,10 +52,6 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddApplicationServices(builder.Configuration);
-
-
-Log.Information("ContentRootPath: {Path}", builder.Environment.ContentRootPath);
-Log.Information("WebRootPath: {Path}", builder.Environment.WebRootPath);
 
 
 

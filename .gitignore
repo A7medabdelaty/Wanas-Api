@@ -372,3 +372,8 @@ Wanas.API.uploads/
 /Wanas.API/uploads
 /Wanas.Infrastructure/Migrations/AppDBContextModelSnapshot.cs
 /Wanas.API/appsettings.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
