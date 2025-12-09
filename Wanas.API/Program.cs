@@ -138,7 +138,7 @@ app.UseMiddleware<SignalRTokenMiddleware>();
 
 app.UseAuthentication();
 app.UseMiddleware<TrafficLoggingMiddleware>();
-// Add User Status Check Middleware (must be after Authentication)
+// Add User Status Check Middleware (Must be after Authentication)
 app.UseMiddleware<UserStatusMiddleware>();
 
 app.UseAuthorization();
