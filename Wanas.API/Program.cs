@@ -59,12 +59,11 @@ builder.Services.AddApplicationServices(builder.Configuration);
 var app = builder.Build();
 
 
-var uploadsPath = Path.Combine(builder.Environment.WebRootPath!, "uploads");
-Directory.CreateDirectory(uploadsPath);
-
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(uploadsPath),
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "uploads")
+    ),
     RequestPath = "/uploads"
 });
 

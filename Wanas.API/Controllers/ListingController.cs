@@ -39,7 +39,7 @@ namespace Wanas.API.Controllers
 
         // GET TOP6 ACTIVE APPROVED LISTINGS
         [HttpGet("top")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ListingDetailsDto>>> GetTop(int size = 6)
         {
             var active = await _listService.GetActiveListingsAsync();
