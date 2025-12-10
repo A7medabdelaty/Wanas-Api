@@ -18,7 +18,10 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.ReviewerName,
                     opt => opt.MapFrom(src => src.Reviewer.FullName))
                 .ForMember(dest => dest.ReviewerProfilePhotoUrl,
-                    opt => opt.MapFrom(src => src.Reviewer.Photo));
+                    opt => opt.MapFrom(src => src.Reviewer.Photo))
+                .ForMember(dest => dest.ReviewerId,
+                    opt => opt.MapFrom(src => src.Reviewer.Id));
+
         }
     }
 }
