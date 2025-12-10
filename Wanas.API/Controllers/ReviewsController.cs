@@ -48,8 +48,7 @@ namespace Wanas.API.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
-            var userId = User.FindFirst("sub")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
             var result = await revServ.UpdateReviewAsync(reviewId, dto, userId);
@@ -60,7 +59,7 @@ namespace Wanas.API.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteReview(int reviewId)
         {
-            var userId = User.FindFirst("sub")?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
             bool success = await revServ.DeleteReviewAsync(reviewId, userId);
