@@ -9,7 +9,7 @@ namespace Wanas.Application.Mappings
         public CommentProfile()
         {
             CreateMap<Comment, CommentDto>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName))
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.FullName))
                 .ForMember(dest => dest.AuthorPhoto, opt => opt.MapFrom(src => src.Author.Photo))
                 .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.Replies));
 

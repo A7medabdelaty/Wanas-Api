@@ -6,14 +6,14 @@ namespace Wanas.Domain.Repositories.Listings
     {
         Task<IEnumerable<Listing>> GetAllListingsAsync();
         Task<Listing?> GetListingWithDetailsAsync(int id);
+        Task<Listing?> GetListingWithDetailsTrackedAsync(int id);
         Task<IEnumerable<Listing>> GetListingsByUserAsync(string userId);
         Task<IEnumerable<Listing>> GetListingsByCityAsync(string city);
         Task<IEnumerable<Listing>> GetActiveListingsAsync();
         Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword);
         IQueryable<Listing> GetQueryableWithIncludes();
-
-            Task<IEnumerable<Listing>> GetPendingWithOwnerAsync();
-        
+        Task<IEnumerable<Listing>> GetPendingWithOwnerAsync();
+        Task<(IEnumerable<Listing> items, int totalCount)> GetPagedListingsAsync(int pageNumber, int pageSize);
         IQueryable<Listing> ApplyKeywordSearch(IQueryable<Listing> query, string keyword);
     }
 }

@@ -55,6 +55,20 @@ namespace Wanas.Infrastructure.Repositories.Listings
                     .Include(l => l.Payments)
                     .FirstOrDefaultAsync(l => l.Id == id);
         }
+        public async Task<Listing?> GetListingWithDetailsTrackedAsync(int id)
+        {
+            return await _context.Listings
+                    .AsSplitQuery()
+                    .Include(l => l.User)
+                    .Include(l => l.ListingPhotos)
+                    .Include(l => l.ApartmentListing)
+                        .ThenInclude(a => a.Rooms)
+                            .ThenInclude(r => r.Beds)
+                    .Include(l => l.Comments)
+                    .Include(l => l.Matches)
+                    .Include(l => l.Payments)
+                    .FirstOrDefaultAsync(l => l.Id == id);
+        }
 
         public async Task<IEnumerable<Listing>> SearchByTitleAsync(string keyword)
         {
@@ -108,6 +122,26 @@ namespace Wanas.Infrastructure.Repositories.Listings
             .Include(l => l.User)  
             .Where(l => l.ModerationStatus == ListingModerationStatus.Pending)
             .ToListAsync();
+        }
+        public async Task<(IEnumerable<Listing> items, int totalCount)> GetPagedListingsAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Listings
+                .Where(l => l.ModerationStatus == ListingModerationStatus.Approved);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Include(l => l.ListingPhotos)
+                .Include(l => l.User)
+                .Include(l => l.ApartmentListing)
+                   .ThenInclude(al => al.Rooms)
+                       .ThenInclude(r => r.Beds)
+                .OrderByDescending(l => l.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
     }
 }

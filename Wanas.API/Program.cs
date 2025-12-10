@@ -9,11 +9,19 @@ using Wanas.Infrastructure.Persistence.Seed;
 
 
 // Configure Serilog (basic console + file rolling)
+var logsPath = Path.Combine(AppContext.BaseDirectory, "Logs");
+Directory.CreateDirectory(logsPath);
+
+
 Log.Logger = new LoggerConfiguration()
  .Enrich.FromLogContext()
  .WriteTo.Console()
- .WriteTo.File("Logs/requests-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
- .CreateLogger();
+.WriteTo.File(
+    Path.Combine(AppContext.BaseDirectory, "Logs", "requests-.log"),
+    rollingInterval: RollingInterval.Day,
+    shared: true
+)
+.CreateLogger();
 
 
 
@@ -21,12 +29,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 
-// Load .env file only in Development
-if (builder.Environment.IsDevelopment())
-{
-    DotEnv.Load(options: new DotEnvOptions(probeForEnv: true));
-    Log.Information("Loaded .env file for Development environment");
-}
+// Load .env file (safe for all environments)
+DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, ignoreExceptions: true));
+
+// Add environment variables to configuration
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers();
 
@@ -46,6 +53,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddApplicationServices(builder.Configuration);
 
+
+
 // ======== BUILD & INITIALIZE ========
 var app = builder.Build();
 
@@ -53,9 +62,9 @@ var app = builder.Build();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
- Path.Combine(builder.Environment.ContentRootPath, "uploads") // <-- path to your uploads folder
- ),
-    RequestPath = "/uploads" // <-- this will make files available at https://localhost:7279/uploads/filename.jpg
+        Path.Combine(builder.Environment.ContentRootPath, "uploads")
+    ),
+    RequestPath = "/uploads"
 });
 
 
@@ -123,7 +132,7 @@ app.UseMiddleware<SignalRTokenMiddleware>();
 
 app.UseAuthentication();
 app.UseMiddleware<TrafficLoggingMiddleware>();
-// Add User Status Check Middleware (must be after Authentication)
+// Add User Status Check Middleware (Must be after Authentication)
 app.UseMiddleware<UserStatusMiddleware>();
 
 app.UseAuthorization();
