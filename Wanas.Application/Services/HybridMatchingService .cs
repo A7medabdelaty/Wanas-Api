@@ -134,6 +134,11 @@ namespace Wanas.Application.Services
                 {
                     var oldScore = result.Score;
                     result.Score += 15; // AI relevance boost
+                    
+                    // Cap score at 100 to prevent overflow
+                    if (result.Score > 100)
+                      result.Score = 100;
+                     
                     boostedCount++;
                     _logger.LogDebug("Boosted listing {ListingId} score from {OldScore} to {NewScore}", 
                         result.ListingId, oldScore, result.Score);

@@ -146,6 +146,8 @@ namespace Wanas.API.Extentions
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IVerificationDocumentRepository, VerificationDocumentRepository>();
+            services.AddScoped<IDocumentAccessLogRepository, DocumentAccessLogRepository>();
             // Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -167,8 +169,11 @@ namespace Wanas.API.Extentions
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IRevenueService, RevenueService>();
             services.AddScoped<IBookingApprovalService, BookingApprovalService>();
-            services.AddScoped<IReservationService, ReservationService>();
+            services.AddScoped<IReservationService, ReservationService>();  
             services.AddHostedService<ReservationExpirationService>();
+            services.AddScoped<ISecureFileService, SecureFileService>();
+            services.AddScoped<IVerificationService, VerificationService>();
+            services.AddHostedService<DocumentCleanupService>();
 
             // Real-time notifier (singleton)
             services.AddSingleton<IRealTimeNotifier, RealTimeNotifier>();
@@ -262,6 +267,8 @@ namespace Wanas.API.Extentions
 
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.Configure<AppSettings>(configuration.GetSection(nameof(AppSettings)));
+            services.Configure<VerificationSettings>(configuration.GetSection(VerificationSettings.SectionName));
+
             services.AddProblemDetails();
             services.AddHttpContextAccessor();
 

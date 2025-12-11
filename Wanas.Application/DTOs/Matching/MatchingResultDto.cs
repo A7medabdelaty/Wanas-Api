@@ -14,6 +14,7 @@ namespace Wanas.Application.DTOs.Matching
         public string ListingCity { get; set; }
         public int Price { get; set; }
         public string FirstPhotoUrl { get; set; }
+        public List<string> ListingPhotos { get; set; } = new();
         public int Score { get; set; }
     }
 }

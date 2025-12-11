@@ -14,4 +14,5 @@ public record UserProfileResponse(
     bool? IsFirstLogin,
     bool IsProfileCompleted,
     bool IsPreferenceCompleted
+    
 );
