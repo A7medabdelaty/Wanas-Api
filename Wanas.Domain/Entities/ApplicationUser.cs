@@ -26,6 +26,10 @@ namespace Wanas.Domain.Entities
         public bool IsBanned { get; set; }
         public bool IsVerified { get; set; }
 
+        // Verification Document Properties
+        public DateTime? VerificationSubmittedAt { get; set; }
+        public DateTime? VerificationApprovedAt { get; set; }
+
         // Completion Flags
         public bool IsProfileCompleted { get; set; } = false;
         public bool IsPreferenceCompleted { get; set; } = false;
@@ -48,5 +52,10 @@ namespace Wanas.Domain.Entities
         public List<RefreshToken> RefreshTokens { get; set; } = [];
         public ICollection<Payout> Payouts { get; set; } = new List<Payout>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+
+        // Verification Documents
+        public ICollection<VerificationDocument> VerificationDocuments { get; set; } = new List<VerificationDocument>();
+        public ICollection<VerificationDocument> ReviewedVerificationDocuments { get; set; } = new List<VerificationDocument>();
+        public ICollection<DocumentAccessLog> DocumentAccessLogs { get; set; } = new List<DocumentAccessLog>();
     }
 }

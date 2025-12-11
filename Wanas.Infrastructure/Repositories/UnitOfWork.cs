@@ -34,7 +34,9 @@ namespace Wanas.Infrastructure.Repositories
         public IRoomRepository Rooms { get; }
         public IBookingApprovalRepository BookingApprovals { get; }
         public IBedRepository Beds { get; }
-        public IReservationRepository Reservations { get; } 
+        public IReservationRepository Reservations { get; }
+        public IVerificationDocumentRepository VerificationDocuments { get; }
+        public IDocumentAccessLogRepository DocumentAccessLogs { get; }
 
         public UnitOfWork(AppDBContext context,
                           IChatRepository chats,
@@ -59,7 +61,9 @@ namespace Wanas.Infrastructure.Repositories
                           IRoomRepository rooms,
                           IBookingApprovalRepository bookingApprovals,
                           IReservationRepository bedReservations,
-                          IBedRepository beds)
+                          IBedRepository beds,
+                          IVerificationDocumentRepository verificationDocuments,
+                          IDocumentAccessLogRepository documentAccessLogs)
         {
             _context = context;
             Chats = chats;
@@ -88,6 +92,8 @@ namespace Wanas.Infrastructure.Repositories
             BookingApprovals = bookingApprovals;
             Reservations = bedReservations;
             Beds = beds;
+            VerificationDocuments = verificationDocuments;
+            DocumentAccessLogs = documentAccessLogs;
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
