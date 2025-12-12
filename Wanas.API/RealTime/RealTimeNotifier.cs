@@ -240,14 +240,17 @@ namespace Wanas.API.RealTime
 
         public async Task NotifyPaymentApprovedAsync(int listingId, string userId)
         {
-            await PersistNotificationAsync(userId, "Success", "Payment Approved", $"Payment for listing {listingId} has been approved.", listingId.ToString());
+            await PersistNotificationAsync(userId,
+             "Success", "الموافقة على الدفع",
+              $"تمت الموافقة على الدفع للإعلان رقم {listingId}.",
+               listingId.ToString());
             
             await _hub.Clients.User(userId)
                 .SendAsync("PaymentApproved", new { ListingId = listingId });
         }
         public async Task NotifyGroupApprovedAsync(int chatId, string userId)
         {
-            await PersistNotificationAsync(userId, "Success", "Group Approved", "You have been approved to join the group chat.", chatId.ToString());
+            await PersistNotificationAsync(userId, "Success", "الموافقة على الانضمام", "تمت الموافقة على انضمامك إلى المجموعة.", chatId.ToString());
 
             await _hub.Clients.Group($"chat_{chatId}")
                 .SendAsync("GroupJoinApproved", new { ChatId = chatId, UserId = userId });
@@ -255,7 +258,7 @@ namespace Wanas.API.RealTime
 
         public async Task NotifyOwnerAsync(string ownerId, string message)
         {
-            await PersistNotificationAsync(ownerId, "Info", "Owner Notification", message);
+            await PersistNotificationAsync(ownerId, "Info", "إشعار المالك", message);
 
             await _hub.Clients.User(ownerId).SendAsync("OwnerNotification", new
             {
@@ -266,7 +269,7 @@ namespace Wanas.API.RealTime
 
         public async Task NotifyUserAsync(string userId, string message)
         {
-            await PersistNotificationAsync(userId, "Info", "Notification", message);
+            await PersistNotificationAsync(userId, "Info", "إشعار", message);
 
             await _hub.Clients.User(userId).SendAsync("UserNotification", new
             {
@@ -327,7 +330,7 @@ namespace Wanas.API.RealTime
         {
             try
             {
-                await PersistNotificationAsync(ownerId, "Info", "Listing Updated", $"Listing {listingId} has been updated.", listingId.ToString());
+                await PersistNotificationAsync(ownerId, "Info", "تحديث الإعلان", $"تم تحديث الإعلان رقم {listingId}.", listingId.ToString());
 
                 await _hub.Clients.User(ownerId)
                     .SendAsync("ListingUpdated", new { ListingId = listingId, Timestamp = DateTime.UtcNow });
@@ -347,9 +350,9 @@ namespace Wanas.API.RealTime
                 var notificationData = new { ReservationId = reservationId, Timestamp = DateTime.UtcNow };
                 
                 // Persist for renter
-                await PersistNotificationAsync(renterId, "Success", "Reservation Created", $"Your reservation {reservationId} has been created.", reservationId.ToString());
+                await PersistNotificationAsync(renterId, "Success", "تم إنشاء الحجز", $"تم إنشاء حجزك رقم {reservationId} بنجاح.", reservationId.ToString());
                 // Persist for owner
-                await PersistNotificationAsync(ownerId, "Info", "New Reservation", $"New reservation {reservationId} received.", reservationId.ToString());
+                await PersistNotificationAsync(ownerId, "Info", "حجز جديد", $"تم استلام حجز جديد رقم {reservationId}.", reservationId.ToString());
 
                 // Notify the renter
                 await _hub.Clients.User(renterId)
@@ -371,7 +374,7 @@ namespace Wanas.API.RealTime
         {
             try
             {
-                await PersistNotificationAsync(userId, "Info", "Reservation Updated", $"Reservation {reservationId} status has been updated.", reservationId.ToString());
+                await PersistNotificationAsync(userId, "Info", "تحديث الحجز", $"تم تحديث حالة الحجز رقم {reservationId}.", reservationId.ToString());
 
                 await _hub.Clients.User(userId)
                     .SendAsync("ReservationUpdated", new { ReservationId = reservationId, Timestamp = DateTime.UtcNow });
@@ -388,7 +391,7 @@ namespace Wanas.API.RealTime
         {
             try
             {
-                await PersistNotificationAsync(userId, "Warning", "Reservation Cancelled", $"Reservation {reservationId} has been cancelled.", reservationId.ToString());
+                await PersistNotificationAsync(userId, "Warning", "إلغاء الحجز", $"تم إلغاء الحجز رقم {reservationId}.", reservationId.ToString());
 
                 await _hub.Clients.User(userId)
                     .SendAsync("ReservationCancelled", new { ReservationId = reservationId, Timestamp = DateTime.UtcNow });

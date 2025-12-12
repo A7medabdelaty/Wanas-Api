@@ -269,10 +269,17 @@ namespace Wanas.Application.Services
 
 
         // ALL LISTINGS
-        public async Task<IEnumerable<ListingCardDto>> GetAllListingsAsync()
+        public async Task<IEnumerable<ListingDetailsDto>> GetAllListingsAsync()
         {
             var listings = await _uow.Listings.GetAllListingsAsync();
-            return _mapper.Map<IEnumerable<ListingCardDto>>(listings);
+            var listingDtos = _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+
+            foreach (var dto in listingDtos)
+            {
+                dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+            }
+
+            return listingDtos;
         }
 
         // PAGED LISTINGS
@@ -280,6 +287,12 @@ namespace Wanas.Application.Services
         {
             var (items, totalCount) = await _uow.Listings.GetPagedListingsAsync(pageNumber, pageSize);
             var mapped = _mapper.Map<IEnumerable<ListingDetailsDto>>(items);
+
+            foreach (var dto in mapped)
+            {
+                dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+            }
+
             return new ApiPagedResponse<ListingDetailsDto>(mapped, totalCount, pageNumber, pageSize);
         }
 
