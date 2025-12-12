@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Responses;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
@@ -204,12 +206,26 @@ namespace Wanas.Application.Services
             return true;
         }
 
-        // ACTIVE LISTINGS
+        //// ACTIVE LISTINGS
+        //public async Task<IEnumerable<ListingDetailsDto>> GetActiveListingsAsync()
+        //{
+        //    var listings = await _uow.Listings.GetActiveListingsAsync();
+        //    return _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+        //}
+
         public async Task<IEnumerable<ListingDetailsDto>> GetActiveListingsAsync()
         {
             var listings = await _uow.Listings.GetActiveListingsAsync();
-            return _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+            var listingDtos = _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+
+            foreach (var dto in listingDtos)
+            {
+                dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+            }
+
+            return listingDtos;
         }
+
 
         // ALL LISTINGS
         public async Task<IEnumerable<ListingCardDto>> GetAllListingsAsync()
@@ -233,8 +249,13 @@ namespace Wanas.Application.Services
             if (listing == null)
                 return null;
 
-            return _mapper.Map<ListingDetailsDto>(listing);
+            var dto = _mapper.Map<ListingDetailsDto>(listing);
+
+            dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(listing.Id.ToString());
+
+            return dto;
         }
+
 
         // GET BY CITY
         public async Task<IEnumerable<ListingDetailsDto>> GetListingsByCityAsync(string city)
@@ -247,7 +268,14 @@ namespace Wanas.Application.Services
         public async Task<IEnumerable<ListingDetailsDto>> GetListingsByUserAsync(string userId)
         {
             var listings = await _uow.Listings.GetListingsByUserAsync(userId);
-            return _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+            var dtos = _mapper.Map<IEnumerable<ListingDetailsDto>>(listings);
+
+            foreach (var dto in dtos)
+            {
+                dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+            }
+
+            return dtos;
         }
 
         

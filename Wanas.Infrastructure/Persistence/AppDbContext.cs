@@ -39,5 +39,7 @@ namespace Wanas.Infrastructure.Persistence
         public DbSet<BookingApproval> BookingApprovals { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<VerificationDocument> VerificationDocuments { get; set; }
+        public DbSet<DocumentAccessLog> DocumentAccessLogs { get; set; }
     }
 }

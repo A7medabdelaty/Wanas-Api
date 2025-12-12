@@ -44,6 +44,9 @@ namespace Wanas.Application.Mappings
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Listing.City))
                 .ForMember(dest => dest.CoverPhotoUrl,
                            opt => opt.MapFrom(src => src.Listing.ListingPhotos))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.FromDate))
+                .ForMember(dest => dest.DurationInDays, 
+                           opt => opt.MapFrom(src => (src.ToDate - src.FromDate).Days))
                 .ForMember(dest => dest.Beds, opt => opt.MapFrom(src => src.Beds));
         }
     }

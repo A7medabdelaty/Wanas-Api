@@ -201,6 +201,11 @@ namespace Wanas.Application.Services
                 .OrderBy(p => p.Id)
                 .FirstOrDefault()?.URL;
 
+            var allPhotos = listing.ListingPhotos?
+                .OrderBy(p => p.Id)
+                .Select(p => p.URL)
+                .ToList() ?? new List<string>();
+
             return new MatchingResultDto
             {
                 ListingId = listing.Id,
@@ -211,6 +216,7 @@ namespace Wanas.Application.Services
                     ? listing.ApartmentListing.MonthlyPrice
                     : listing.MonthlyPrice,
                 FirstPhotoUrl = firstPhotoUrl,
+                ListingPhotos = allPhotos,
                 Score = score
             };
         }

@@ -39,6 +39,8 @@ namespace Wanas.Application.DTOs.Listing
         public string? ModerationNote { get; set; }
         public double? AverageRating { get; set; }
 
+        public double? AverageRating { get; set; }
+
         public HostDetailsDto Host { get; set; }
         public List<ListingPhotoDto> ListingPhotos { get; set; }
         public List<CommentDto> Comments { get; set; }
