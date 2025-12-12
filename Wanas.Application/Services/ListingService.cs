@@ -16,19 +16,22 @@ namespace Wanas.Application.Services
         private readonly IFileService _fileService;
         private readonly IChromaIndexingService _chromaIndexingService;
         private readonly ILogger<ListingService> _logger;
+        private readonly IReviewRepository _reviewRepository;
 
         public ListingService(
             IUnitOfWork unit,
             IMapper mapper,
             IFileService fileServ,
             IChromaIndexingService chromaIndexingService,
-            ILogger<ListingService> logger)
+            ILogger<ListingService> logger,
+            IReviewRepository reviewRepository)
         {
             this._uow = unit;
             this._mapper = mapper;
             this._fileService = fileServ;
             this._chromaIndexingService = chromaIndexingService;
             this._logger = logger;
+            this._reviewRepository = reviewRepository;
         }
 
         // Add photos to a listing
