@@ -193,6 +193,7 @@ namespace Wanas.Application.Services
             if (listing == null)
                 return false;
 
+            // Delete associated photos
             if (listing.ListingPhotos != null)
             {
                 foreach (var photo in listing.ListingPhotos)
@@ -201,8 +202,48 @@ namespace Wanas.Application.Services
                 }
             }
 
+            // Delete group chat if it exists
+            if (listing.GroupChatId.HasValue)
+            {
+                var groupChat = await _uow.Chats.GetByIdAsync(listing.GroupChatId.Value);
+                if (groupChat != null)
+                {
+                    _uow.Chats.Remove(groupChat);
+                    _logger.LogInformation("Deleted group chat {ChatId} for listing {ListingId}", 
+                        listing.GroupChatId.Value, id);
+                }
+            }
+
+            // Delete all 1-1 private chats linked to this listing
+            var privateChats = await _uow.Chats.FindAsync(c => c.ListingId == id);
+            if (privateChats != null && privateChats.Any())
+            {
+                foreach (var chat in privateChats)
+                {
+                    _uow.Chats.Remove(chat);
+                }
+                _logger.LogInformation("Deleted {Count} private chat(s) for listing {ListingId}", 
+                    privateChats.Count(), id);
+            }
+
+            // Delete the listing
             _uow.Listings.Remove(listing);
             await _uow.CommitAsync();
+
+            // Remove from ChromaDB index in background
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _chromaIndexingService.RemoveListingFromIndexAsync(id);
+                    _logger.LogInformation("Removed listing {ListingId} from ChromaDB index", id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to remove listing {ListingId} from ChromaDB index", id);
+                }
+            });
+
             return true;
         }
 
