@@ -29,7 +29,7 @@ namespace Wanas.API.Controllers
 
         // GET ALL (PAGED)
         [HttpGet]
-        public async Task<ActionResult<ApiPagedResponse<ListingCardDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<ApiPagedResponse<ListingDetailsDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _listService.GetPagedListingsAsync(pageNumber, pageSize);
             return Ok(result);
