@@ -238,9 +238,7 @@ namespace Wanas.Application.Services
         public async Task<List<VerificationStatusDto>> GetPendingVerificationsAsync()
         {
             var pendingDocs = await _unitOfWork.VerificationDocuments.GetPendingDocumentsAsync();
-
             var groupedByUser = pendingDocs.GroupBy(d => d.UserId);
-
             var result = new List<VerificationStatusDto>();
 
             foreach (var group in groupedByUser)
@@ -258,6 +256,10 @@ namespace Wanas.Application.Services
 
                 result.Add(new VerificationStatusDto
                 {
+                    // Add these properties
+                    UserId = user?.Id,
+                    UserName = user?.UserName, // or user?.FullName
+                    Email = user?.Email,
                     HasSubmitted = true,
                     Status = VerificationStatus.Pending,
                     SubmittedAt = user?.VerificationSubmittedAt,
@@ -267,6 +269,8 @@ namespace Wanas.Application.Services
 
             return result;
         }
+
+      
 
         private async Task LogDocumentAccessAsync(
                  List<VerificationDocument> documents, string userId, string action)
