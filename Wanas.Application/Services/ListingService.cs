@@ -235,11 +235,11 @@ namespace Wanas.Application.Services
         }
 
         // PAGED LISTINGS
-        public async Task<ApiPagedResponse<ListingCardDto>> GetPagedListingsAsync(int pageNumber, int pageSize)
+        public async Task<ApiPagedResponse<ListingDetailsDto>> GetPagedListingsAsync(int pageNumber, int pageSize)
         {
             var (items, totalCount) = await _uow.Listings.GetPagedListingsAsync(pageNumber, pageSize);
-            var mapped = _mapper.Map<IEnumerable<ListingCardDto>>(items);
-            return new ApiPagedResponse<ListingCardDto>(mapped, totalCount, pageNumber, pageSize);
+            var mapped = _mapper.Map<IEnumerable<ListingDetailsDto>>(items);
+            return new ApiPagedResponse<ListingDetailsDto>(mapped, totalCount, pageNumber, pageSize);
         }
 
         // GET BY ID

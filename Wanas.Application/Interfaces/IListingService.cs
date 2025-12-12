@@ -8,7 +8,7 @@ namespace Wanas.Application.Interfaces
     public interface IListingService
     {
         Task<IEnumerable<ListingCardDto>> GetAllListingsAsync();
-        Task<ApiPagedResponse<ListingCardDto>> GetPagedListingsAsync(int pageNumber, int pageSize);
+        Task<ApiPagedResponse<ListingDetailsDto>> GetPagedListingsAsync(int pageNumber, int pageSize);
         Task<ListingDetailsDto> GetListingByIdAsync(int id);
         Task<IEnumerable<ListingDetailsDto>> GetListingsByUserAsync(string userId);
         Task<IEnumerable<ListingDetailsDto>> GetListingsByCityAsync(string city);
