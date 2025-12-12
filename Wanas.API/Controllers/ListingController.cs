@@ -66,7 +66,7 @@ namespace Wanas.API.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var isAdmin = User.IsInRole("Admin");
-                if (listing.OwnerId != userId&& !isAdmin)
+                if (listing.OwnerId != userId && !isAdmin)
                     return NotFound();
             }
 
@@ -262,6 +262,16 @@ namespace Wanas.API.Controllers
                 return NotFound();
 
             return Ok(comment);
+        }
+
+        [HttpDelete("{listingId:int}/comments/{commentId:int}")]
+        public async Task<IActionResult> DeleteComment(int listingId, int commentId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var deleted = await _commentService.DeleteCommentAsync(commentId, userId);
+            if (!deleted)
+                return NotFound();
+            return NoContent();
         }
     }
 }
