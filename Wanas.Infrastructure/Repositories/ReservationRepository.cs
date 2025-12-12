@@ -64,6 +64,10 @@ namespace Wanas.Infrastructure.Repositories
         {
             return await _context.Reservations
                 .Include(r => r.Beds)
+                    .ThenInclude(br => br.Bed)
+                        .ThenInclude(b => b.Room)
+                .Include(r => r.Listing)
+                    .ThenInclude(l => l.ListingPhotos)
                 .Include(r => r.Listing)
                     .ThenInclude(l => l.ApartmentListing)
                 .Where(r => r.UserId == renterId)

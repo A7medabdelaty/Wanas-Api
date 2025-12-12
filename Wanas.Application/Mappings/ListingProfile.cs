@@ -161,7 +161,9 @@ namespace Wanas.Application.Mappings
             CreateMap<BedReservation, BedDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.BedId))
             .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.Bed.RoomId))
-            .ForMember(dest => dest.PricePerBed, opt => opt.MapFrom(src => src.Bed.Room.PricePerBed));
+            .ForMember(dest => dest.PricePerBed, opt => opt.MapFrom(src => src.Bed.Room.PricePerBed))
+            .ForMember(dest => dest.BedNumber, opt => opt.MapFrom(src => src.BedId.ToString()))
+            .ForMember(dest => dest.RoomNumber, opt => opt.MapFrom(src => src.Bed.Room.RoomNumber));
 
             CreateMap<ApartmentListing, UpdateListingDto>().ReverseMap();
             CreateMap<Room, UpdateRoomDto>().ReverseMap();
