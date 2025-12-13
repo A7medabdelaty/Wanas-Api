@@ -25,7 +25,9 @@ namespace Wanas.API.Middlewares
             "/api/auth/resend-confirmation-email",
             "/api/auth/forget-password",    // Password reset
             "/api/auth/reset-password",
-            "/api/user/status"      // User status check endpoint
+            "/api/user/status",     // User status check endpoint
+            "api/user/appeals",          // Submitting appeals
+            "api/user/appeals/my", // Viewing own appeals
         };
 
         public UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddleware> logger)
