@@ -20,6 +20,8 @@ namespace Wanas.Application.DTOs.Listing
         public bool HasElevator { get; set; }
         public int Floor { get; set; }
         public int AreaInSqMeters { get; set; }
+        public bool IsActive { get; set; }
+        public bool HasOccupiedBeds { get; set; }
 
         public int TotalRooms { get; set; }
         public int AvailableRooms { get; set; }

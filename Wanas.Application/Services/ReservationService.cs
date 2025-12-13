@@ -5,6 +5,7 @@ using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Wanas.Application.Services
 {
@@ -13,12 +14,21 @@ namespace Wanas.Application.Services
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IRealTimeNotifier _notifier;
+        private readonly IChromaIndexingService _chromaIndexingService;
+        private readonly ILogger<ReservationService> _logger;
 
-        public ReservationService(IUnitOfWork uow, IMapper mapper, IRealTimeNotifier notifier)
+        public ReservationService(
+            IUnitOfWork uow, 
+            IMapper mapper, 
+            IRealTimeNotifier notifier,
+            IChromaIndexingService chromaIndexingService,
+            ILogger<ReservationService> logger)
         {
             _uow = uow;
             _mapper = mapper;
             _notifier = notifier;
+            _chromaIndexingService = chromaIndexingService;
+            _logger = logger;
         }
 
         public async Task<ReservationDto> CreateReservationAsync(CreateReservationRequestDto request, string userId)
@@ -147,6 +157,28 @@ namespace Wanas.Application.Services
                 listing.UserId,
                 $"Deposit paid for reservation #{reservation.Id} in listing {reservation.ListingId}"
             );
+
+            // Check if all beds are occupied (Inactive Logic)
+            var allBeds = await _uow.Beds.GetBedsByListingIdAsync(reservation.ListingId);
+            if (allBeds.All(b => b.RenterId != null))
+            {
+                listing.IsActive = false;
+                _uow.Listings.Update(listing);
+                await _uow.CommitAsync();
+
+                // Remove from ChromaDB index
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _chromaIndexingService.RemoveListingFromIndexAsync(listing.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to update ChromaDB index for full listing {ListingId}", listing.Id);
+                    }
+                });
+            }
 
             return _mapper.Map<ReservationDto>(reservation);
         }

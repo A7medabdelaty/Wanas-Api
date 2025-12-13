@@ -62,7 +62,7 @@ namespace Wanas.API.Controllers
             var listing = await _listService.GetListingByIdAsync(id);
             if (listing == null)
                 return NotFound();
-            if (listing.ModerationStatus != ListingModerationStatus.Approved)
+            if (listing.ModerationStatus != ListingModerationStatus.Approved || !listing.IsActive)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var isAdmin = User.IsInRole("Admin");
@@ -207,6 +207,22 @@ namespace Wanas.API.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        // REACTIVATE LISTING
+        [Authorize]
+        [HttpPost("{id:int}/reactivate")]
+        public async Task<IActionResult> ReactivateListing(int id)
+        {
+            try
+            {
+               var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+               var success = await _listService.ReactivateListingAsync(id, userId);
+               if (success) return Ok(new { Message = "Listing reactivated" });
+               return BadRequest(new { Message = "Cannot reactivate: no available beds." });
+            }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+            catch (Exception ex) { return BadRequest(new { Message = ex.Message }); }
         }
 
         // COMMENTS

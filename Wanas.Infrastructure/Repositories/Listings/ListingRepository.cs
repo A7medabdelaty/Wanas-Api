@@ -123,7 +123,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
             .Where(l => l.ModerationStatus == ListingModerationStatus.Pending)
             .ToListAsync();
         }
-        public async Task<(IEnumerable<Listing> items, int totalCount)> GetPagedListingsAsync(int pageNumber, int pageSize)
+        public async Task<(IEnumerable<Listing> items, int totalCount)> GetPagedActiveListingsAsync(int pageNumber, int pageSize)
         {
             var query = _context.Listings
                 .Where(l => l.ModerationStatus == ListingModerationStatus.Approved);
@@ -131,6 +131,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
             var totalCount = await query.CountAsync();
 
             var items = await query
+                .Where(l=>l.IsActive)
                 .Include(l => l.ListingPhotos)
                 .Include(l => l.User)
                 .Include(l => l.ApartmentListing)
