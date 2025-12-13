@@ -184,7 +184,7 @@ public class AuthService(
             return Result.Failure(UserErrors.DuplicatedEmail);
 
         var user = request.Adapt<ApplicationUser>();
-        var userName = request.Email.Replace("@", "").Replace(".", "");
+        var userName = request.Email.Split('@')[0];
         user.UserName = userName;
         user.NormalizedUserName = userName.ToUpper();
         user.Email = request.Email;
