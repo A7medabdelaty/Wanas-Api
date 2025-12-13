@@ -9,6 +9,7 @@
         public decimal PricePerBed { get; set; }
         
         // For reservation display
+        public string RenterId { get; set; }
         public string BedNumber { get; set; }
         public int RoomNumber { get; set; }
     }

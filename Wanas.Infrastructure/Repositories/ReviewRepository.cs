@@ -25,6 +25,41 @@ namespace Wanas.Infrastructure.Repositories
             return ratings.Average();
         }
 
+
+        public async Task<Dictionary<int, double>> GetAverageRatingsForListingIdsAsync(IEnumerable<int> listingIds)
+        {
+            var idStrings = listingIds.Select(id => id.ToString()).ToList();
+
+            var list = await _context.Reviews
+                .Where(r => idStrings.Contains(r.TargetId))
+                .GroupBy(r => r.TargetId)
+                .Select(g => new
+                {
+                    TargetId = g.Key,
+                    Avg = g.Average(r => (double)r.Rating) 
+                })
+                .ToListAsync();
+
+            var dict = list
+                .Where(x => int.TryParse(x.TargetId, out _))
+                .ToDictionary(x => int.Parse(x.TargetId), x => x.Avg);
+
+            return dict;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         public async Task<IEnumerable<Review>> GetReviewsByReviewerAsync(string reviewerId)
         {
             var reviews = await _context.Reviews

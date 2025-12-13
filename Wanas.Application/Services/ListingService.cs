@@ -32,7 +32,7 @@ namespace Wanas.Application.Services
             this._fileService = fileServ;
             this._chromaIndexingService = chromaIndexingService;
             this._logger = logger;
-            _reviewRepository = reviewRepository;
+            this._reviewRepository = reviewRepository;
         }
 
         // Add photos to a listing
@@ -341,9 +341,32 @@ namespace Wanas.Application.Services
 
             dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(listing.Id.ToString());
 
-             // Check for occupied beds
+            // Check for occupied beds
             var beds = await _uow.Beds.GetBedsByListingIdAsync(listing.Id);
             dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
+
+            // Map Tenants
+            if (listing.ApartmentListing?.Rooms != null)
+            {
+                var tenants = listing.ApartmentListing.Rooms
+                    .SelectMany(r => r.Beds)
+                    .Where(b => b.Renter != null)
+                    .Select(b => b.Renter)
+                    .Distinct() // ApplicationUser implements generic equality or by reference? Better Use DistinctBy if possible or GroupBy
+                    .GroupBy(u => u.Id).Select(g => g.First())
+                    .Select(u => new TenantDto
+                    {
+                        Id = u.Id,
+                        FullName = u.FullName,
+                        Photo = u.Photo,
+                        Gender = u.Gender,
+                        Age = u.Age,
+                        Bio = u.Bio
+                    })
+                    .ToList();
+                
+                dto.Tenants = tenants;
+            }
 
             return dto;
         }
@@ -402,14 +425,34 @@ namespace Wanas.Application.Services
             if (listing == null)
                 return null;
 
-            // Update Listing (simple patch)
+            UpdateListingInfo(listing, dto);
+            UpdateApartmentInfo(listing.ApartmentListing, dto);
+
+            if (dto.Rooms != null)
+            {
+                UpdateRooms(listing.ApartmentListing, dto.Rooms);
+            }
+
+            if (dto.NewPhotos != null)
+            {
+                await AddPhotosAsync(listing, dto.NewPhotos);
+            }
+
+            await _uow.CommitAsync();
+
+            return _mapper.Map<ListingDetailsDto>(listing);
+        }
+
+        private void UpdateListingInfo(Listing listing, UpdateListingDto dto)
+        {
             listing.Title = dto.Title ?? listing.Title;
             listing.Description = dto.Description ?? listing.Description;
             listing.City = dto.City ?? listing.City;
             listing.MonthlyPrice = dto.MonthlyPrice ?? listing.MonthlyPrice;
+        }
 
-            var apartment = listing.ApartmentListing;
-
+        private void UpdateApartmentInfo(ApartmentListing apartment, UpdateListingDto dto)
+        {
             apartment.Address = dto.Address ?? apartment.Address;
             apartment.Floor = dto.Floor ?? apartment.Floor;
             apartment.AreaInSqMeters = dto.AreaInSqMeters ?? apartment.AreaInSqMeters;
@@ -422,81 +465,120 @@ namespace Wanas.Application.Services
             apartment.HasFans = dto.HasFans ?? apartment.HasFans;
             apartment.IsPetFriendly = dto.IsPetFriendly ?? apartment.IsPetFriendly;
             apartment.IsSmokingAllowed = dto.IsSmokingAllowed ?? apartment.IsSmokingAllowed;
+        }
 
+        private void UpdateRooms(ApartmentListing apartment, List<UpdateRoomDto> roomDtos)
+        {
+            var existingRooms = apartment.Rooms.ToList();
+            
+            UpdateExistingRooms(existingRooms, roomDtos);
+            AddNewRooms(apartment, roomDtos);
+            RemoveDeletedRooms(apartment, existingRooms, roomDtos);
+        }
 
-            // ---------- ROOMS UPDATE (Simplified) ----------
-            if (dto.Rooms != null)
+        private void UpdateExistingRooms(List<Room> existingRooms, List<UpdateRoomDto> roomDtos)
+        {
+            foreach (var rDto in roomDtos.Where(r => r.Id != 0))
             {
-                var existingRooms = apartment.Rooms.ToList();
+                var room = existingRooms.FirstOrDefault(x => x.Id == rDto.Id);
+                if (room == null) continue;
 
-                // Update existing
-                foreach (var rDto in dto.Rooms.Where(r => r.Id != 0))
-                {
-                    var room = existingRooms.FirstOrDefault(x => x.Id == rDto.Id);
-                    if (room == null)
-                        continue;
-
-                    room.RoomNumber = rDto.RoomNumber;
-                    room.BedsCount = rDto.BedsCount ?? room.BedsCount;
-                    room.AvailableBeds = rDto.AvailableBeds ?? room.AvailableBeds;
-                    room.PricePerBed = rDto.PricePerBed ?? room.PricePerBed;
-
-                    // Regenerate beds
-                    room.Beds.Clear();
-                    for (int i = 0; i < room.BedsCount; i++)
-                    {
-                        room.Beds.Add(new Bed
-                        {
-                            IsAvailable = i < room.AvailableBeds
-                        });
-                    }
-
-                    room.RecalculateAvailability();
-                }
-
-                // Add new rooms
-                foreach (var rDto in dto.Rooms.Where(r => r.Id == 0))
-                {
-                    var room = new Room
-                    {
-                        RoomNumber = rDto.RoomNumber,
-                        BedsCount = rDto.BedsCount ?? 0,
-                        AvailableBeds = rDto.AvailableBeds ?? 0,
-                        PricePerBed = rDto.PricePerBed ?? 0,
-                        Beds = new List<Bed>()
-                    };
-
-                    for (int i = 0; i < room.BedsCount; i++)
-                    {
-                        room.Beds.Add(new Bed
-                        {
-                            IsAvailable = i < room.AvailableBeds
-                        });
-                    }
-
-                    room.RecalculateAvailability();
-                    apartment.Rooms.Add(room);
-                }
-
-                // Delete rooms
-                var incomingIds = dto.Rooms.Where(r => r.Id != 0).Select(r => r.Id).ToHashSet();
-                foreach (var room in existingRooms.Where(r => !incomingIds.Contains(r.Id)))
-                    apartment.Rooms.Remove(room);
+                UpdateRoomDetails(room, rDto);
+                UpdateRoomBeds(room, rDto);
+                room.RecalculateAvailability();
             }
+        }
 
-            if (dto.NewPhotos != null)
+        private void UpdateRoomDetails(Room room, UpdateRoomDto rDto)
+        {
+            room.RoomNumber = rDto.RoomNumber;
+            room.BedsCount = rDto.BedsCount ?? room.BedsCount;
+            room.AvailableBeds = rDto.AvailableBeds ?? room.AvailableBeds;
+            room.PricePerBed = rDto.PricePerBed ?? room.PricePerBed;
+        }
+
+        private void UpdateRoomBeds(Room room, UpdateRoomDto rDto)
+        {
+            var existingBeds = room.Beds.OrderBy(b => b.Id).ToList();
+            int newBedCount = rDto.BedsCount ?? room.BedsCount;
+
+            if (existingBeds.Count > newBedCount)
             {
-                listing.ListingPhotos ??= new HashSet<ListingPhoto>();
-                foreach (var file in dto.NewPhotos)
-                {
-                    var url = await _fileService.SaveFileAsync(file);
-                    listing.ListingPhotos.Add(new ListingPhoto { URL = url });
-                }
+                RemoveExcessBeds(room, existingBeds, newBedCount);
             }
+            else if (existingBeds.Count < newBedCount)
+            {
+                AddNewBeds(room, newBedCount - existingBeds.Count);
+            }
+        }
 
-            await _uow.CommitAsync();
+        private void RemoveExcessBeds(Room room, List<Bed> existingBeds, int newBedCount)
+        {
+            int countToRemove = existingBeds.Count - newBedCount;
 
-            return _mapper.Map<ListingDetailsDto>(listing);
+            // Prioritize removing unreserved/unoccupied beds
+            var removableBeds = existingBeds
+                .Where(b => b.RenterId == null && (!b.BedReservations?.Any() ?? true))
+                .Take(countToRemove)
+                .ToList();
+
+            foreach (var bed in removableBeds)
+            {
+                _uow.Beds.Remove(bed);
+                room.Beds.Remove(bed);
+            }
+        }
+
+        private void AddNewBeds(Room room, int countToAdd)
+        {
+            for (int i = 0; i < countToAdd; i++)
+            {
+                room.Beds.Add(new Bed { IsAvailable = true });
+            }
+        }
+
+        private void AddNewRooms(ApartmentListing apartment, List<UpdateRoomDto> roomDtos)
+        {
+            foreach (var rDto in roomDtos.Where(r => r.Id == 0))
+            {
+                var room = new Room
+                {
+                    RoomNumber = rDto.RoomNumber,
+                    BedsCount = rDto.BedsCount ?? 0,
+                    AvailableBeds = rDto.AvailableBeds ?? 0,
+                    PricePerBed = rDto.PricePerBed ?? 0,
+                    Beds = new List<Bed>()
+                };
+
+                AddNewBeds(room, room.BedsCount);
+                room.RecalculateAvailability();
+                apartment.Rooms.Add(room);
+            }
+        }
+
+        private void RemoveDeletedRooms(ApartmentListing apartment, List<Room> existingRooms, List<UpdateRoomDto> roomDtos)
+        {
+            var incomingIds = roomDtos.Where(r => r.Id != 0).Select(r => r.Id).ToHashSet();
+            var roomsToDelete = existingRooms.Where(r => !incomingIds.Contains(r.Id)).ToList();
+
+            foreach (var room in roomsToDelete)
+            {
+                if (room.Beds.Any(b => b.RenterId != null || b.BedReservations.Any()))
+                {
+                    throw new InvalidOperationException($"Cannot delete Room {room.RoomNumber} because it contains occupied or reserved beds.");
+                }
+                apartment.Rooms.Remove(room);
+            }
+        }
+
+        private async Task AddPhotosAsync(Listing listing, List<IFormFile> photos)
+        {
+            listing.ListingPhotos ??= new HashSet<ListingPhoto>();
+            foreach (var file in photos)
+            {
+                var url = await _fileService.SaveFileAsync(file);
+                listing.ListingPhotos.Add(new ListingPhoto { URL = url });
+            }
         }
 
         public async Task<bool> ReactivateListingAsync(int id, string userId)

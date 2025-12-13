@@ -46,6 +46,7 @@ namespace Wanas.Application.DTOs.Listing
         public List<ListingPhotoDto> ListingPhotos { get; set; }
         public List<CommentDto> Comments { get; set; }
         public List<ListingRoomDto> Rooms { get; set; }
+        public List<TenantDto> Tenants { get; set; } = new();
     }
 
 }

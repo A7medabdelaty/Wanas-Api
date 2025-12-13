@@ -12,6 +12,7 @@ namespace Wanas.Domain.Repositories
         Task<Review?> GetByIdWithReviewerAsync(int id);
         Task<bool> HasUserReviewedAsync(string reviewerId, string targetId, ReviewTarget targetType); 
         Task<double> GetAverageRatingAsync(string targetId);
+        Task<Dictionary<int, double>> GetAverageRatingsForListingIdsAsync(IEnumerable<int> listingIds);
         Task<IEnumerable<Review>> GetLatestReviewsAsync(string targetId, int count);
     }
 }
