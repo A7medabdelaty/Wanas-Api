@@ -32,7 +32,7 @@ namespace Wanas.Application.Services
             this._fileService = fileServ;
             this._chromaIndexingService = chromaIndexingService;
             this._logger = logger;
-            _reviewRepository = reviewRepository;
+            this._reviewRepository = reviewRepository;
         }
 
         // Add photos to a listing
