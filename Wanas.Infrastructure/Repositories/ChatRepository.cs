@@ -25,6 +25,7 @@ namespace Wanas.Infrastructure.Repositories
                 .Include(c => c.ChatParticipants).ThenInclude(cp => cp.User)
                 .Include(c => c.Messages)
                 .Where(c => !c.IsGroup)
+                .Where(c => c.ListingId == null)
                 .Where(c =>
                     c.ChatParticipants.Any(p => p.UserId == userA) &&
                     c.ChatParticipants.Any(p => p.UserId == userB)
