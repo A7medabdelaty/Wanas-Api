@@ -464,16 +464,46 @@ namespace Wanas.Application.Services
                     room.AvailableBeds = rDto.AvailableBeds ?? room.AvailableBeds;
                     room.PricePerBed = rDto.PricePerBed ?? room.PricePerBed;
 
-                    // Regenerate beds
-                    room.Beds.Clear();
-                    for (int i = 0; i < room.BedsCount; i++)
+                    var existingBeds = room.Beds.OrderBy(b => b.Id).ToList();
+                    int newBedCount = rDto.BedsCount ?? room.BedsCount;
+
+                    // 1. Update existing beds (check if we need to remove some)
+                    // 1. Update existing beds (check if we need to remove some)
+                    if (existingBeds.Count > newBedCount)
                     {
-                        room.Beds.Add(new Bed
+                        int countToRemove = existingBeds.Count - newBedCount;
+                        
+                        // Valid candidates for removal: Beds with NO Renter AND NO Reservations
+                        var removableBeds = existingBeds
+                            .Where(b => b.RenterId == null && (!b.BedReservations?.Any() ?? true))
+                            .Take(countToRemove)
+                            .ToList();
+
+                        foreach (var bed in removableBeds)
                         {
-                            IsAvailable = i < room.AvailableBeds
-                        });
+                            _uow.Beds.Remove(bed);
+                            room.Beds.Remove(bed);
+                        }
+                        
+                        // If we still need to remove beds but all remaining are reserved/occupied:
+                        // We do NOTHING (or log/warn). We do NOT remove reserved beds.
                     }
 
+                    // 2. Add new beds if needed
+                    else if (existingBeds.Count < newBedCount)
+                    {
+                        int bedsToAdd = newBedCount - existingBeds.Count;
+                        for (int i = 0; i < bedsToAdd; i++)
+                        {
+                            room.Beds.Add(new Bed { IsAvailable = true });
+                        }
+                    }
+
+                    // 3. Update availability logic (optional, dependent on your business logic)
+                    // room.AvailableBeds might come from DTO, but usually calculated based on reservations.
+                    // If DTO sends AvailableBeds, we might need to set IsAvailable on specific beds? 
+                    // For now, simpler approach: Update logic relies on RecalculateAvailability later.
+                    
                     room.RecalculateAvailability();
                 }
 
@@ -504,7 +534,16 @@ namespace Wanas.Application.Services
                 // Delete rooms
                 var incomingIds = dto.Rooms.Where(r => r.Id != 0).Select(r => r.Id).ToHashSet();
                 foreach (var room in existingRooms.Where(r => !incomingIds.Contains(r.Id)))
+                {
+                    // Safety Check: Cannot delete room if it has occupied beds
+                    if (room.Beds.Any(b => b.RenterId != null || b.BedReservations.Any()))
+                    {
+                        // We choose to throw here to alert the caller (frontend) that their request is invalid/dangerous
+                        // preventing accidental data loss or corruption.
+                        throw new InvalidOperationException($"Cannot delete Room {room.RoomNumber} because it contains occupied or reserved beds.");
+                    }
                     apartment.Rooms.Remove(room);
+                }
             }
 
             if (dto.NewPhotos != null)
