@@ -62,7 +62,7 @@ namespace Wanas.API.Controllers
             var listing = await _listService.GetListingByIdAsync(id);
             if (listing == null)
                 return NotFound();
-            if (listing.ModerationStatus != ListingModerationStatus.Approved || !listing.IsActive)
+            if (listing.ModerationStatus != ListingModerationStatus.Approved)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var isAdmin = User.IsInRole("Admin");
