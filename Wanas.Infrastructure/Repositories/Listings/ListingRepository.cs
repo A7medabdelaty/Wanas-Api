@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CloudinaryDotNet.Actions;
+using Microsoft.EntityFrameworkCore;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories.Listings;
@@ -17,6 +18,7 @@ namespace Wanas.Infrastructure.Repositories.Listings
         {
             return await _context.Listings
                 .Where(l => l.IsActive)
+                .Where(l=>l.ModerationStatus == ListingModerationStatus.Approved)
                 .Include(l => l.User)
                 .ThenInclude(u => u.UserPreference)
                 .Include(l => l.ApartmentListing)
