@@ -474,6 +474,64 @@ public class UserService( UserManager<ApplicationUser> userManager, IFileService
         return Result<UserPreferencesResponse>.Success(dto);
     }
 
+    // Get user ban/suspension status
+    public async Task<Result<UserStatusDto>> GetUserStatusAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
 
+        if (user is null || user.IsDeleted)
+            return Result.Failure<UserStatusDto>(UserErrors.UserNotFound);
 
+   var statusDto = new UserStatusDto
+ {
+    IsBanned = user.IsBanned,
+       IsSuspended = user.IsSuspended,
+    SuspendedUntil = user.SuspendedUntil
+    };
+
+    // If banned, get ban reason from AuditLogs
+   if (user.IsBanned)
+        {
+   var banLog = await _unitOfWork.AuditLogs
+       .FindAsync(log => log.TargetUserId == userId && log.Action == "BanUser")
+        .ContinueWith(t => t.Result.OrderByDescending(l => l.CreatedAt).FirstOrDefault(), cancellationToken);
+
+      if (banLog != null)
+  {
+      statusDto.BanReason = ExtractReason(banLog.Details);
+   statusDto.BannedAt = banLog.CreatedAt;
+     }
+  }
+
+        // If suspended, get suspension reason from AuditLogs
+        if (user.IsSuspended)
+ {
+            var suspensionLog = await _unitOfWork.AuditLogs
+        .FindAsync(log => log.TargetUserId == userId && log.Action == "SuspendUser")
+        .ContinueWith(t => t.Result.OrderByDescending(l => l.CreatedAt).FirstOrDefault(), cancellationToken);
+
+  if (suspensionLog != null)
+   {
+     statusDto.SuspensionReason = ExtractReason(suspensionLog.Details);
+      statusDto.SuspendedAt = suspensionLog.CreatedAt;
+     }
+        }
+
+        return Result.Success(statusDto);
+    }
+
+ // Helper method to extract reason from Details field (format: "Reason=...")
+    private string? ExtractReason(string? details)
+    {
+   if (string.IsNullOrEmpty(details))
+     return null;
+
+   var reasonPrefix = "Reason=";
+   if (details.StartsWith(reasonPrefix))
+   {
+  return details.Substring(reasonPrefix.Length);
+        }
+
+     return details;
+    }
 }

@@ -13,6 +13,7 @@ namespace Wanas.Domain.Entities
 
         //Optional Fields
         public string? Bio { get; set; } 
+
         public int? Age { get; set; }
         public string? Photo { get; set; }
 

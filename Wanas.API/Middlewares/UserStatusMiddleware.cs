@@ -15,6 +15,21 @@ namespace Wanas.API.Middlewares
         private readonly RequestDelegate _next;
         private readonly ILogger<UserStatusMiddleware> _logger;
 
+        // Endpoints that should bypass the status check
+        private static readonly HashSet<string> WhitelistedPaths = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "/api/auth",          // Login endpoint (POST)
+            "/api/auth/refresh",  // Refresh token
+            "/api/auth/register",         // Registration
+            "/api/auth/confirm-email",      // Email confirmation
+            "/api/auth/resend-confirmation-email",
+            "/api/auth/forget-password",    // Password reset
+            "/api/auth/reset-password",
+            "/api/user/status",     // User status check endpoint
+            "api/user/appeals",          // Submitting appeals
+            "api/user/appeals/my", // Viewing own appeals
+        };
+
         public UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddleware> logger)
         {
             _next = next;
@@ -23,6 +38,13 @@ namespace Wanas.API.Middlewares
 
         public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager, AppDBContext db)
         {
+            // Skip check for whitelisted endpoints
+            if (IsWhitelistedPath(context.Request.Path))
+            {
+                await _next(context);
+                return;
+            }
+
             // Skip check for anonymous requests or public endpoints
             if (!context.User.Identity?.IsAuthenticated ?? true)
             {
@@ -130,6 +152,12 @@ namespace Wanas.API.Middlewares
                     && !l.IsFlagged
                     && l.ModerationStatus == ListingModerationStatus.Approved)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(l => l.IsActive, true));
+        }
+
+        private static bool IsWhitelistedPath(PathString path)
+        {
+            return WhitelistedPaths.Any(whitelisted =>
+            path.StartsWithSegments(whitelisted, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
