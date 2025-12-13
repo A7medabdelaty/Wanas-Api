@@ -341,9 +341,32 @@ namespace Wanas.Application.Services
 
             dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(listing.Id.ToString());
 
-             // Check for occupied beds
+            // Check for occupied beds
             var beds = await _uow.Beds.GetBedsByListingIdAsync(listing.Id);
             dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
+
+            // Map Tenants
+            if (listing.ApartmentListing?.Rooms != null)
+            {
+                var tenants = listing.ApartmentListing.Rooms
+                    .SelectMany(r => r.Beds)
+                    .Where(b => b.Renter != null)
+                    .Select(b => b.Renter)
+                    .Distinct() // ApplicationUser implements generic equality or by reference? Better Use DistinctBy if possible or GroupBy
+                    .GroupBy(u => u.Id).Select(g => g.First())
+                    .Select(u => new TenantDto
+                    {
+                        Id = u.Id,
+                        FullName = u.FullName,
+                        Photo = u.Photo,
+                        Gender = u.Gender,
+                        Age = u.Age,
+                        Bio = u.Bio
+                    })
+                    .ToList();
+                
+                dto.Tenants = tenants;
+            }
 
             return dto;
         }
