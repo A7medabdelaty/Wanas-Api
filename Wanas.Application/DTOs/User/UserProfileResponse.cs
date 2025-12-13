@@ -9,6 +9,7 @@ public record UserProfileResponse(
     int? Age,
     string? City,
     string? PhoneNumber,
+    Gender Gender,
     string? Bio,
     string? Photo,
     bool? IsFirstLogin,

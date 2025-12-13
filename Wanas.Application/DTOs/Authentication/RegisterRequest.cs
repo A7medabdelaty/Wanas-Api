@@ -8,5 +8,6 @@ public record RegisterRequest(
     string FullName,
     string City,
     string PhoneNumber,
+    Gender Gender,
     ProfileType ProfileType  
 );
