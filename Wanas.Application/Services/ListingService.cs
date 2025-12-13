@@ -6,7 +6,6 @@ using Wanas.Application.DTOs.Listing;
 using Wanas.Application.Interfaces;
 using Wanas.Application.Responses;
 using Wanas.Domain.Entities;
-using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
@@ -186,12 +185,38 @@ namespace Wanas.Application.Services
             return _mapper.Map<ListingDetailsDto>(savedListing);
         }
 
-        // DELETE LISTING
         public async Task<bool> DeleteListingAsync(int id)
         {
             var listing = await _uow.Listings.GetListingWithDetailsTrackedAsync(id);
             if (listing == null)
                 return false;
+
+            // ck if there are any occupied beds (meaning active reservations/tenants)
+            var beds = await _uow.Beds.GetBedsByListingIdAsync(id);
+            bool hasOccupiedBeds = beds.Any(b => b.RenterId != null);
+
+            if (hasOccupiedBeds)
+            {
+                // Mark as inactive instead of deleting
+                listing.IsActive = false;
+                _uow.Listings.Update(listing);
+                await _uow.CommitAsync();
+
+                // Remove from ChromaDB index in background as it is now inactive
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _chromaIndexingService.RemoveListingFromIndexAsync(id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to remove inactive listing {ListingId} from ChromaDB index", id);
+                    }
+                });
+
+                return true;
+            }
 
             // 1. Safely delete associated photos (Ignore file lock errors)
             if (listing.ListingPhotos != null)
@@ -262,6 +287,9 @@ namespace Wanas.Application.Services
             foreach (var dto in listingDtos)
             {
                 dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+                 // Check for occupied beds
+                var beds = await _uow.Beds.GetBedsByListingIdAsync(dto.Id);
+                dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
             }
 
             return listingDtos;
@@ -277,6 +305,9 @@ namespace Wanas.Application.Services
             foreach (var dto in listingDtos)
             {
                 dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+                 // Check for occupied beds
+                var beds = await _uow.Beds.GetBedsByListingIdAsync(dto.Id);
+                dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
             }
 
             return listingDtos;
@@ -285,12 +316,15 @@ namespace Wanas.Application.Services
         // PAGED LISTINGS
         public async Task<ApiPagedResponse<ListingDetailsDto>> GetPagedListingsAsync(int pageNumber, int pageSize)
         {
-            var (items, totalCount) = await _uow.Listings.GetPagedListingsAsync(pageNumber, pageSize);
+            var (items, totalCount) = await _uow.Listings.GetPagedActiveListingsAsync(pageNumber, pageSize);
             var mapped = _mapper.Map<IEnumerable<ListingDetailsDto>>(items);
 
             foreach (var dto in mapped)
             {
                 dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+                 // Check for occupied beds
+                var beds = await _uow.Beds.GetBedsByListingIdAsync(dto.Id);
+                dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
             }
 
             return new ApiPagedResponse<ListingDetailsDto>(mapped, totalCount, pageNumber, pageSize);
@@ -306,6 +340,10 @@ namespace Wanas.Application.Services
             var dto = _mapper.Map<ListingDetailsDto>(listing);
 
             dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(listing.Id.ToString());
+
+             // Check for occupied beds
+            var beds = await _uow.Beds.GetBedsByListingIdAsync(listing.Id);
+            dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
 
             return dto;
         }
@@ -327,6 +365,9 @@ namespace Wanas.Application.Services
             foreach (var dto in dtos)
             {
                 dto.AverageRating = await _reviewRepository.GetAverageRatingAsync(dto.Id.ToString());
+                 // Check for occupied beds
+                var beds = await _uow.Beds.GetBedsByListingIdAsync(dto.Id);
+                dto.HasOccupiedBeds = beds.Any(b => b.RenterId != null);
             }
 
             return dtos;
@@ -456,6 +497,42 @@ namespace Wanas.Application.Services
             await _uow.CommitAsync();
 
             return _mapper.Map<ListingDetailsDto>(listing);
+        }
+
+        public async Task<bool> ReactivateListingAsync(int id, string userId)
+        {
+             var listing = await _uow.Listings.GetByIdAsync(id);
+             if (listing == null) return false;
+             if (listing.UserId != userId) throw new UnauthorizedAccessException("Not owner");
+
+             // Check if there is at least one available bed
+             var availableBeds = await _uow.Beds.GetAvailableBedsByListingAsync(id);
+             
+             // Check if all beds are truly occupied or reserved, logic similar to PayDepositAsync but simplified
+             // If GetAvailableBedsByListingAsync returns beds that are free to book, then we can reactivate.
+             if (availableBeds != null && availableBeds.Any())
+             {
+                 listing.IsActive = true;
+                 _uow.Listings.Update(listing);
+                 await _uow.CommitAsync();
+
+                 // Re-index to ChromaDB
+                 _ = Task.Run(async () =>
+                 {
+                    try
+                    {
+                        await _chromaIndexingService.IndexListingAsync(id);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to reindex reactivated listing {ListingId}", id);
+                    }
+                 });
+
+                 return true;
+             }
+             
+             return false;
         }
 
     }

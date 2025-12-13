@@ -209,6 +209,22 @@ namespace Wanas.API.Controllers
             return NoContent();
         }
 
+        // REACTIVATE LISTING
+        [Authorize]
+        [HttpPost("{id:int}/reactivate")]
+        public async Task<IActionResult> ReactivateListing(int id)
+        {
+            try
+            {
+               var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+               var success = await _listService.ReactivateListingAsync(id, userId);
+               if (success) return Ok(new { Message = "Listing reactivated" });
+               return BadRequest(new { Message = "Cannot reactivate: no available beds." });
+            }
+            catch (UnauthorizedAccessException) { return Forbid(); }
+            catch (Exception ex) { return BadRequest(new { Message = ex.Message }); }
+        }
+
         // COMMENTS
         [HttpGet("{listingId:int}/comments")]
         public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments(int listingId)

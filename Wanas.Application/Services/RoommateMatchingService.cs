@@ -6,6 +6,7 @@ using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
 using Wanas.Domain.Repositories;
+using Wanas.Domain.Enums;
 
 namespace Wanas.Application.Services
 {
@@ -41,7 +42,8 @@ namespace Wanas.Application.Services
             u.UserPreference != null &&
             !(u.IsDeleted || u.IsBanned) &&
             !u.IsSuspended &&
-            u.UserPreference!.Gender == pref.Gender
+            u.UserPreference!.Gender == pref.Gender &&
+            u.ProfileType == ProfileType.Renter
             ).ToList();
 
             var results = new List<RoommateMatchDto>();

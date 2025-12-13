@@ -21,7 +21,7 @@ namespace Wanas.Application.Interfaces
         // Listing Photos
         Task AddPhotosToListingAsync(int listingId, List<IFormFile> photos);
         Task<bool> RemovePhotoAsync(int listingId, int photoId, string userId);
-
+        Task<bool> ReactivateListingAsync(int id, string userId);
     }
 
 }
