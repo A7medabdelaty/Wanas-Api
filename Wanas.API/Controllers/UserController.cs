@@ -142,9 +142,19 @@ public class UserController(
         return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
     }
 
+    // Get User Status (Ban/Suspension)
+    [HttpGet("status")]
+    public async Task<IActionResult> GetUserStatus(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
 
+        _logger.LogInformation("User {UserId} checking account status", userId);
 
+        var result = await _userService.GetUserStatusAsync(userId, cancellationToken);
 
-
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+    }
 }

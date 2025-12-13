@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Wanas.Application.DTOs.Matching;
 using Wanas.Application.Interfaces;
 using Wanas.Domain.Entities;
+using Wanas.Domain.Enums;
 using Wanas.Domain.Repositories;
 
 namespace Wanas.Application.Services
@@ -41,7 +42,8 @@ namespace Wanas.Application.Services
             u.UserPreference != null &&
             !(u.IsDeleted || u.IsBanned) &&
             !u.IsSuspended &&
-            u.UserPreference!.Gender == pref.Gender
+            u.Gender == user.Gender && // Filter by ApplicationUser.Gender (same gender)
+            u.ProfileType == ProfileType.Renter
             ).ToList();
 
             var results = new List<RoommateMatchDto>();
@@ -60,7 +62,8 @@ namespace Wanas.Application.Services
                 if (RangesOverlap(pref.MinimumBudget, pref.MaximumBudget, otherPref.MinimumBudget, otherPref.MaximumBudget))
                 { score += BudgetCompatibilityScore; breakdown.BudgetCompatible = true; }
 
-                if (pref.Gender == otherPref.Gender)
+                // Gender match score - now comparing ApplicationUser.Gender
+                if (user.Gender == other.Gender)
                 { score += GenderPreferenceScore; breakdown.GenderMatch = true; }
 
                 if (pref.Smoking == otherPref.Smoking)
@@ -89,7 +92,7 @@ namespace Wanas.Application.Services
                         Photo = other.Photo,
                         Score = score,
                         Percentage = percentage,
-                        Gender = otherPref.Gender == 0 ? "Male" : "Female",
+                        Gender = other.Gender == Gender.Male ? "Male" : "Female", // Use ApplicationUser.Gender directly
                         Breakdown = breakdown
                     });
                 }

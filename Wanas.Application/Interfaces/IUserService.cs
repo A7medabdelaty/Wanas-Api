@@ -1,4 +1,3 @@
-
 using Wanas.Application.Abstractions;
 using Wanas.Application.DTOs.User;
 
@@ -16,9 +15,6 @@ namespace Wanas.Application.Interfaces;
         Task<Result<UserPreferencesResponse>> UpdatePreferencesAsync(string userId, UpdatePreferencesRequest request, CancellationToken cancellationToken = default);
         Task<Result<UserProfileResponse>> GetUserProfileByIdAsync(string userId, CancellationToken cancellationToken);
         Task<Result<UserPreferencesResponse>> GetUserPreferencesByIdAsync(string userId, CancellationToken cancellationToken);
-
-
-
-
+        Task<Result<UserStatusDto>> GetUserStatusAsync(string userId, CancellationToken cancellationToken = default);
 }
 

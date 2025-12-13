@@ -8,10 +8,12 @@ namespace Wanas.Domain.Entities
         //Mandatory Fields
         public string FullName { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
+        public Gender Gender { get; set; }
         public ProfileType ProfileType { get; set; } = ProfileType.Renter;
 
         //Optional Fields
         public string? Bio { get; set; } 
+
         public int? Age { get; set; }
         public string? Photo { get; set; }
 
